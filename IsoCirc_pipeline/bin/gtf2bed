@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+if [[ $# -ne 2 ]]; then
+    echo "Usage:"
+    echo "$0 in.GTF out.bed"
+    exit
+fi
+GTF=$1
+BED=$2
+tmp=${BED}.tmp.gene
+
+if [[ -s $GTF ]]; then
+#    echo "gtfToGenePred -genePredExt $GTF $tmp"
+    gtfToGenePred -genePredExt -ignoreGroupsWithoutExons $GTF $tmp
+#    echo "genePredToBed $tmp $BED"
+    genePredToBed $tmp $BED
+    rm $tmp
+else
+    touch $BED
+fi

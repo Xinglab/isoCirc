@@ -1,0 +1,8 @@
+biopython
+gffutils
+matplotlib
+mappy
+numpy
+pandas
+pyfaidx
+pysam

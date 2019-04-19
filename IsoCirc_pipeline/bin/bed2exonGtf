@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+if [[ $# != 2 ]] ; then
+    echo "Usage:"
+    echo "$0 in.bed out.exon.gtf"
+    exit
+fi
+
+in_bed=$1
+exon_gtf=$2
+tmp_gtf=${exon_gtf}.tmp.gtf
+
+# 0. bed => gtf
+#>&2 echo "bed2gtf ${in_bed} $tmp_gtf parris"
+bed2gtf ${in_bed} $tmp_gtf parris
+
+# 1. gtf => exon.gtf
+#>&2 echo "awk '(\$3==\"exon\"){print}' $tmp_gtf > ${exon_gtf}"
+awk '($3=="exon"){print}' $tmp_gtf > ${exon_gtf}
+rm $tmp_gtf

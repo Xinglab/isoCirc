@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+if [[ $# -ne 3 ]] ; then
+    echo "Usage:"
+    echo "$0 in.exon.gtf in.gtf out.name_id"
+    exit
+fi
+
+exon_gtf=$1
+in_gtf=$2
+out_name_id=$3
+gene_bed=${1}.tmp.bed
+tmp=${1}.tmp
+
+#
+
+# 0. gene_gtf => gene.bed
+gawk -v OFS="\t" '
+    ($3=="gene") {
+    gene_id='NA';
+    gene_name='NA';
+    gene_strand='NA';
+    if (match($0, /gene_id \"([^\"]+)\";/, arr)) {
+        gene_id=arr[1];
+    }
+    if (match($0, /gene_name \"([^\"]+)\";/, arr)) {
+        gene_name=arr[1];
+    }
+    print $1, $4-1, $5, gene_id","gene_name","$7, ".", $7;
+}
+' $in_gtf > $gene_bed
+
+# 1. intersect gene_bed with exon_gtf
+#echo "bedtools intersect -a $gene_bed -b $exon_gtf -split -wb > $tmp"
+bedtools intersect -a $gene_bed -b $exon_gtf -split -wb > $tmp
+
+# 2. extract gene id and gene name
+gawk -v OFS="\t" '
+    (match($0, /gene_id \"([^\"]+)\";/, arr)) {
+        read_id=arr[1]
+        split($4, gene, ",")
+        gene_id=gene[1]
+        gene_name=gene[2]
+        gene_strand=gene[3]
+
+        print read_id, gene_id, gene_name, gene_strand
+    }
+' $tmp | sort | uniq > $out_name_id
+rm $gene_bed
+rm $tmp

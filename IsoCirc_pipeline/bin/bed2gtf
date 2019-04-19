@@ -1,0 +1,13 @@
+#!/bin/bash
+if [ $# -ne 3 ]; then
+    echo "Usage:"
+    echo "    $0 in.bed out.gtf source"
+    echo ""
+    echo "Convert detailed bed format to GTF format"
+    exit
+fi
+bed=$1
+gtf=$2
+src=$3
+#>&2 echo "bedToGenePred $bed /dev/stdout | genePredToGtf file /dev/stdin -source=$src $gtf"
+bedToGenePred $bed /dev/stdout | genePredToGtf file /dev/stdin -source=$src $gtf

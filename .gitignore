@@ -1,0 +1,14 @@
+IsoCirc_pipeline/.idea/*
+IsoCirc_pipeline/anno/*
+IsoCirc_pipeline/data/*
+IsoCirc_pipeline/venv/*
+*pyc
+IsoCirc_pipeline/isocirc/*pyc
+IsoCirc_pipeline/isocirc/*/*pyc
+IsoCirc_pipeline/isocirc/tags
+IsoCirc_pipeline/isocirc/cscope*
+IsoCirc_pipeline/isocirc/plot/*pyc
+IsoCirc_pipeline/dist/*
+IsoCirc_pipeline/build/*
+IsoCirc_pipeline/isocirc.egg-info/
+
