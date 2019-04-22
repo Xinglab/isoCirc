@@ -9,4 +9,4 @@ The input file in this script is 'all_samples_isocirc4overlap_nanopore_raw_0417.
 The three input files are /path/to/seperate_chromosomes/, /path/to/isoCirc_output, and /path/to/miRNA_list.
 The output file first recorded length of chromosomes and number of circRNAs in each.
 Next it list each circRNA ID, sequence and miRNA seed found in its sequence. Only miRNA seeds found more than 3 times in a circRNA are listed.
-I also told Yan about the details of the output format.
+An example output of this script is 'miRNA_binding_site_isoforms_isocirc_pb3.txt'. I also told Yan about the details of the output format.
