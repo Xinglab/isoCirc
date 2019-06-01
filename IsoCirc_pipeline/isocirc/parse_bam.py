@@ -112,13 +112,18 @@ def cigarstring_to_cigartuples(cigarstring=''):
         cigartuples.append((cigar_op_dict[r[-1]], int(r[:-1])))
     return cigartuples
 
+def cigartuples_to_cigarstats(cigartuples=[]):
+    cigarstats = dd(lambda: 0)
+    for t in cigartuples:
+        cigarstats[t[0]] += t[1]
+    return cigarstats
 
 def cigarstring_to_cigarstats(cigar=''):
     cigarstats = dd(lambda: 0)
     for c in 'MIDNHS=X':
         if c in cigar:
             count = sum(map(int, (re.findall(r'(\d+)' + c, cigar))))
-            cigarstats[c] = count
+            cigarstats[cigar_op_dict[c]] = count
     return cigarstats
 
 
@@ -143,7 +148,7 @@ def get_aligned_read_length(r=ps.AlignedSegment):
     return op_len
 
 
-def minipulate_cigar(r=ps.AlignedSegment, old='', new=''):
+def manipulate_cigar(r=ps.AlignedSegment, old='', new=''):
     r.cigarstring = re.sub(r'%s' % old, new, r.cigarstring)
 
 
@@ -214,15 +219,51 @@ def get_spec_MD(mdstr='', start=0, end=0):
     # print ret_md
     return ''.join(ret_md)
 
-
-# '15M1D5M1I10M', 10, 25 => '5M1D5M1I4M'
-def get_spec_cigar(cigartuples=[], start=0, end=0):  # Aligned bases
+# '15M1D5M2I10M', 10, 25 => '5M1D5M2I4M'
+def get_spec_ref_cigar(cigartuples=[], start=0, end=0):  # Aligned bases
     tuples = copy.copy(cigartuples)
     start_remain_len = start
     end_remain_len = end - start
     ret_cigar = []
     mi = 0
     # print start_remain_len, end_remain_len
+    # print start, end, tuples
+    while start_remain_len > 0:
+        if is_cigar_M(tuples[mi][0]) or tuples[mi][0] == BAM_CDEL:
+            if tuples[mi][1] > start_remain_len:
+                tuples[mi] = (tuples[mi][0], tuples[mi][1] - start_remain_len)
+                break
+            else:
+                start_remain_len -= tuples[mi][1]
+
+        mi += 1
+    if end_remain_len > 0 and tuples[mi][0] == BAM_CINS:
+        mi += 1
+    # print tuples
+    while end_remain_len > 0:
+        # print end_remain_len
+        if is_cigar_M(tuples[mi][0]) or tuples[mi][0] == BAM_CDEL:
+            if tuples[mi][1] > end_remain_len:
+                ret_cigar.append((tuples[mi][0], end_remain_len))
+                break
+            else:
+                end_remain_len -= tuples[mi][1]
+                ret_cigar.append(tuples[mi])
+        else:
+            ret_cigar.append(tuples[mi])
+        mi += 1
+    # print ret_cigar
+    return ret_cigar
+
+# '15M2D5M1I10M', 10, 25 => '5M2D5M1I4M'
+def get_spec_read_cigar(cigartuples=[], start=0, end=0):  # Aligned bases
+    tuples = copy.copy(cigartuples)
+    start_remain_len = start
+    end_remain_len = end - start
+    ret_cigar = []
+    mi = 0
+    # print start_remain_len, end_remain_len
+    # print tuples, start, end
     while start_remain_len > 0:
         if is_cigar_M(tuples[mi][0]) or tuples[mi][0] == BAM_CINS:
             if tuples[mi][1] > start_remain_len:
@@ -514,11 +555,39 @@ def get_error_rate(in_sam_fn=''):
             tot_mapped_n += 1
             tot_mapped_base += r.query_alignment_length
             cigar_stats = cigarstring_to_cigarstats(r.cigarstring)
-            tot_match += cigar_stats['=']
-            tot_ins += cigar_stats['I']
-            tot_del += cigar_stats['D']
-            tot_mis += cigar_stats['X']
+            tot_match += cigar_stats[cigar_op_dict['=']]
+            tot_ins += cigar_stats[cigar_op_dict['I']]
+            tot_del += cigar_stats[cigar_op_dict['D']]
+            tot_mis += cigar_stats[cigar_op_dict['X']]
     return tot_mapped_n, tot_mapped_base, '{0:.1f}%'.format((tot_ins+tot_del+tot_mis) / (tot_ins+tot_mis+tot_match+0.0) * 100)
+
+def parse_sj_alignment(r=ps.AlignedSegment, flank_len=2, min_xid=0):
+    is_high_sj = []
+    read_start, read_end, aln_read_len = -1, 0, get_aligned_read_length(r)
+    for tuples in r.cigartuples:
+        if tuples[0] == BAM_CREF_SKIP:
+            # left
+            read_start = read_end - flank_len
+            if read_start < 0:
+                is_high_sj.append(False)
+                continue
+            left_cigar_stats = cigartuples_to_cigarstats(get_spec_read_cigar(r.cigartuples, read_start, read_end))
+            # right
+            read_start = read_end
+            read_end += flank_len
+            if read_end > aln_read_len:
+                is_high_sj.append(False)
+                continue
+            right_cigar_stats = cigartuples_to_cigarstats(get_spec_read_cigar(r.cigartuples, read_start, read_end))
+            if left_cigar_stats[cigar_op_dict['X']] + left_cigar_stats[cigar_op_dict['I']] + left_cigar_stats[cigar_op_dict['D']] + right_cigar_stats[cigar_op_dict['X']] + right_cigar_stats[cigar_op_dict['I']] + right_cigar_stats[cigar_op_dict['D']] > min_xid:
+                is_high_sj.append(False)
+            else:
+                is_high_sj.append(True)
+        elif is_cigar_M(tuples[0]) or tuples[0] == BAM_CINS:
+            read_end += tuples[1]
+    if not is_high_sj:
+        is_high_sj.append('NA')
+    return is_high_sj
 
 def get_chimeric_junction(rs=[]):
     cj = []

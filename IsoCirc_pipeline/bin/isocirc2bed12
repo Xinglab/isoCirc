@@ -2,7 +2,7 @@
 if [[ $# != 2 ]];
 then
 	echo "Usage:"
-	echo "$0 in.parris.out out.bed"
+	echo "$0 in.IsoCirc.out out.bed"
 	exit
 fi
 

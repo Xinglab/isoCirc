@@ -11,4 +11,5 @@ IsoCirc_pipeline/isocirc/plot/*pyc
 IsoCirc_pipeline/dist/*
 IsoCirc_pipeline/build/*
 IsoCirc_pipeline/isocirc.egg-info/
+test_data/output/*
 

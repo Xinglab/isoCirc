@@ -20,17 +20,18 @@ def is_same_isoform(last_coor, coor, site_dis, end_dis):
 	# else:
 		# return False
 
-def uniq_isoform_with_unsorted_coors(coor_dict=dict()):
+def uniq_isoform_with_unsorted_coors(coor_dict=dict(), sort_ret=False):
 	ut.err_format_time('uniq_isoform_with_unsorted_coors', 'Generating isoform-wise evaluation result ... ')
 	coor_to_iso_dict = dd(lambda: -1)  # name# : iso_id
 	iso_to_name_dict = dd(lambda: [])  # iso_id : [name1, name2]
 	iso_id = 0
-	for id, coor in coor_dict.items():
+	coor_list = sorted(coor_dict.items(), key=lambda k:k[1:]) if sort_ret else coor_dict.items()
+	for read_id, coor in coor_list:
 		if coor_to_iso_dict[tuple(coor)] != -1:
-			iso_to_name_dict[coor_to_iso_dict[tuple(coor)]].append(id)
+			iso_to_name_dict[coor_to_iso_dict[tuple(coor)]].append(read_id)
 		else:
 			coor_to_iso_dict[tuple(coor)] = iso_id
-			iso_to_name_dict[iso_id] = [id]
+			iso_to_name_dict[iso_id] = [read_id]
 			iso_id += 1
 	ut.err_format_time('uniq_isoform_with_unsorted_coors', 'Generating isoform-wise evaluation result done!')
 	return iso_to_name_dict

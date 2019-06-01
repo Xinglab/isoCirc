@@ -6,9 +6,12 @@ import sys
 
 high_max_ratio = 1.1
 high_min_ratio = 0.9
-high_iden_ratio = 0.75
+high_iden_ratio = 0.75 #TODO old: 0.75
 high_repeat_ratio = 0.6
 low_repeat_ratio = 1.9
+
+max_ins_len = 50
+max_del_len = 50
 
 
 # map / cons
@@ -19,6 +22,11 @@ low_repeat_ratio = 1.9
 # partial mapped, map / cons < 0.9
 
 def get_iden_ratio(r):
+    for tuples in r.cigartuples:
+        if tuples[0] == pb.BAM_CINS and tuples[1] > max_ins_len:
+            return -1.0
+        if tuples[0] == pb.BAM_CDEL and tuples[1] > max_del_len:
+            return -1.0
     map_len = pb.get_aligned_read_length(r)
     if not r.has_tag('NM'): ut.fatal_format_time('bam_classify', 'No NM tag found.\n')
     NM = int(r.get_tag('NM'))
@@ -27,6 +35,8 @@ def get_iden_ratio(r):
     return iden_len / (map_len + 0.0)
 
 
+#if any returnable record is aligned to non-primary chromosome, discard all the records
+#TODO secondary / best < ratio ???
 def high_qual_record(r_array, high_max_ratio=high_max_ratio, high_min_ratio=high_min_ratio, high_iden_ratio=high_iden_ratio):
     if not r_array: return None
     primary_r = r_array[0]
@@ -38,17 +48,31 @@ def high_qual_record(r_array, high_max_ratio=high_max_ratio, high_min_ratio=high
     rlen = 0.0 + pb.get_read_op_length(primary_r)
     cons_len = rlen / 2
 
+    best_i = -1
+    best_r = None
+    best_AS = -1
+    best_iden_ratio = -1.0
+    primary_is_high = False
     for i, r in iter(enumerate(r_array)):
         map_len = pb.get_aligned_read_length(r)
         mc = map_len / cons_len
-        if high_min_ratio <= mc <= high_max_ratio and get_iden_ratio(r) >= high_iden_ratio:
-            # if r is not primary record, r has to NOT overlap with primary r
-            if i == 0 or (r.reference_name != primary_r.reference_name or (
-                    r.reference_start + 1 > primary_end or r.reference_start + pb.get_ref_op_length(
-                    r) < primary_start)):
-                return r
-    return None
+        iden_ratio = get_iden_ratio(r)
+        AS = int(r.get_tag('AS'))
+        if high_min_ratio <= mc <= high_max_ratio and iden_ratio >= high_iden_ratio:
+            if len(r.reference_name) >= 6 or r.reference_name.startswith('chrM') or r.reference_name.startswith('chrUn'):
+                return None
+            if AS > best_AS:
+                if i == 0:
+                    primary_is_high = True
+                    best_r, best_i, best_AS = r, i, AS
+                # if r is not primary record, r has to NOT overlap with primary r
+                elif r.reference_name != primary_r.reference_name or (r.reference_start + 1 > primary_end or r.reference_start + pb.get_ref_op_length(r) < primary_start):
+                    best_r, best_i, best_AS = r, i, AS
 
+    if best_i == -1:
+        return None
+    else:
+        return primary_r if primary_is_high else best_r
 
 # cons is 2/3... copies of the real cons
 # 2 or more parts are mapped to one same mapped positions and same mapped length
@@ -117,7 +141,8 @@ def cla_record(r_array, high_bam, low_bam, high_max_ratio=high_max_ratio, high_m
         else:
             rep_r = cons_repeat_record(r_array, high_iden_ratio, high_repeat_ratio)
             if rep_r:
-                high_bam.write(rep_r)
+                # high_bam.write(rep_r) # TODO
+                low_bam.write(rep_r)
                 return
             self_r = cons_self_tandem_record(r_array, low_repeat_ratio)
             if self_r:
@@ -140,7 +165,6 @@ def bam_classify(in_bam_fn, high_bam_fn, low_bam_fn,
         r_name = ''
         for r in in_bam:
             if pb.is_unmapped(r) : continue
-            # if len(r.reference_name) >= 6 or r.reference_name.startswith('chrM') or r.reference_name.startswith('chrUn'): continue
             if r.query_name != r_name:
                 cla_record(r_array, high_bam, low_bam, high_max_ratio, high_min_ratio, high_iden_ratio, high_repeat_ratio, low_repeat_ratio)
                 r_name = r.query_name

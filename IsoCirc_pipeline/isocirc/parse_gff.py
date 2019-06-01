@@ -277,6 +277,28 @@ def get_splice_junction_from_gtf(in_gtf, is_db, include_end, bam_fn=""):
 	if bam: bam.close
 	return sj
 
+def get_back_splice_junction_from_bed(in_bed, bam_fn=""):
+	ut.err_format_time("get_back_splice_junction_from_bed", "Loading splice junction from {} ... ".format(in_bed))
+	# chromStart: 0-base, exonStarts: 0-base
+	header_ele = ['chrom', 'chromStart', 'chromEnd']
+	bed_header = {header_ele[i]: i for i in range(len(header_ele))}
+	sj = dict()
+	bam = ps.AlignmentFile(bam_fn) if bam_fn else None
+	with open(in_bed, 'r') as bed:
+		for line in bed:
+			if line.startswith('#'): continue
+			ele = line[:-1].rsplit()
+			chrom = ele[bed_header['chrom']]
+			# strand = ele[bed_header['strand']]
+			start = int(ele[bed_header['chromStart']])
+			end = int(ele[bed_header['chromEnd']])
+			tid = bam.get_tid(chrom) if bam else chrom
+			# is_rev = strand == '-'
+			is_rev = False
+			sj[(tid, is_rev, end+1, start)] = 1
+	ut.err_format_time("get_back_splice_junction_from_bed", "Loading splice junction from {} done!".format(in_bed))
+	if bam: bam.close()
+	return sj
 
 def get_splice_junction_from_bed12(in_bed, include_end, bam_fn=""):
 	ut.err_format_time("get_splice_junction_from_bed12", "Loading splice junction from {} ... ".format(in_bed))
@@ -484,25 +506,25 @@ def get_cano_sj(left_seq, left_center, right_seq, right_center, strand):
 				return True, strand, left_idx, right_idx, cm
 	return is_cano, cano_strand, left_idx, right_idx, 'NA' 
 
-def get_cano_sjs(left_seq, left_center, right_seq, right_center, strand):
+def get_cano_sjs(down_seq, up_seq, strand):
 	canos = []
-	is_cano, cano_strand, left_idx, right_idx, left_motif, right_motif = False, 'NA', -1, -1, '', ''
+	is_cano, cano_strand, down_idx, up_idx, down_motif, up_motif = False, 'NA', -1, -1, '', ''
 	for_motif = [('GT', 'AG'), ('GC', 'AG'), ('AT', 'AC')]
 	rev_motif = [('CT', 'AC'), ('CT', 'GC'), ('GT', 'AT')]
 	cano_motif = ['GT/AG', 'GC/AG', 'AT/AC']
 	if not strand:  # forward and reverse have same priority
 		for fm, rm, cm in zip(for_motif, rev_motif, cano_motif):
-			f_left_idx, f_right_idx, r_left_idx, r_right_idx = None, None, None, None
-			if fm[0] in left_seq and fm[1] in right_seq:  # forward
-				left_idxs = [i.start() for i in re.finditer(fm[0], left_seq)]  # forward
-				right_idxs = [i.start() for i in re.finditer(fm[1], right_seq)]
-				for left_idx, right_idx in list(itertools.product(left_idxs, right_idxs)):
-					canos.append(('+', left_idx, right_idx, cm))
-			if rm[0] in left_seq and rm[1] in right_seq:  # reverse
-				left_idxs = [i.start() for i in re.finditer(rm[0], left_seq)]
-				right_idxs = [i.start() for i in re.finditer(rm[1], right_seq)]
-				for left_idx, right_idx in list(itertools.product(left_idxs, right_idxs)):
-					canos.append(('-', left_idx, right_idx, cm))
+			f_down_idx, f_up_idx, r_down_idx, r_up_idx = None, None, None, None
+			if fm[0] in down_seq and fm[1] in up_seq:  # forward
+				down_idxs = [i.start() for i in re.finditer(fm[0], down_seq)]  # forward
+				up_idxs = [i.start() for i in re.finditer(fm[1], up_seq)]
+				for down_idx, up_idx in list(itertools.product(down_idxs, up_idxs)):
+					canos.append(('+', down_idx, up_idx, cm))
+			if rm[0] in down_seq and rm[1] in up_seq:  # reverse
+				down_idxs = [i.start() for i in re.finditer(rm[0], down_seq)]
+				up_idxs = [i.start() for i in re.finditer(rm[1], up_seq)]
+				for down_idx, up_idx in list(itertools.product(down_idxs, up_idxs)):
+					canos.append(('-', down_idx, up_idx, cm))
 			if canos:
 				break
 	else:
@@ -511,79 +533,156 @@ def get_cano_sjs(left_seq, left_center, right_seq, right_center, strand):
 		elif strand == '-':
 			in_motif = rev_motif
 		for motif, cm in zip(in_motif, cano_motif):
-			if motif[0] in left_seq and motif[1] in right_seq:
+			if motif[0] in down_seq and motif[1] in up_seq:
 				# find indices that are the most close to the centers
-				left_idxs = [i.start() for i in re.finditer(motif[0], left_seq)]
-				right_idxs = [i.start() for i in re.finditer(motif[1], right_seq)]
-				for left_idx, right_idx in list(itertools.product(left_idxs, right_idxs)):
-					canos.append((strand, left_idx, right_idx, cm))
+				down_idxs = [i.start() for i in re.finditer(motif[0], down_seq)]
+				up_idxs = [i.start() for i in re.finditer(motif[1], up_seq)]
+				for down_idx, up_idx in list(itertools.product(down_idxs, up_idxs)):
+					canos.append((strand, down_idx, up_idx, cm))
 			if canos:
 				break
 	return canos
 
-# alignment around BSJ
-def get_cano_bsj_align(dis_to_cano_bsj, bsj_strand, ref_seq, read_seq, start, end, end_dis, is_reverse, left_soft_clip):
+# return alnScore, alnCigar
+def get_cano_bsj_align(up_dis, down_dis, bsj_strand, ref_seq, read_seq, start, end, end_dis, is_reverse, cigartuples, ref_map_len, cons_len):
 	# ref
-	[left_dis, right_dis] = map(int, dis_to_cano_bsj.split(','))
-	left_cano_pos, right_cano_pos = start + left_dis, end + right_dis
-	bsj_ref_seq = ref_seq[right_cano_pos-end_dis:right_cano_pos].seq.upper() + ref_seq[left_cano_pos:left_cano_pos+end_dis].seq.upper()
+	up_ref_cano_pos, down_ref_cano_pos = start + up_dis, end + down_dis
+	bsj_ref_seq = ref_seq[down_ref_cano_pos-end_dis:down_ref_cano_pos].seq.upper() + ref_seq[up_ref_cano_pos:up_ref_cano_pos+end_dis].seq.upper()
 	# read
-	read_seq += read_seq
+	# read_seq += read_seq
 	if is_reverse: read_seq = str(Seq(read_seq).reverse_complement())
-	bsj_read_seq = read_seq[left_soft_clip - end_dis + left_dis:left_soft_clip + end_dis + left_dis]
 
-	# print left_dis, right_dis, bsj_ref_seq, bsj_read_seq
-	# realign_len = 15  # TODO
-	# bsj_left_ref_len, bsj_right_ref_len = realign_len + left_dis, realign_len - right_dis
-	return pb.pairwise_align(bsj_ref_seq, bsj_read_seq, 'g', True)
+	# NEW CHANGE
+	# corresponding query's base positions of up_ref_cano_pos+end_dis and down_ref_cano_pos-end_dis: up_read_cano_pos and down_read_cano_pos
+	# bsj_read_seq = read_seq[down_read_cano_pos_start : up_read_cano_pos_end]
+	if up_dis + end_dis < 0 or down_dis - end_dis > 0:
+		return -sys.maxsize, 'NA'
+	up_cigartuples = pb.get_spec_ref_cigar(cigartuples, 0, up_dis + end_dis)
+	up_cigarstats = pb.cigartuples_to_cigarstats(up_cigartuples)
+	up_len = up_cigarstats[0] + up_cigarstats[1] + up_cigarstats[7] + up_cigarstats[8]
+	down_cigartuples = pb.get_spec_ref_cigar(cigartuples, ref_map_len + down_dis - end_dis, ref_map_len)
+	down_cigarstats = pb.cigartuples_to_cigarstats(down_cigartuples)
+	down_len = down_cigarstats[0] + down_cigarstats[1] + down_cigarstats[7] + down_cigarstats[8]
 
-def is_known_cano_bsj(bsj, anno_bsj, ref_seq, read_seq, start, end, is_reverse, left_soft_clip, end_dis, force_strand):
-	known, dis_to_known, cano, dis_to_cano, strand, cano_motif, alignBSJ = False, 'NA,NA', False, 'NA,NA', 'NA', 'NA', 'NA'
-	S = end_dis
-	S_range = [0]
-	for i in range(1, end_dis + 1):
-		S_range.append(i)
-		S_range.append(-i)
+	left_soft_clip = cigartuples[0][1] if cigartuples[0][0] == 4 or cigartuples[0][0] == 5 else 0
+	right_soft_clip = cigartuples[-1][1] if cigartuples[-1][0] == 4 or cigartuples[-1][0] == 5 else 0
+	if left_soft_clip + up_len <= cons_len:
+		up_end = left_soft_clip + up_len + cons_len
+		down_start = cons_len * 2 - right_soft_clip - down_len
+	else:
+		up_end = left_soft_clip + up_len
+		down_start = cons_len - right_soft_clip - down_len
+	if down_start < up_end and down_start >= 0 and up_end <= cons_len * 2:
+		bsj_read_seq = read_seq[down_start:up_end]
+		return pb.pairwise_align(bsj_ref_seq, bsj_read_seq, 'g', True)
+	else:
+		return -sys.maxsize, 'NA'
 
-	anno_start, anno_end = bsj[2], bsj[3]
-	for s1 in S_range:
-		for s2 in S_range:
-			if (force_strand and (bsj[0], force_strand=='-', bsj[2]+s1, bsj[3]+s2) in anno_bsj) or \
-					(not force_strand and ((bsj[0], True, bsj[2]+s1, bsj[3]+s2) in anno_bsj or \
-						(bsj[0], False, bsj[2]+s1, bsj[3]+s2) in anno_bsj)):
-				known = True
-				anno_start, anno_end = bsj[2] + s1, bsj[3] + s2
-				dis_to_known = ','.join([str(s1), str(s2)])
+	# left_soft_clip += cons_len if left_soft_clip < end_dis else 0
+	# bsj_read_seq = read_seq[left_soft_clip - end_dis + up_dis:left_soft_clip + end_dis + up_dis]
+	# return pb.pairwise_align(bsj_ref_seq, bsj_read_seq, 'g', True)
+
+
+# TODO use bedtools intersect to extract known sites/junctions
+# bsj[rid, is_rev, end, start]
+# NEW_CHANGE
+# delta_aln_len = consMapLen - consLen
+# constrain: | canoBSJLen - consLen | <= dis
+def is_known_cano_bsj(bsj, anno_bsj, ref_seq, read_seq, start, end, is_reverse, cigartuples, ref_map_len, cons_map_len, cons_len, end_dis, force_strand):
+	known, dis_to_known, cano, dis_to_cano, strand, cano_motif, alignBSJ = [], 'NA,NA', False, 'NA,NA', 'NA', 'NA', 'NA'
+	for anno_bsj1 in anno_bsj:
+		known.append(False)
+	# TODO if cons_map_len / (cons_len+0.0) <= pb.high_repeat_ratio: # multi-copies cons
+
+	delta_aln_cons = cons_map_len - cons_len # delta_aln_cano = s1 - s2
+	delta_ref_aln_cons = int(round((cons_map_len - cons_len) * ref_map_len / cons_map_len))
+	# AG | up -- circRNA -- down | GT
+	up_range = [0]
+	if delta_ref_aln_cons >= 0:
+		# (-dis, +dis+delta), (-dis-delta, +dis)
+		up_range_s = -end_dis
+		up_range_e = delta_ref_aln_cons + end_dis
+		down_range_s = -delta_ref_aln_cons - end_dis
+		down_range_e = end_dis
+		for i in range(1, end_dis + 1):
+			up_range.append(i)
+			# down_range.append(i)
+			up_range.append(-i)
+			# down_range.append(-i)
+		for i in range(end_dis + 1, end_dis + delta_ref_aln_cons + 1):
+			up_range.append(i)
+			# down_range.append(-i)
+	else:
+		# TODO (-dis+delta, +dis), (-dis, +dis-delta)
+		# (-dis, +dis), (-dis, +dis)
+		up_range_s = -end_dis
+		up_range_e = end_dis
+		down_range_s = -end_dis
+		down_range_e = end_dis
+		for i in range(1, end_dis+1):
+			up_range.append(i)
+			up_range.append(-i)
+			# down_range.append(i)
+			# down_range.append(-i)
+		# for i in range(end_dis + 1, end_dis - delta_ref_aln_cons + 1):
+		# 	up_range.append(-i)
+		# 	down_range.append(i)
+	end_range = [0]
+	for i in range(1, end_dis+1):
+		end_range.append(i)
+		end_range.append(-i)
+
+	anno_start, anno_end = bsj[2], bsj[3] # down, up
+	for i in end_range:
+		for s1 in up_range:
+			s2 = s1 - delta_ref_aln_cons + i
+			if s2 < down_range_s or s2 > down_range_e:
+				continue
+			for anno_i in range(len(anno_bsj)):
+				if (force_strand and (bsj[0], force_strand=='-', bsj[2]+s2, bsj[3]+s1) in anno_bsj[anno_i]) or \
+						(not force_strand and ((bsj[0], True, bsj[2]+s2, bsj[3]+s1) in anno_bsj[anno_i] or \
+							(bsj[0], False, bsj[2]+s2, bsj[3]+s1) in anno_bsj[anno_i])):
+					known[anno_i] = True
+					anno_start, anno_end = bsj[2] + s2, bsj[3] + s1
+					dis_to_known = ','.join([str(s1), str(s2)])
+			if True in known:
 				break
+		if True in known:
+			break	
 	if ref_seq:
 		ref_len = len(ref_seq)
 		if not(anno_start + 1 > ref_len or anno_end > ref_len or anno_start - 1 < 0 or anno_end - 2 < 0):
-			S = 0 if known else S
-			left_seq = ref_seq[max(0, anno_start - 1 - S): min(ref_len, anno_start + S + 1)].seq.upper()
-			left_start = max(0, anno_start - 1 - S) + 1
-			left_center = anno_start - left_start
-			right_seq = ref_seq[max(0, anno_end - 2 - S): min(ref_len, anno_end + S)].seq.upper()
-			right_start = max(0, anno_end - 2 - S) + 1
-			right_center = anno_end - right_start - 1
+			# S = 0 if known else S
+			if True in known:
+				up_range_s = up_range_e = down_range_s = down_range_e = 0
+			down_seq = ref_seq[max(0, anno_start - 1 + down_range_s): min(ref_len, anno_start + 1 + down_range_e)].seq.upper()
+			down_start = max(0, anno_start - 1 + down_range_s) + 1
+			# down_center = anno_start - dwon_start
+			up_seq = ref_seq[max(0, anno_end - 2 + up_range_s): min(ref_len, anno_end + up_range_e)].seq.upper()
+			up_start = max(0, anno_end - 2 + up_range_s) + 1
+			# up_center = anno_end - up_start - 1
 
-			canos = get_cano_sjs(left_seq, left_center, right_seq, right_center, force_strand)
+			canos = get_cano_sjs(down_seq, up_seq, force_strand)
 			if canos:
-				cano = True
 				max_score = -sys.maxsize
-				for strand1, left_idx, right_idx, cano_motif1 in canos:
-					dis_to_cano1 = '{},{}'.format(left_start + left_idx - bsj[2], right_start + right_idx - (bsj[3]-1))
-					tmp = dis_to_cano1.split(',')
-					tmp.reverse()
-					dis_to_cano1 = ','.join(tmp)
+				for strand1, down_idx, up_idx, cano_motif1 in canos:
+					up_dis, down_dis = up_start + up_idx - (bsj[3]-1), down_start + down_idx - bsj[2]
+					if up_dis + end_dis < 0 or down_dis-end_dis > 0:
+						continue
+					delta_cano_aln_cons = (up_dis - down_dis) * cons_map_len / ref_map_len
+					if abs(delta_aln_cons - delta_cano_aln_cons) > end_dis:
+						continue
+					dis_to_cano1 = '{},{}'.format(up_dis, down_dis)
 					cano_motif1 = strand1 + cano_motif1
-					score, alignBSJ1 = get_cano_bsj_align(dis_to_cano1, strand1, ref_seq, read_seq, start, end, end_dis, is_reverse, left_soft_clip)
+					score, alignBSJ1 = get_cano_bsj_align(up_dis, down_dis, strand1, ref_seq, read_seq, start, end, end_dis, is_reverse, cigartuples, ref_map_len, cons_len)
 					if score > max_score:
+						cano = True
 						dis_to_cano = dis_to_cano1
 						strand = strand1
 						cano_motif = cano_motif1
 						alignBSJ = alignBSJ1
 						max_score = score
-	return known, dis_to_known, cano, dis_to_cano, cano_motif, alignBSJ
+	return ','.join(map(str, known)), dis_to_known, cano, dis_to_cano, cano_motif, alignBSJ
 
 # sj1: 1-base intronic position
 def is_known_cano_sj(sj1, anno_sj, ref_seq, site_dis, end_dis, force_strand):

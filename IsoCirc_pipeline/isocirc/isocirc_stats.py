@@ -70,7 +70,7 @@ def get_genomic_cate1(ele, order, cov_rat=0.75):
 def pb_get_all_stats(samp, isoform_res, stats_out):
     with open(isoform_res, 'r') as in_fp, open(stats_out, 'w') as out_fp:
         samp = isoform_res if not samp else samp
-        out_fp.write('Sample\tReadType\tCount\tCategory\tConsLen\tMapLen\tKnownBSJ\n')
+        out_fp.write('Sample\tReadType\tCount\tCategory\tConsLen\tMapLen\tKnownSS\n')
         for line in in_fp:
             if line.startswith('#'): continue
             ele = line.rsplit()
@@ -80,22 +80,22 @@ def pb_get_all_stats(samp, isoform_res, stats_out):
             map_len = int(ele[isoform_output_header_idx['consMapLen']])
             # circ_len = int(ele[isoform_output_header_idx['circLen']])
             cate = get_genomic_cate1(ele, hier_order, 0.75)
-            known_bsj = "Known" if ele[isoform_output_header_idx['isKnownBSJ']] == 'True' else "Unknown"
-            out_fp.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(samp, subread_t, subreads_cnt, cate, cons_len, map_len, known_bsj))
-            out_fp.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(samp, polyread_t, polyreads_cnt, cate, cons_len, map_len, known_bsj))
+            known_ss = "False" if 'False' in ele[isoform_output_header_idx['isKnownSS']] else "True"
+            out_fp.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(samp, subread_t, subreads_cnt, cate, cons_len, map_len, known_ss))
+            out_fp.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(samp, polyread_t, polyreads_cnt, cate, cons_len, map_len, known_ss))
 
 def nano_get_all_stats(samp, isoform_res, stats_out):
     with open(isoform_res, 'r') as in_fp, open(stats_out, 'w') as out_fp:
         samp = isoform_res if not samp else samp
-        out_fp.write('Sample\tCount\tCategory\tMapLen\tKnownBSJ\n')
+        out_fp.write('Sample\tCount\tCategory\tMapLen\tKnownSS\n')
         for line in in_fp:
             if line.startswith('#'): continue
             ele = line.rsplit()
             read_cnt = int(ele[isoform_output_header_idx['readCount']])
             map_len = int(ele[isoform_output_header_idx['refMapLen']])
             cate = get_genomic_cate1(ele, hier_order, 0.75)
-            known_bsj = "Known" if ele[isoform_output_header_idx['isKnownBSJ']] == 'True' else "Unknown"
-            out_fp.write('{}\t{}\t{}\t{}\t{}\n'.format(samp, read_cnt, cate, map_len, known_bsj))
+            known_ss = 'False' if 'False' in ele[isoform_output_header_idx['isKnownSS']] else 'True'
+            out_fp.write('{}\t{}\t{}\t{}\t{}\n'.format(samp, read_cnt, cate, map_len, known_ss))
 
 def classify_read_by_mapped_region(samp, isoform_res, out_fn):
     with open(isoform_res, 'r') as in_fp, open(out_fn, 'w') as out_fp:

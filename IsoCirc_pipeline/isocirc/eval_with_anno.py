@@ -32,6 +32,7 @@ whole_output_header = isocirc.whole_output_header
 whole_output_header_idx = isocirc.whole_output_header_idx
 isoform_output_header = isocirc.isoform_output_header
 isoform_output_header_idx = isocirc.isoform_output_header_idx
+cigar_op_dict = pb.cigar_op_dict
 
 itst_bed_name = ['CDS', 'UTR', 'lincRNA', 'antisense', 'rRNA', 'Alu', 'allRepeat']
 
@@ -372,20 +373,19 @@ def is_coincide_knownSS(eval_out):
 		return False
 	dis_to_bsj = eval_out['disToCanoBSJ'].split(',')
 	dis_to_known = eval_out['disToKnownSS'].split(',')
-	if dis_to_bsj[0] != dis_to_known[0] or dis_to_bsj[-1] != dis_to_known[-1]:
-		return False
-	else: return True
+	return dis_to_bsj[0] == dis_to_known[0] and dis_to_bsj[-1] == dis_to_known[-1]
 
 
+# No xid in key 4 bases
 def get_bsj_xnum(cigar_str, flank_len=10):
 	if cigar_str == 'NA':
 		return flank_len*2, flank_len*2
 	cigar_stats = pb.cigarstring_to_cigarstats(cigar_str)
-	key_cigar_tup = pb.get_spec_cigar(pb.cigarstring_to_cigartuples(cigar_str), flank_len-2, flank_len+2)
-	key_cigar_stats = pb.cigarstring_to_cigarstats(pb.cigartuples_to_cigarstring(key_cigar_tup))
-	if cigar_stats['D'] > 0 or cigar_stats['I'] > 0:
+	key_cigar_tup = pb.get_spec_ref_cigar(pb.cigarstring_to_cigartuples(cigar_str), flank_len-2, flank_len+2)
+	key_cigar_stats = pb.cigartuples_to_cigarstats(key_cigar_tup)
+	if key_cigar_stats[cigar_op_dict['D']] > 0 or key_cigar_stats[cigar_op_dict['I']] > 0:
 		return flank_len*2, flank_len*2
-	return cigar_stats['X'], key_cigar_stats['X']
+	return cigar_stats[cigar_op_dict['X']] + cigar_stats[cigar_op_dict['I']] + cigar_stats[cigar_op_dict['D']], key_cigar_stats[cigar_op_dict['X']]
 
 
 def get_bsj_aln_score(cigar_str, flank_len=10):
@@ -393,10 +393,10 @@ def get_bsj_aln_score(cigar_str, flank_len=10):
 	if cigar_str == 'NA':
 		return -flank_len*2, -flank_len*2
 	cigar_stats = pb.cigarstring_to_cigarstats(cigar_str)
-	key_cigar_tup = pb.get_spec_cigar(pb.cigarstring_to_cigartuples(cigar_str), flank_len-2, flank_len+2)
-	key_cigar_stats = pb.cigarstring_to_cigarstats(pb.cigartuples_to_cigarstring(key_cigar_tup))
-	score = cigar_stats['='] * eq + (cigar_stats['X'] + cigar_stats['D'] + cigar_stats['I']) * xid
-	key_score = key_cigar_stats['='] * eq + (key_cigar_stats['X'] + key_cigar_stats['D'] + key_cigar_stats['I']) * xid
+	key_cigar_tup = pb.get_spec_ref_cigar(pb.cigarstring_to_cigartuples(cigar_str), flank_len-2, flank_len+2)
+	key_cigar_stats = pb.cigartuples_to_cigarstats(key_cigar_tup)
+	score = cigar_stats[cigar_op_dict['=']] * eq + (cigar_stats[cigar_op_dict['X']] + cigar_stats[cigar_op_dict['D']] + cigar_stats[cigar_op_dict['I']]) * xid
+	key_score = key_cigar_stats[cigar_op_dict['=']] * eq + (key_cigar_stats[cigar_op_dict['X']] + key_cigar_stats[cigar_op_dict['D']] + key_cigar_stats[cigar_op_dict['I']]) * xid
 	return score, key_score
 
 
@@ -418,15 +418,10 @@ def circRNA_filter_core(eval_out, bsj_motifs=['GT/AG'], bsj_xnum=1, bsj_key_xnum
 		if cano == 0:
 			return False
 		# filter #4/5
-		# xnum, key_xnum = get_bsj_xnum(eval_out['alignAroundCanoBSJ'])
-		# if xnum > bsj_xnum:
-			# return False
-		# if key_xnum > bsj_key_xnum:
-			# return False
-		bsj_score, key_bsj_score = get_bsj_aln_score(eval_out['alignAroundCanoBSJ'])
-		if bsj_score < 18: 
+		xnum, key_xnum = get_bsj_xnum(eval_out['alignAroundCanoBSJ'])
+		if xnum > bsj_xnum:
 			return False
-		if key_bsj_score != 4:
+		if key_xnum > bsj_key_xnum:
 			return False
 		# filter #6/7
 		if (int(eval_out['endCoor']) + int(eval_out['disToCanoBSJ'].split(',')[1])) - (int(eval_out['startCoor0base']) + int(eval_out['disToCanoBSJ'].split(',')[0])) < min_circ_dis:
@@ -474,8 +469,8 @@ def get_one_cons_out(mul_cons):
 	best_cons_i = 0
 	best_score, best_key_score = get_bsj_aln_score(mul_cons[0]['alignAroundCanoBSJ'])
 	best_cluster_frac = tot_frac[0]
-	best_cons_frac = float(mul_cons[0]['consFrac'])
-	# best_NM, best_AS = mul_cons[0]['mapNM'], mul_cons[0]['mapAS']
+	# best_cons_frac = float(mul_cons[0]['consFrac'])
+	best_NM, best_AS = mul_cons[0]['mapNM'], mul_cons[0]['mapAS']
 	best_chrom = mul_cons[0]['chrom']
 
 	for i, cons_out in enumerate(mul_cons[1:]):
@@ -483,29 +478,26 @@ def get_one_cons_out(mul_cons):
 		cons_i = i + 1
 		score, key_score = get_bsj_aln_score(cons_out['alignAroundCanoBSJ'])
 		cluster_frac = tot_frac[clu_id[id]]
-		cons_frac = float(cons_out['consFrac'])
+		# cons_frac = float(cons_out['consFrac'])
 		NM, AS = cons_out['mapNM'], cons_out['mapAS']
 		chrom = cons_out['chrom']
 		if score > best_score:
-			# best_cons_i, best_score, best_key_score, best_cluster_frac, best_NM, best_AS, best_chrom = cons_i, score, key_score, cluster_frac, NM, AS, chrom
-			best_cons_i, best_score, best_key_score, best_cluster_frac, best_cons_frac, best_chrom = cons_i, score, key_score, cluster_frac, cons_frac, chrom
+			best_cons_i, best_score, best_key_score, best_cluster_frac, best_NM, best_AS, best_chrom = cons_i, score, key_score, cluster_frac, NM, AS, chrom
 		elif score == best_score:
 			if cluster_frac > best_cluster_frac:
-				best_cons_i, best_score, best_key_score, best_cluster_frac, best_cons_frac, best_chrom = cons_i, score, key_score, cluster_frac, cons_frac, chrom
+				best_cons_i, best_score, best_key_score, best_cluster_frac, best_NM, best_AS, best_chrom = cons_i, score, key_score, cluster_frac, NM, AS, chrom
 			elif cluster_frac == best_cluster_frac:
-				if cons_frac > best_cons_frac:
-					best_cons_i, best_score, best_key_score, best_cluster_frac, best_cons_frac, best_chrom = cons_i, score, key_score, cluster_frac, cons_frac, chrom
-				# if AS > best_AS:
-					# best_cons_i, best_score, best_key_score, best_cluster_frac, best_NM, best_AS, best_chrom = cons_i, score, key_score, cluster_frac, NM, AS, chrom
-				# elif AS == best_AS:
-					# if NM < best_NM:
-						# best_cons_i, best_score, best_key_score, best_cluster_frac, best_NM, best_AS, best_chrom = cons_i, score, key_score, cluster_frac, NM, AS, chrom
-					# elif NM == best_NM:
-					if key_score > best_key_score:
-						best_cons_i, best_score, best_key_score, best_cluster_frac, best_cons_frac, best_chrom = cons_i, score, key_score, cluster_frac, cons_frac, chrom
-					elif key_score == best_key_score:
-						if (best_chrom == 'chrM' or chrom.startswith('chrUn')) and (chrom != 'chrM' and not chrom.startswith('chrUn')):
-							best_cons_i, best_score, best_key_score, best_cluster_frac, best_cons_frac, best_chrom = cons_i, score, key_score, cluster_frac, cons_frac, chrom
+				if AS > best_AS:
+					best_cons_i, best_score, best_key_score, best_cluster_frac, best_NM, best_AS, best_chrom = cons_i, score, key_score, cluster_frac, NM, AS, chrom
+				elif AS == best_AS:
+					if NM < best_NM:
+						best_cons_i, best_score, best_key_score, best_cluster_frac, best_NM, best_AS, best_chrom = cons_i, score, key_score, cluster_frac, NM, AS, chrom
+					elif NM == best_NM:
+						if key_score > best_key_score:
+							best_cons_i, best_score, best_key_score, best_cluster_frac, best_NM, best_AS, best_chrom = cons_i, score, key_score, cluster_frac, NM, AS, chrom
+						elif key_score == best_key_score:
+							if (best_chrom == 'chrM' or chrom.startswith('chrUn')) and (chrom != 'chrM' and not chrom.startswith('chrUn')):
+								best_cons_i, best_score, best_key_score, best_cluster_frac, best_NM, best_AS, best_chrom = cons_i, score, key_score, cluster_frac, NM, AS, chrom
 	return mul_cons[best_cons_i]
 
 
@@ -516,28 +508,52 @@ def get_one_cons_out(mul_cons):
 # 5. filtered.bsj.coors + filterted.out + ovlp.bed => circRNA.out
 def circRNA_bsj_filter(all_out, cano_motifs=['GT/AG'], bsj_xnum=1, key_bsj_xnum=0, min_circ_dis=150):
 	# filtered_coors: adjusted coors by disToCanoBSJ
-	filtered_bsj_coors = dict()
+	filtered_bsj_coors, all_bsj, all_bsj_stats_dict = dict(), dict(), dd(lambda:0) # 'read_with_bsj_n'/'bsj_n'/'known_bsj_n'
+	all_bsj_stats_dict['known_bsj_n'] = dd(lambda:0)
 	last_read_name, mul_cons = '', []
 	for id, eval_out in all_out.items():
 		read_name = eval_out['#readID'].rsplit('_cons')[0]
 		if read_name != last_read_name:
 			if mul_cons:
 				out1 = get_one_cons_out(mul_cons)
-				if circRNA_filter_core(out1, cano_motifs, bsj_xnum, key_bsj_xnum, min_circ_dis):
-					# bsj coors
-					filtered_bsj_coors[(out1['chrom'], int(out1['startCoor0base']) + int(out1['disToCanoBSJ'].split(',')[0]), int(out1['endCoor']) + int(out1['disToCanoBSJ'].split(',')[1]))] = 1
+				if out1['isCanoBSJ']:
+					bsj = (out1['chrom'], int(out1['startCoor0base']) + int(out1['disToCanoBSJ'].split(',')[0]), int(out1['endCoor']) + int(out1['disToCanoBSJ'].split(',')[1]))
+
+					# all bsj
+					all_bsj_stats_dict['read_with_bsj_n'] += 1
+					if bsj not in all_bsj:
+						all_bsj[bsj] = 1
+						all_bsj_stats_dict['bsj_n'] += 1
+						for i, known_bsj in enumerate(out1['isKnownBSJ'].rsplit(',')):
+							all_bsj_stats_dict['known_bsj_n'][i] += (known_bsj == 'True')
+						all_bsj_stats_dict['known_bsj_n'][i+1] += ('False' not in out1['isKnownBSJ'])
+					if circRNA_filter_core(out1, cano_motifs, bsj_xnum, key_bsj_xnum, min_circ_dis):
+						# bsj coors
+						filtered_bsj_coors[bsj] = 1
 			mul_cons = [eval_out]
 			last_read_name = read_name
 		else:
 			mul_cons.append(eval_out)
 	if mul_cons:
 		out1 = get_one_cons_out(mul_cons)
-		if circRNA_filter_core(out1, cano_motifs, bsj_xnum, key_bsj_xnum, min_circ_dis):
-			# bsj coors
-			filtered_bsj_coors[(out1['chrom'], int(out1['startCoor0base']) + int(out1['disToCanoBSJ'].split(',')[0]), int(out1['endCoor']) + int(out1['disToCanoBSJ'].split(',')[1]))] = 1
-	return filtered_bsj_coors
+		if out1['isCanoBSJ']:
+			bsj = (out1['chrom'], int(out1['startCoor0base']) + int(out1['disToCanoBSJ'].split(',')[0]), int(out1['endCoor']) + int(out1['disToCanoBSJ'].split(',')[1]))
+			# all bsj
+			all_bsj_stats_dict['read_with_bsj_n'] += 1
+			if bsj not in all_bsj:
+				all_bsj[bsj] = 1
+				all_bsj_stats_dict['bsj_n'] += 1
+				for i, known_bsj in enumerate(out1['isKnownBSJ'].rsplit(',')):
+					if known_bsj == 'True':
+						all_bsj_stats_dict['known_bsj_n'][i] += 1
+				if 'False' not in out1['isKnownBSJ']:
+					all_bsj_stats_dict['known_bsj_n'][i+1] += 1
+			if circRNA_filter_core(out1, cano_motifs, bsj_xnum, key_bsj_xnum, min_circ_dis):
+				# bsj coors
+				filtered_bsj_coors[bsj] = 1
+	return filtered_bsj_coors, all_bsj_stats_dict
 
-def circRNA_rescue(all_out, bsj_coors):
+def circRNA_rescue(all_out, bsj_coors, h_bam, anno_site, anno_exon):
 	# filtered_coors: adjusted coors by disToCanoBSJ
 	filtered_id, filtered_out, filtered_coors = 0, dict(), dict()
 	last_read_name, mul_cons = '', []
@@ -548,10 +564,11 @@ def circRNA_rescue(all_out, bsj_coors):
 				out1 = get_one_cons_out(mul_cons)
 				if 'NA' not in out1['disToCanoBSJ']: 
 					chrom, adj_start, adj_end = out1['chrom'], int(out1['startCoor0base']) + int(out1['disToCanoBSJ'].split(',')[0]), int(out1['endCoor']) + int(out1['disToCanoBSJ'].split(',')[1])
+					chrom_id = h_bam.get_tid(chrom)
 					# print(last_read_name, chrom, adj_start, adj_end)
 					if (chrom, adj_start, adj_end) in bsj_coors:
 						# coors
-						filtered_coors[filtered_id] = [out1['chrom']]
+						filtered_coors[filtered_id] = [chrom_id]
 						filtered_coors[filtered_id].extend(pg.get_coor_from_block(out1['startCoor0base'], out1['blockSize'], out1['blockStarts'])) 
 						filtered_coors[filtered_id][1] = adj_start + 1
 						filtered_coors[filtered_id][-1] = adj_end
@@ -562,6 +579,17 @@ def circRNA_rescue(all_out, bsj_coors):
 							filtered_coors.pop(filtered_id)
 							continue
 						out1['refMapLen'] = sum(map(int, out1['blockSize'].rsplit(','))) 
+						if not is_coincide_knownSS(out1): # update
+							is_known_ss = out1['isKnownSS'].rsplit(',')
+							is_known_ss[0] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', True, adj_start+1) in anno_site else 'False'
+							is_known_ss[-1] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', False, adj_end) in anno_site else 'False'
+							out1['isKnownSS'] = ','.join(is_known_ss)
+
+							is_known_exon = out1['isKnownExon'].rsplit(',')
+							block_sizes = map(int, out1['blockSize'].rsplit(','))
+							is_known_exon[0] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', adj_start+1, adj_start + block_sizes[0]) in anno_exon else 'False'
+							is_known_exon[-1] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', adj_end-block_sizes[-1]+1, adj_end) in anno_exon else 'False'
+							out1['isKnownExon'] = ','.join(is_known_exon)
 						filtered_out[filtered_id] = out1
 						filtered_id += 1
 			mul_cons = [eval_out]
@@ -572,10 +600,11 @@ def circRNA_rescue(all_out, bsj_coors):
 		out1 = get_one_cons_out(mul_cons)
 		if 'NA' not in out1['disToCanoBSJ']:
 			chrom, adj_start, adj_end = out1['chrom'], int(out1['startCoor0base']) + int(out1['disToCanoBSJ'].split(',')[0]), int(out1['endCoor']) + int(out1['disToCanoBSJ'].split(',')[1])
+			chrom_id = h_bam.get_tid(chrom)
 			# print(last_read_name, chrom, adj_start, adj_end)
 			if (chrom, adj_start, adj_end) in bsj_coors:
 				# coors
-				filtered_coors[filtered_id] = [out1['chrom']]
+				filtered_coors[filtered_id] = [chrom_id]
 				filtered_coors[filtered_id].extend(pg.get_coor_from_block(out1['startCoor0base'], out1['blockSize'], out1['blockStarts']))
 				filtered_coors[filtered_id][1] = adj_start + 1
 				filtered_coors[filtered_id][-1] = adj_end
@@ -587,14 +616,26 @@ def circRNA_rescue(all_out, bsj_coors):
 					filtered_coors.pop(filtered_id)
 					return filtered_out, filtered_coors
 				out1['refMapLen'] = sum(map(int, out1['blockSize'].rsplit(','))) 
+				if not is_coincide_knownSS(out1): # update
+					is_known_ss = out1['isKnownSS'].rsplit(',')
+					is_known_ss[0] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', True, adj_start+1) in anno_site else 'False'
+					is_known_ss[-1] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', False, adj_end) in anno_site else 'False'
+					out1['isKnownSS'] = ','.join(is_known_ss)
+
+
+					is_known_exon = out1['isKnownExon'].rsplit(',')
+					block_sizes = map(int, out1['blockSize'].rsplit(','))
+					is_known_exon[0] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', adj_start+1, adj_start + block_sizes[0]) in anno_exon else 'False'
+					is_known_exon[-1] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', adj_end-block_sizes[-1]+1, adj_end) in anno_exon else 'False'
+					out1['isKnownExon'] = ','.join(is_known_exon)
 				filtered_out[filtered_id] = out1
 				filtered_id += 1
 	return filtered_out, filtered_coors
 
 
+# circ_sj = [dict(), dict()] : multiple circRNA annotation files
 def eval_core(id, r, cons_info_dict, ref_fa, cons_fa, all_site, all_exon, all_sj,
-			  circ_site, circ_exon, circ_sj, circ_trans, site_dis, end_dis,
-			  all_out):
+			  circ_sj, sj_flank_len, sj_xnum, site_dis, end_dis, all_out):
 	r_block, coors = pb.get_block(r), []
 	for b in r_block: 
 		coors.extend([b[2], b[3]])
@@ -604,30 +645,28 @@ def eval_core(id, r, cons_info_dict, ref_fa, cons_fa, all_site, all_exon, all_sj
 	eval_out['startCoor0base'], eval_out['endCoor'] = r.reference_start, r.reference_end
 	eval_out['blockCount'] = len(r_block)
 	_s, eval_out['blockSize'], eval_out['blockStarts'] = pg.get_block_from_coor(coors)
+	eval_out['refMapLen'] = sum(map(int, eval_out['blockSize'].rsplit(',')))
 	[eval_out['readLen'], eval_out['consLen'], eval_out['copyNum'], eval_out['consFrac'], eval_out['chimInfo']] = cons_info_dict[r.query_name]
 
 	# mapping score
 	eval_out['mapNM'], eval_out['mapAS'] = int(r.get_tag('NM')) if r.has_tag('NM') else 0, int(r.get_tag('AS')) if r.has_tag('AS') else 0
-
 	ref_seq = ref_fa[r.reference_name]
-	# 1. get circRNA blocks, comp with circ_anno
-	bsj = (r.reference_id, r.is_reverse, int(eval_out['endCoor']) + 1, int(eval_out['startCoor0base']))
-
-	# 2. compare with whole gene annotation
+	# 1. compare with whole gene annotation TODO use bedtools intersect
 	is_known_site, is_known_exon, is_known_junc, is_cano_junc, dis_to_known_ss, dis_to_cano_sj, cano_splice_motif = pg.comp_with_anno(r_block, all_site, all_exon, all_sj, ref_seq, site_dis, end_dis)
 	splice_strand = [m[0] if k else 'NA' for k,m in zip(is_known_junc, cano_splice_motif)]
+	is_high_sj = pb.parse_sj_alignment(r, flank_len=sj_flank_len, min_xid=sj_xnum)
 
-	# check bsj
+	# 2. check bsj
+	bsj = (r.reference_id, r.is_reverse, int(eval_out['endCoor']) + 1, int(eval_out['startCoor0base']))
 	force_strand = ''
 	if '+' in splice_strand and '-' not in splice_strand: force_strand = '+'
 	elif '-' in splice_strand and '+' not in splice_strand: force_strand = '-'
-	left_soft_clip = r.cigartuples[0][1] if r.cigartuples[0][0] == 4 or r.cigartuples[0][0] == 5 else 0
-	left_soft_clip += int(eval_out['consLen']) if left_soft_clip < end_dis else 0
-	is_known_bsj, dis_to_known_bsj, is_cano_bsj, dis_to_cano_bsj, bsj_motif, align_bsj = pg.is_known_cano_bsj(bsj, circ_sj, ref_seq, cons_fa[r.query_name][:].seq.upper(), int(eval_out['startCoor0base']), int(eval_out['endCoor']), r.is_reverse, left_soft_clip, end_dis, force_strand)
+	is_known_bsj, dis_to_known_bsj, is_cano_bsj, dis_to_cano_bsj, bsj_motif, align_bsj = pg.is_known_cano_bsj(bsj, circ_sj, ref_seq, cons_fa[r.query_name][:].seq.upper(), int(eval_out['startCoor0base']), int(eval_out['endCoor']), r.is_reverse, r.cigartuples, int(eval_out['refMapLen']), int(eval_out['consMapLen']), int(eval_out['consLen']), end_dis, force_strand)
 
 	eval_out['isKnownBSJ'], eval_out['disToKnownBSJ'], eval_out['isCanoBSJ'], eval_out['disToCanoBSJ'], eval_out['canoBSJMotif'], eval_out['alignAroundCanoBSJ'] = is_known_bsj, dis_to_known_bsj, is_cano_bsj, dis_to_cano_bsj, bsj_motif, align_bsj
 
 	eval_out['isKnownSS'], eval_out['isKnownSJ'], eval_out['isCanoSJ'], eval_out['isKnownExon'], eval_out['disToKnownSS'], eval_out['disToCanoSJ'], eval_out['canoSJMotif'] = ','.join(map(str, is_known_site)), ','.join(map(str, is_known_junc)),  ','.join(map(str, is_cano_junc)), ','.join(map(str, is_known_exon)), ','.join(map(str, dis_to_known_ss)), ','.join(dis_to_cano_sj), ','.join(cano_splice_motif)
+	eval_out['isHighSJ'] = ','.join(map(str, is_high_sj))
 
 	all_out[id] = eval_out
 
@@ -635,6 +674,7 @@ def eval_with_anno(data_type, high_bam, low_bam, long_len, cons_info, cons,
 				   ref, all_anno, circ_anno, itst_anno_dict, bedtools=bedtools, 
 				   flank_len=flank_len, site_dis=site_dis, end_dis=end_dis,
 				   cano_motif='GT/AG', bsj_xnum=1, key_bsj_xnum=0, min_circ_dis=150, rescue_low = False,
+				   sj_xnum=0, sj_flank_len=2,
 				   isoform_out_fn='iso.out', circRNA_bed='circRNA.bed', stats_out_fn='stats.out'):
 	# filter criteria
 	cano_motifs = ['GT/AG'] if cano_motif == 'GT/AG' else ['GT/AG', 'GC/AG', 'AT/AC']
@@ -642,7 +682,6 @@ def eval_with_anno(data_type, high_bam, low_bam, long_len, cons_info, cons,
 	ref_fa, cons_fa = Fasta(ref), Fasta(cons)
 	# read whole and circRNA annotation file
 	out_dir = os.path.dirname(os.path.abspath(isoform_out_fn)) + '/'
-	circRNA_bed = out_dir + '{}.bed'.format(__program__)
 
 	all_anno_bed = out_dir + os.path.basename(all_anno) + '.bed'
 	ut.exec_cmd(sys.stderr, 'gtf2bed', '{} {} {}'.format(gtf2bed, all_anno, all_anno_bed))
@@ -650,15 +689,15 @@ def eval_with_anno(data_type, high_bam, low_bam, long_len, cons_info, cons,
 	all_site = pg.get_splice_site_from_bed12(all_anno_bed, high_bam)
 	all_sj = pg.get_splice_junction_from_bed12(all_anno_bed, False, high_bam)
 	all_exon = pg.get_exon_from_bed12(all_anno_bed, high_bam)
-	if os.path.splitext(circ_anno)[1] == '.gtf':
-		circ_anno_bed = out_dir + os.path.basename(circ_anno) + '.bed'
-		ut.exec_cmd(sys.stderr, 'gtf2bed', '{} {} {}'.format(gtf2bed, circ_anno, circ_anno_bed))
-	else:
-		circ_anno_bed = circ_anno
-	circ_site = pg.get_splice_site_from_bed12(circ_anno_bed, high_bam)
-	circ_sj = pg.get_splice_junction_from_bed12(circ_anno_bed, True, high_bam)
-	circ_exon = pg.get_exon_from_bed12(circ_anno_bed, high_bam)
-	circ_trans = pg.get_exon_block_from_bed12(circ_anno_bed, high_bam)
+	# multiple circ_anno input files
+	circ_sj = []
+	for circ_anno1 in circ_anno.rsplit(','):
+		if os.path.splitext(circ_anno1)[1] == '.gtf':
+			circ_anno_bed = out_dir + os.path.basename(circ_anno1) + '.bed'
+			ut.exec_cmd(sys.stderr, 'gtf2bed', '{} {} {}'.format(gtf2bed, circ_anno1, circ_anno_bed))
+		else:
+			circ_anno_bed = circ_anno1
+		circ_sj.append(pg.get_back_splice_junction_from_bed(circ_anno_bed, high_bam))
 
 	with ps.AlignmentFile(high_bam) as h_bam, ps.AlignmentFile(low_bam) as l_bam, open(cons_info, 'r') as cons_info_fp, open(isoform_out_fn, 'w') as iso_fp:
 		# write header information for eval.out
@@ -672,42 +711,43 @@ def eval_with_anno(data_type, high_bam, low_bam, long_len, cons_info, cons,
 		ut.err_format_time('read_wise_eval', 'Generating read-wise evaluation result ... ')
 		for r in h_bam:
 			if r.is_unmapped: continue
-			eval_core(processed_cnt, r, cons_info_dict, ref_fa, cons_fa, all_site, all_exon, all_sj, circ_site, circ_exon, circ_sj, circ_trans, site_dis, end_dis, all_out)
+			eval_core(processed_cnt, r, cons_info_dict, ref_fa, cons_fa, all_site, all_exon, all_sj, circ_sj, sj_flank_len, sj_xnum, site_dis, end_dis, all_out)
 			processed_cnt += 1
 			if processed_cnt % batch_n == 0:
 				ut.err_format_time('high_quality', '{} high mapping quality BAM records have been processed ... '.format(processed_cnt))
 		ut.err_format_time('read_wise_eval', 'Generating read-wise evaluation result done!')
 
 		# 1. circRNA filtering using only high-quality reads
+		# all_bsj: bsj from all high-quality reads
 		ut.err_format_time('filter_circRNA_read', 'Filtering back-splice-junctions ...')
-		filtered_bsj_coors = circRNA_bsj_filter(all_out, cano_motifs, bsj_xnum, key_bsj_xnum, min_circ_dis)
+		filtered_bsj_coors, all_bsj_stats_dict = circRNA_bsj_filter(all_out, cano_motifs, bsj_xnum, key_bsj_xnum, min_circ_dis)
 		ut.err_format_time('filter_circRNA_read', 'Filtering back-splice-junctions done!')
 
 		if rescue_low:
 			high_processed_cnt = processed_cnt
 			for r in l_bam:
 				if r.is_unmapped: continue
-				eval_core(processed_cnt, r, cons_info_dict, ref_fa, cons_fa, all_site, all_exon, all_sj, circ_site, circ_exon, circ_sj, circ_trans, site_dis, end_dis, all_out)
+				eval_core(processed_cnt, r, cons_info_dict, ref_fa, cons_fa, all_site, all_exon, all_sj, circ_sj, sj_flank_len, sj_xnum, site_dis, end_dis, all_out)
 				processed_cnt += 1
 				if (processed_cnt - high_processed_cnt) % batch_n == 0:
 					ut.err_format_time('low_quality', '{} low mapping quality BAM records have been processed ... '.format(processed_cnt - high_processed_cnt))
 
 		# 2. find reads with reliable bsjs
 		ut.err_format_time('rescue_reads', 'Rescuing reads using reliable back-splice-junctions ...')
-		circRNA_out, circRNA_coors = circRNA_rescue(all_out, filtered_bsj_coors)
+		circRNA_out, circRNA_coors = circRNA_rescue(all_out, filtered_bsj_coors, h_bam, all_site, all_exon)
 		ut.err_format_time('rescue_reads', 'Rescuing reads using reliable back-splice-junctions done!')
 
 		# 3. circRNA isoform
-		iso_to_name_dict = ui.uniq_isoform_with_unsorted_coors(circRNA_coors)
-		circRNA_isoform_bed12(circRNA_bed, circRNA_out, iso_to_name_dict)
+		sorted_iso_to_name_dict = ui.uniq_isoform_with_unsorted_coors(circRNA_coors, True)
+		circRNA_isoform_bed12(circRNA_bed, circRNA_out, sorted_iso_to_name_dict)
 		# 4. intersect with annoation
 		itst_out_dict = intersect_with_bed(out_dir, circRNA_bed, site_dis, end_dis, all_anno, all_anno_bed, itst_anno_dict, flank_len, bedtools)
 		# 5. output isoform result
-		output_isoform_eval(iso_fp, circRNA_out, itst_out_dict, iso_to_name_dict)
+		output_isoform_eval(iso_fp, circRNA_out, itst_out_dict, sorted_iso_to_name_dict)
 	if data_type == 'ont':
-		bs.stats_core(long_len, cons_info, high_bam, isoform_out_fn, stats_out_fn)
+		bs.stats_core(long_len, cons_info, high_bam, isoform_out_fn, all_bsj_stats_dict, stats_out_fn)
 	elif data_type == 'pb':
-		bs.pb_stats_core(long_len, cons_info, high_bam, isoform_out_fn, stats_out_fn)
+		bs.pb_stats_core(long_len, cons_info, high_bam, isoform_out_fn, all_bsj_stats_dict, stats_out_fn)
 	ut.exec_cmd(sys.stderr, 'remove temp', 'rm {}.* {}{}.*'.format(circRNA_bed, out_dir, os.path.basename(all_anno)))
 	return
 
@@ -721,6 +761,7 @@ def eval_with_anno_core(args):
 		args.cons_fa, args.ref, args.all_anno, args.circRNA_anno, itst_anno_dict, args.bedtools,
 		args.flank_len, args.site_dis, args.end_dis, 
 		args.cano_motif, args.bsj_xnum, args.key_bsj_xnum, args.min_circ_dis, args.rescue_low,
+		args.sj_xnum, args.sj_flank_len,
 		args.out, args.bed, args.stats_out)
 
 
@@ -736,7 +777,7 @@ def parser_argv():
 	parser.add_argument('low_bam', metavar='low.bam', type=str, help='Unsorted low mapping quality alignment file of consensus sequence.')
 	parser.add_argument('ref', metavar='ref.fa', type=str, help='Reference genome sequence.')
 	parser.add_argument('all_anno', metavar='all.gtf', type=str, help='Whole gene annotation file in GTF format.')
-	parser.add_argument('circRNA_anno', metavar='circRNA.bed/gtf', type=str, help='circRNA annotation file in BED12 or GTF format.')
+	parser.add_argument('circRNA_anno', metavar='circRNA.bed/gtf', type=str, help='circRNA annotation file in BED12 or GTF format. Use \',\' to separate multiple circRNA annotation files.')
 	parser.add_argument('out', metavar='{}.out'.format(__program__), type=str, help='Isoform-wise circRNA output file of {} result.'.format(__program__))
 	parser.add_argument('bed', metavar='{}.bed'.format(__program__), type=str, help='BED12 format file of circRNA output file.'.format(__program__))
 	parser.add_argument('stats_out', metavar='{}_stats.out'.format(__program__), type=str, help='Stats output file of {} result.'.format(__program__))
@@ -753,11 +794,13 @@ def parser_argv():
 	parser.add_argument('-S', '--end-dis', type=int, default=end_dis, help='Maximum allowed distance between circRNA back-splice-site and annoated splice-site.')
 	parser.add_argument('--cano-motif', type=str, default='GT/AG', help='Canonical back-splicing motif (GT/AG or all three motifs: GT/AG, GC/AG, AT/AC).', choices=['GT/AG', 'all'])
 	# parser.add_argument('--bsj-score', type=int, default=18, help='Minimum alignment score of sequence around the back-splicing junction (<=20).')
-	parser.add_argument('--bsj-xnum', type=int, default=1, help='Maximum allowed mismatch for sequences around the back-splicing junction.')
 	# parser.add_argument('--key-bsj-score', type=int, default=4, help='Minimum alignment score of the back-splicing motif (<=4).')
-	parser.add_argument('--key-bsj-xnum', type=int, default=0, help='Maximum allowed mismatch for the back-splicing motif.')
+	parser.add_argument('--bsj-xnum', type=int, default=1, help='Maximum allowed mis/ins/del for sequences around the back-splicing junction.')
+	parser.add_argument('--key-bsj-xnum', type=int, default=0, help='Maximum allowed mis/ins/del for the back-splicing motif.')
 	parser.add_argument('--min-circ-dis', type=int, default=150, help='Minimum distance of the start and end coordinates of circRNA.')
 	parser.add_argument('--rescue-low', default=False, action='store_true', help='Use high mapping quality reads to rescue low mapping quality reads.')
+	parser.add_argument('--sj-flank-len', type=int, default=2, help='Length of flanking sequences around the internal splice junction.')
+	parser.add_argument('--sj-xnum', type=int, default=0, help='Maximum allowed mis/ins/del for sequences around the internal splice junction.')
 	return parser.parse_args()
 
 

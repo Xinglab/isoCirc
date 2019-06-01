@@ -3,11 +3,6 @@ import re, io
 from isocirc.__init__ import __version__
 from isocirc.__init__ import __program__
 
-# __version__ = re.search(
-# 	r'__version__\s*=\s*[\'"]([^\'"]*)[\'"]',  # It excludes inline comment too
-# 	io.open('isocirc/__init__.py', encoding='utf_8_sig').read()
-# ).group(1)
-
 setup(
 	name=__program__,
 	# packages=['isocirc'],
@@ -50,11 +45,11 @@ setup(
 		'pyfaidx',
 		'pysam',
 	],
-	url='https://github.com/yangao07/PARRIS',
+	url='https://github.com/Xinglab/IsoCirc',
 	license='MIT',
 	author='yan',
 	author_email='yangaoucla@gmail.com',
-	description='PARRIS: Profiling and Annotating ciRcular RNA with Iso-Seq',
+	description='IsoCirc: circular RNA profiling and analysis using long-read sequencing',
 	long_description=open('README.md').read(),
 	long_description_content_type="text/markdown",
 )

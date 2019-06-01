@@ -1,2 +1,2 @@
-__program__ = "IsoCirc"
-__version__ = "1.5.12"
+__program__ = "isocirc"
+__version__ = "1.5.13"

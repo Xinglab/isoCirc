@@ -17,23 +17,23 @@ threads = 8
 def align_cons(cons_fa, ref_fa, cons_all_sam, minimap2=minimap2, threads=threads):
     ut.exec_cmd(sys.stderr, 'Mapping', '{} -ax splice -ub --MD --eqx {} {} -t {} > {}'.format(minimap2, ref_fa, cons_fa, threads, cons_all_sam))
 
-# # cons_fa: 2 copies of consensus sequence
-# def new_align_cons(cons_fa, ref_fa, cons_all_sam, minimap2=minimap2, threads=threads):
-#     # 1st round alignment
-#     tmp_all_sam = cons_all_sam + '.tmp'
-#     ut.exec_cmd(sys.stderr, 'Mapping', '{} -ax splice -ub --MD --eqx {} {} -t {} > {}'.format(minimap2, ref_fa, cons_fa, threads, tmp_all_sam))
-#     # rotate cons based on the alignment
-#     rotated_cons = cons_fa + '.rotated'
-#     rotate_cons_based_on_sam(cons_fa, rotated_cons, tmp_all_sam)
+# cons_fa: 2 copies of consensus sequence
+def new_align_cons(cons_fa, ref_fa, cons_all_sam, minimap2=minimap2, threads=threads):
+    # 1st round alignment
+    tmp_all_sam = cons_all_sam + '.tmp'
+    ut.exec_cmd(sys.stderr, 'Mapping', '{} -ax splice -ub --MD --eqx {} {} -t {} > {}'.format(minimap2, ref_fa, cons_fa, threads, tmp_all_sam))
+    # rotate cons based on the alignment
+    rotated_cons = cons_fa + '.rotated'
+    rotate_cons_based_on_sam(cons_fa, rotated_cons, tmp_all_sam)
 
-#     # 2nd round alignment
-#     ut.exec_cmd(sys.stderr, 'Mapping', '{} -ax splice -ub --MD --eqx {} {} -t {} > {}'.format(minimap2, ref_fa, rotated_cons, threads, cons_all_sam))
+    # 2nd round alignment
+    ut.exec_cmd(sys.stderr, 'Mapping', '{} -ax splice -ub --MD --eqx {} {} -t {} > {}'.format(minimap2, ref_fa, rotated_cons, threads, cons_all_sam))
 
 def cons_align_core(args):
-    # if args.two_rounds:
-    #     new_align_cons(args.cons_fa, args.ref_fa, args.cons_all_sam, args.minimap2, args.threads)
-    # else:
-    align_cons(args.cons_fa, args.ref_fa, args.cons_all_sam, args.minimap2, args.threads)
+    if args.two_rounds:
+        new_align_cons(args.cons_fa, args.ref_fa, args.cons_all_sam, args.minimap2, args.threads)
+    else:
+        align_cons(args.cons_fa, args.ref_fa, args.cons_all_sam, args.minimap2, args.threads)
 
 
 def parser_argv():
@@ -44,7 +44,7 @@ def parser_argv():
     parser.add_argument("cons_all_sam", metavar='cons.fa.sam', type=str, help='Consensus SAM alignment file.')
 
     parser.add_argument('--minimap2', help='Path to minimap2.', default=minimap2)
-    # parser.add_argument('--two-rounds', help='Do two-rounds of alignment.', default=False, action='store_true')
+    parser.add_argument('--two-rounds', help='Do two-rounds of alignment.', default=False, action='store_true')
     parser.add_argument('-t', '--threads', type=int, help='Number of threads.', default=threads)
 
     return parser.parse_args()
