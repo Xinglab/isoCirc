@@ -7,7 +7,7 @@ whole_output_header = ['#readID', 'chrom', 'startCoor0base', 'endCoor', 'mapStra
 					   'readLen', 'consLen', 'consMapLen', 'copyNum', 'consFrac', 'chimInfo',
 					   # original read and consensus sequence information
 					   'isKnownBSJ', 'disToKnownBSJ', 'isCanoBSJ', 'disToCanoBSJ', 'canoBSJMotif', 'alignAroundCanoBSJ',
-					   # back-splicing junction
+					   # back-splice junction
 					   'isKnownSS', 'isKnownSJ', 'isKnownExon', #
 					   'isCanoSJ', 'canoSJMotif', 'isHighSJ', # isHighSJ: high-confidence SJ based on alignment around SJ
 					   'CDS', 'UTR', 'lincRNA', 'antisense',  # gene_type/biotype
@@ -20,6 +20,7 @@ isoform_output_header = ['#isoformID', 'chrom', 'startCoor0base', 'endCoor', # 1
 						 'blockType', 'blockAnno', # 12-13
 						 'isKnownSS', 'isKnownSJ', 'isCanoSJ', 'isHighSJ', 'isKnownExon', # 14-18
 						 'isKnownBSJ', 'isCanoBSJ', 'canoBSJMotif', # 19-21
+					     'isFullLength', 'BSJCate', 'interIsoCate', # FSM: full splice match, NIC: novel in catelog, NNC, novel and not in catelog
 						 'CDS', 'UTR', 'lincRNA', 'antisense',  # 22-25 gene_type/biotype 
 						 'rRNA', 'Alu', 'allRepeat', 'upFlankAlu', 'downFlankAlu', # 26-30 repeat element
 						 'readCount', 'readIDs'] # 31-32
@@ -133,10 +134,10 @@ def isocirc_core(args):
 
 	# ut.err_format_time('Filtering', 'Filtering circRNA reads ...')
 	isoform_out, bed_out, stats_out = args.out_dir + '/{}.out'.format(__program__), args.out_dir + '/{}.bed'.format(__program__), args.out_dir + '/{}_stats.out'.format(__program__)
-	ea.eval_with_anno(args.type, high_bam, low_bam, long_len_fn, cons_info, cons_fa, 
+	ea.eval_with_anno(high_bam, low_bam, long_len_fn, cons_info, cons_fa,
 		args.ref, args.gene_anno, args.circRNA_anno, itst_bed_dict, args.bedtools, args.flank_len, args.site_dis, args.end_dis,
-		args.cano_motif, args.bsj_xnum, args.key_bsj_xnum, args.min_circ_dis, args.rescue_low, 
-		args.sj_xnum, args.sj_flank_len,
+		args.cano_motif, args.bsj_xid, args.key_bsj_xid, args.min_circ_dis, args.rescue_low,
+		args.sj_xid, args.key_sj_xid,
 		isoform_out, bed_out, stats_out)
 	# ut.err_format_time('Filtering', 'Filtering circRNA reads done!')
 	# 5. generate stats plot
@@ -158,7 +159,7 @@ def parser_argv():
 	parser.add_argument('-v', '--version', action='version', version=__program__ + ' ' + __version__)
 
 	general_par = parser.add_argument_group('General options')
-	general_par.add_argument('--type', type=str, help='Type of sequencing data: Oxford Nanopore(ont) or Pacific Biosciences (pb).', choices=['ont', 'pb'], default='ont')
+	# general_par.add_argument('--type', type=str, help='Type of sequencing data: Oxford Nanopore(ont) or Pacific Biosciences (pb).', choices=['ont', 'pb'], default='ont')
 	general_par.add_argument('-t', '--threads', type=int, default=threads, help='Number of thread to use.')
 	general_par.add_argument('--bedtools', help='Path to bedtools.', default=ea.bedtools)
 	general_par.add_argument('--minimap2', help='Path to minimap2.', default=ca.minimap2)
@@ -203,16 +204,15 @@ def parser_argv():
 	eval_par.add_argument('-S', '--end-dis', type=int, default=ea.end_dis, help='Maximum allowed distance between circRNA back-splice-site and annoated splice-site.')
 
 	circ_par = parser.add_argument_group('circRNA filtering criteria')
-	circ_par.add_argument('--cano-motif', type=str, default='GT/AG', help='Canonical back-splicing motif (GT/AG or all three motifs: GT/AG, GC/AG, AT/AC).', choices=['GT/AG', 'all'])
-	# circ_par.add_argument('--bsj-score', type=int, default=18, help='Minimum alignment score of sequence around the back-splicing junction (<=20).')
-	# circ_par.add_argument('--key-bsj-score', type=int, default=4, help='Minimum alignment score of the back-splicing motif (<=4).')
-	circ_par.add_argument('--bsj-xnum', type=int, default=1, help='Maximum allowed mis/ins/del for sequences around the back-splicing junction.')
-	circ_par.add_argument('--key-bsj-xnum', type=int, default=0, help='Maximum allowed mis/ins/del for the back-splicing motif.')
+	circ_par.add_argument('--cano-motif', type=str, default='GT/AG', help='Canonical back-splice motif (GT/AG or all three motifs: GT/AG, GC/AG, AT/AC).', choices=['GT/AG', 'all'])
+
+	circ_par.add_argument('--bsj-xid', type=int, default=1, help='Maximum allowed mis/ins/del for 20 bp sequence alignment around the back-splice junction.')
+	circ_par.add_argument('--key-bsj-xid', type=int, default=0, help='Maximum allowed mis/ins/del for 4 bp sequence alignment around the back-splice junction.')
 	circ_par.add_argument('--min-circ-dis', type=int, default=150, help='Minimum distance of the start and end coordinates of circRNA.')
 	circ_par.add_argument('--rescue-low', default=False, action='store_true', help='Use high mapping quality reads to rescue low mapping quality reads.')
 
-	circ_par.add_argument('--sj-flank-len', type=int, default=2, help='Length of flanking sequences around the internal splice junction.')
-	circ_par.add_argument('--sj-xnum', type=int, default=0, help='Maximum allowed mis/ins/del for sequences around the internal splice junction.')
+	circ_par.add_argument('--sj-xid', type=int, default=1, help='Maximum allowed mis/ins/del for 20 bp sequence alignment around the internal splice junction.')
+	circ_par.add_argument('--key-sj-xid', type=int, default=0, help='Maximum allowed mis/ins/del for 4 bp sequence alignment around the internal splice junction.')
 	return parser.parse_args()
 
 

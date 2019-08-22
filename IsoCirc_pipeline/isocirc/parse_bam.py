@@ -265,6 +265,7 @@ def get_spec_read_cigar(cigartuples=[], start=0, end=0):  # Aligned bases
     # print start_remain_len, end_remain_len
     # print tuples, start, end
     while start_remain_len > 0:
+        # print mi
         if is_cigar_M(tuples[mi][0]) or tuples[mi][0] == BAM_CINS:
             if tuples[mi][1] > start_remain_len:
                 tuples[mi] = (tuples[mi][0], tuples[mi][1] - start_remain_len)
@@ -561,33 +562,39 @@ def get_error_rate(in_sam_fn=''):
             tot_mis += cigar_stats[cigar_op_dict['X']]
     return tot_mapped_n, tot_mapped_base, '{0:.1f}%'.format((tot_ins+tot_del+tot_mis) / (tot_ins+tot_mis+tot_match+0.0) * 100)
 
-def parse_sj_alignment(r=ps.AlignedSegment, flank_len=2, min_xid=0):
+def get_xid_from_cigar(cigar_stats):
+    return cigar_stats[cigar_op_dict['X']] + cigar_stats[cigar_op_dict['I']] + cigar_stats[cigar_op_dict['D']]
+
+def parse_sj_alignment(r=ps.AlignedSegment, flank_len=10, min_xid=1, key_flank_len=2, key_min_xid=0):
     is_high_sj = []
-    read_start, read_end, aln_read_len = -1, 0, get_aligned_read_length(r)
+    last_read_end, read_end, aln_read_len = 0, 0, get_aligned_read_length(r)
     for tuples in r.cigartuples:
         if tuples[0] == BAM_CREF_SKIP:
             # left
-            read_start = read_end - flank_len
-            if read_start < 0:
+            if read_end - last_read_end < flank_len:
                 is_high_sj.append(False)
+                last_read_end = read_end
                 continue
-            left_cigar_stats = cigartuples_to_cigarstats(get_spec_read_cigar(r.cigartuples, read_start, read_end))
+            start, key_start, end = read_end - flank_len, read_end - key_flank_len, read_end
+            left_cigar_stats = cigartuples_to_cigarstats(get_spec_read_cigar(r.cigartuples, start, end))
+            key_left_cigar_stats = cigartuples_to_cigarstats(get_spec_read_cigar(r.cigartuples, key_start, end))
             # right
-            read_start = read_end
-            read_end += flank_len
-            if read_end > aln_read_len:
+            start, end, key_end = read_end, read_end + flank_len, read_end + key_flank_len
+            if end > aln_read_len:
                 is_high_sj.append(False)
+                last_read_end = read_end
                 continue
-            right_cigar_stats = cigartuples_to_cigarstats(get_spec_read_cigar(r.cigartuples, read_start, read_end))
-            if left_cigar_stats[cigar_op_dict['X']] + left_cigar_stats[cigar_op_dict['I']] + left_cigar_stats[cigar_op_dict['D']] + right_cigar_stats[cigar_op_dict['X']] + right_cigar_stats[cigar_op_dict['I']] + right_cigar_stats[cigar_op_dict['D']] > min_xid:
+            right_cigar_stats = cigartuples_to_cigarstats(get_spec_read_cigar(r.cigartuples, start, end))
+            key_right_cigar_stats = cigartuples_to_cigarstats(get_spec_read_cigar(r.cigartuples, start, key_end))
+
+            if get_xid_from_cigar(left_cigar_stats) + get_xid_from_cigar(right_cigar_stats) > min_xid or\
+                    get_xid_from_cigar(key_left_cigar_stats) + get_xid_from_cigar(key_right_cigar_stats) > key_min_xid:
                 is_high_sj.append(False)
             else:
                 is_high_sj.append(True)
+            last_read_end = read_end
         elif is_cigar_M(tuples[0]) or tuples[0] == BAM_CINS:
             read_end += tuples[1]
     if not is_high_sj:
         is_high_sj.append('NA')
     return is_high_sj
-
-def get_chimeric_junction(rs=[]):
-    cj = []

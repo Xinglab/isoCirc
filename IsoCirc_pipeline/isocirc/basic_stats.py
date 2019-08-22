@@ -8,6 +8,7 @@ import isocirc_stats as ps
 import isocirc
 from collections import defaultdict as dd
 from __init__ import __program__
+from __init__ import __version__
 
 isoform_output_header = isocirc.isoform_output_header
 isoform_output_header_idx = isocirc.isoform_output_header_idx
@@ -113,7 +114,6 @@ def pb_stats_core(long_read_len, cons_info, cons_bam, isoform_out, all_bsj_stats
 def stats_core(long_read_len, cons_info, cons_bam, isoform_out, all_bsj_stats_dict, stats_out):
     # basic stats of read/cons
     tot_read_n, tot_base, tot_read_cons_n, tot_cons_n, tot_cons_base, tot_map_cons_n, tot_map_cons_base, error_rate = 0, 0, 0, 0, 0, 0, 0, '0.0%'
-    read_names = dict()
     with open(long_read_len, 'r') as in_fp:
         for line in in_fp:
             [name, read_len] = line.rsplit()
@@ -135,9 +135,12 @@ def stats_core(long_read_len, cons_info, cons_bam, isoform_out, all_bsj_stats_di
     # tot_known_circRNA
     tot_isoform, tot_bsj, tot_known_bsj, tot_circRNA_read_n, tot_iso_with_known_bsj, tot_known_bsj_read_n, tot_iso_with_cano_bsj, tot_cano_bsj_read_n = 0, 0, dd(lambda:0), 0, 0, 0, 0, 0
     tot_iso_with_cano_sj, tot_read_with_cano_sj = 0, 0
-    tot_iso_with_cano_high_sj, tot_iso_with_known_ss, tot_iso_with_cano_high_sj_known_ss = 0, 0, 0
-    tot_read_with_cano_high_sj, tot_read_with_known_ss, tot_read_with_cano_high_sj_known_ss = 0, 0, 0
-    bsj_dict= dict()
+    tot_iso_with_high_sj, tot_iso_with_known_ss, tot_iso_with_high_sj_known_ss = 0, 0, 0
+    tot_read_with_high_sj, tot_read_with_known_ss, tot_read_with_high_sj_known_ss = 0, 0, 0
+    tot_full_iso, tot_full_read = 0, 0
+    tot_full_iso_bsj_fsm_iso, tot_full_iso_bsj_fsm_read, tot_full_iso_bsj_nic_iso, tot_full_iso_bsj_nic_read, tot_full_iso_bsj_nnc_iso, tot_full_iso_bsj_nnc_read = 0,0,0,0,0,0
+    tot_full_iso_int_fsm_iso, tot_full_iso_int_fsm_read, tot_full_iso_int_nic_iso, tot_full_iso_int_nic_read, tot_full_iso_int_nnc_iso, tot_full_iso_int_nnc_read = 0,0,0,0,0,0
+    bsj_dict = dict()
     with open(isoform_out) as in_fp:
         for line in in_fp:
             if line.startswith('#'): continue
@@ -155,71 +158,96 @@ def stats_core(long_read_len, cons_info, cons_bam, isoform_out, all_bsj_stats_di
             if 'False' not in ele[isoform_output_header_idx['isKnownSS']]:
                 tot_read_with_known_ss += read_cnt
                 tot_iso_with_known_ss += 1
+            full_len = False
             if 'False' not in ele[isoform_output_header_idx['isCanoSJ']]:
                 tot_iso_with_cano_sj += 1
                 tot_read_with_cano_sj += read_cnt
                 if 'False' not in ele[isoform_output_header_idx['isHighSJ']]:
-                    tot_iso_with_cano_high_sj += 1
-                    tot_read_with_cano_high_sj += read_cnt
+                    tot_iso_with_high_sj += 1
+                    tot_read_with_high_sj += read_cnt
+                    full_len = True
                     if 'False' not in ele[isoform_output_header_idx['isKnownSS']]:
-                        tot_iso_with_cano_high_sj_known_ss += 1
-                        tot_read_with_cano_high_sj_known_ss += read_cnt
-            # if ele[isoform_output_header_idx['isKnownBSJ']] == 'True':
-                # tot_iso_with_known_bsj += 1
-                # tot_known_bsj_read_n += read_cnt
-            # if ele[isoform_output_header_idx['isCanoBSJ']] == 'True':
-                # tot_iso_with_cano_bsj += 1
-                # tot_cano_bsj_read_n += read_cnt
+                        tot_iso_with_high_sj_known_ss += 1
+                        tot_read_with_high_sj_known_ss += read_cnt
+            if 'False' not in ele[isoform_output_header_idx['isKnownSS']]:
+                full_len = True
+            if full_len:
+                tot_full_iso += 1
+                tot_full_read += read_cnt
+                if ele[isoform_output_header_idx['BSJCate']] == 'FSM':
+                    tot_full_iso_bsj_fsm_iso += 1
+                    tot_full_iso_bsj_fsm_read += read_cnt
+                elif ele[isoform_output_header_idx['BSJCate']] == 'NIC':
+                    tot_full_iso_bsj_nic_iso += 1
+                    tot_full_iso_bsj_nic_read += read_cnt
+                else:
+                    tot_full_iso_bsj_nnc_iso += 1
+                    tot_full_iso_bsj_nnc_read += read_cnt
+
+                if ele[isoform_output_header_idx['interIsoCate']] == 'FSM':
+                    tot_full_iso_int_fsm_iso += 1
+                    tot_full_iso_int_fsm_read += read_cnt
+                elif ele[isoform_output_header_idx['interIsoCate']] == 'NIC':
+                    tot_full_iso_int_nic_iso += 1
+                    tot_full_iso_int_nic_read += read_cnt
+                else:
+                    tot_full_iso_int_nnc_iso += 1
+                    tot_full_iso_int_nnc_read += read_cnt
 
     ut.err_format_time('basic_stats_core', 'Writing basic stats to file ... ')
     with open(stats_out, 'w') as out:
-        out.write('# cons=consensus sequence, BSJ=back-splice junction, SJ=splice junction, SS=splice site\n')
-        out.write('1_Total_reads\t{}\n'.format(tot_read_n))
-        # out.write('Total_base\t{}\n'.format(tot_base))
-        out.write('2_Total_reads_with_cons\t{}\n'.format(tot_read_cons_n))
-        # out.write('Total_cons_seq\t{}\n'.format(tot_cons_n))
-        # out.write('Total_cons_seq_base\t{}\n'.format(tot_cons_base))
-        out.write('3_Total_mappable_reads_with_cons\t{}\n'.format(tot_map_read_n))
-        # out.write('Total_mappable_cons\t{}\n'.format(tot_map_cons_n))
-        # out.write('Total_mappable_cons_base\t{}\n'.format(tot_map_cons_base))
-        # out.write('Error_rate\t{}\n'.format(error_rate))
-        out.write('4_Total_reads_with_candidate_BSJs\t{}\n'.format(all_bsj_stats_dict['read_with_bsj_n']))
-        out.write('5_Total_candidate_BSJs\t{}\n'.format(all_bsj_stats_dict['bsj_n']))
+        out.write('#' + __program__ + '\t' + __version__ + '\n')
+        out.write('# cons=consensus sequence, high=high-confidence, cano=canonical, BSJ=back-splice junction, SJ=splice junction, SS=splice site\n')
+        out.write('1_Total_reads\t{:,}\n'.format(tot_read_n))
+        # out.write('Total_base\t{:,}\n'.format(tot_base))
+        out.write('2_Total_reads_with_cons\t{:,}\n'.format(tot_read_cons_n))
+        out.write('3_Total_mappable_reads_with_cons\t{:,}\n'.format(tot_map_read_n))
+        out.write('4_Total_reads_with_candidate_BSJs\t{:,}\n'.format(all_bsj_stats_dict['read_with_bsj_n']))
+        out.write('5_Total_candidate_BSJs\t{:,}\n'.format(all_bsj_stats_dict['bsj_n']))
         if len(all_bsj_stats_dict['known_bsj_n']) > 2:
             for i in all_bsj_stats_dict['known_bsj_n']:
                 idx = 'all' if i == len(all_bsj_stats_dict['known_bsj_n']) - 1 else i
-                out.write('6_Total_candidate_BSJs_known_in_{}\t{}\n'.format(idx, all_bsj_stats_dict['known_bsj_n'][i]))
+                out.write('6_Total_candidate_BSJs_known_in_{}\t{:,}\n'.format(idx, all_bsj_stats_dict['known_bsj_n'][i]))
         else:
-            out.write('6_Total_known_candidate_BSJs\t{}\n'.format(all_bsj_stats_dict['known_bsj_n'][0]))
-        out.write('7_Total_reads_with_high_confidence_BSJs\t{}\n'.format(tot_circRNA_read_n))
-        out.write('8_Total_high_confidence_BSJs\t{}\n'.format(tot_bsj))
+            out.write('6_Total_known_candidate_BSJs\t{:,}\n'.format(all_bsj_stats_dict['known_bsj_n'][0]))
+        out.write('7_Total_reads_with_high_confidence_BSJs\t{:,}\n'.format(tot_circRNA_read_n))
+        out.write('8_Total_high_confidence_BSJs\t{:,}\n'.format(tot_bsj))
         if len(tot_known_bsj) > 2:
             for i in tot_known_bsj:
                 idx = 'all' if i == len(tot_known_bsj) - 1 else i
-                out.write('9_Total_high_confidence_BSJs_known_in_{}\t{}\n'.format(idx, tot_known_bsj[i]))
+                out.write('9_Total_high_confidence_BSJs_known_in_{}\t{:,}\n'.format(idx, tot_known_bsj[i]))
         else:
-            out.write('9_Total_known_high_confidence_BSJs\t{}\n'.format(tot_known_bsj[0]))
-        out.write('10_Total_isoforms_with_high_confidence_BSJs\t{}\n'.format(tot_isoform))
-        out.write('11_Total_isoforms_with_high_confidence_BSJs_cano_SJs\t{}\n'.format(tot_iso_with_cano_sj))
-        out.write('12_Total_reads_with_high_confidence_BSJs_cano_SJs\t{}\n'.format(tot_read_with_cano_sj))
-        out.write('13_Total_isoforms_with_high_confidence_BSJs_cano_high_SJs\t{}\n'.format(tot_iso_with_cano_high_sj))
-        out.write('14_Total_read_with_high_confidence_BSJ_cano_high_SJs\t{}\n'.format(tot_read_with_cano_high_sj))
-        out.write('15_Total_isoforms_with_high_confidence_BSJ_known_SSs\t{}\n'.format(tot_iso_with_known_ss))
-        out.write('16_Total_reads_with_high_confidence_BSJs_known_SSs\t{}\n'.format(tot_read_with_known_ss))
-        out.write('17_Total_isoforms_with_high_confidence_BSJs_cano_high_SJs_known_SSs\t{}\n'.format(tot_iso_with_cano_high_sj_known_ss))
-        out.write('18_Total_reads_with_high_confidence_BSJs_cano_high_SJs_known_SSs\t{}\n'.format(tot_read_with_cano_high_sj_known_ss))
-        # out.write('Total_isoform_with_known_BSJ\t{}\n'.format(tot_iso_with_known_bsj))
-        # out.write('Total_read_with_known_BSJ\t{}\n'.format(tot_known_bsj_read_n))
-        # out.write('Total_isoform_with_cano_BSJ\t{}\n'.format(tot_iso_with_cano_bsj))
-        # out.write('Total_read_with_cano_BSJ\t{}\n'.format(tot_cano_bsj_read_n))
+            out.write('9_Total_known_high_confidence_BSJs\t{:,}\n'.format(tot_known_bsj[0]))
+        out.write('10_Total_isoforms_with_high_BSJs\t{:,}\n'.format(tot_isoform))
+        out.write('11_Total_isoforms_with_high_BSJs_cano_SJs\t{:,}\n'.format(tot_iso_with_cano_sj))
+        out.write('12_Total_isoforms_with_high_BSJs_high_SJs\t{:,}\n'.format(tot_iso_with_high_sj))
+        out.write('13_Total_isoforms_with_high_BSJ_known_SSs\t{:,}\n'.format(tot_iso_with_known_ss))
+        out.write('14_Total_isoforms_with_high_BSJs_high_SJs_known_SSs\t{:,}\n'.format(tot_iso_with_high_sj_known_ss))
+        out.write('15_Total_full_length_isoforms\t{:,}\n'.format(tot_full_iso))
+        out.write('16_Total_reads_for_full_length_isoforms\t{:,}\n'.format(tot_full_read))
+        # FSM/NIC/NNC
+        out.write('17_Total_full_length_isoforms_with_FSM_BSJ\t{:,}\n'.format(tot_full_iso_bsj_fsm_iso))
+        out.write('18_Total_reads_for_full_length_isoforms_with_FSM_BSJ\t{:,}\n'.format(tot_full_iso_bsj_fsm_read))
+        out.write('19_Total_full_length_isoforms_with_NIC_BSJ\t{:,}\n'.format(tot_full_iso_bsj_nic_iso))
+        out.write('20_Total_reads_for_full_length_isoforms_with_NIC_BSJ\t{:,}\n'.format(tot_full_iso_bsj_nic_read))
+        out.write('21_Total_full_length_isoforms_with_NNC_BSJ\t{:,}\n'.format(tot_full_iso_bsj_nnc_iso))
+        out.write('22_Total_reads_for_full_length_isoforms_with_NNC_BSJ\t{:,}\n'.format(tot_full_iso_bsj_nnc_read))
+
+        out.write('23_Total_full_length_and_internal_FSM_isoforms\t{:,}\n'.format(tot_full_iso_int_fsm_iso))
+        out.write('24_Total_reads_full_length_and_internal_FSM_isoforms\t{:,}\n'.format(tot_full_iso_int_fsm_read))
+        out.write('25_Total_full_length_and_internal_NIC_isoforms\t{:,}\n'.format(tot_full_iso_int_nic_iso))
+        out.write('26_Total_reads_for_full_length_and_internal_NIC_isoforms\t{:,}\n'.format(tot_full_iso_int_nic_read))
+        out.write('27_Total_full_length_and_internal_NNC_isoforms\t{:,}\n'.format(tot_full_iso_int_nnc_iso))
+        out.write('28_Total_reads_for_full_length_and_internal_NNC_isoforms\t{:,}\n'.format(tot_full_iso_int_nnc_read))
     ut.err_format_time('basic_stats_core', 'Writing basic stats to file done!')
 
 def basic_stats(args):
     all_bsj_stats_dict = dd(lambda:0)
-    if args.type == 'ont':
-        stats_core(args.long_read_len, args.cons_info, args.cons_bam, args.out, all_bsj_stats_dict, args.stats_out)
-    elif args.type == 'pb':
-        pb_stats_core(args.long_read_len, args.cons_info, args.cons_bam, args.out, all_bsj_stats_dict, args.stats_out)
+    all_bsj_stats_dict['known_bsj_n'] = [0]
+    # if args.type == 'ont':
+    stats_core(args.long_read_len, args.cons_info, args.cons_bam, args.out, all_bsj_stats_dict, args.stats_out)
+    # elif args.type == 'pb':
+    #     pb_stats_core(args.long_read_len, args.cons_info, args.cons_bam, args.out, all_bsj_stats_dict, args.stats_out)
 
 def parser_argv():
     # parse command line arguments
@@ -229,7 +257,7 @@ def parser_argv():
     parser.add_argument('cons_bam', metavar='cons.bam', type=str, help='Alignment file of consensus sequence.')
     parser.add_argument('out', metavar='{}.out'.format(__program__), type=str, help='Isoform-wise circRNA output file of {} result.'.format(__program__))
     parser.add_argument('stats_out', metavar='{}_stats.out'.format(__program__), type=str, help='Stats output file of {} result.'.format(__program__))
-    parser.add_argument('--type', type=str, help='Type of sequencing data: Oxford Nanopore(ont) or Pacific Biosciences (pb).', choices=['ont', 'pb'], default='ont')
+    # parser.add_argument('--type', type=str, help='Type of sequencing data: Oxford Nanopore(ont) or Pacific Biosciences (pb).', choices=['ont', 'pb'], default='ont')
 
     return parser.parse_args()
 
