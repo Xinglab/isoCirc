@@ -223,7 +223,7 @@ def run_tidehunter(in_long, cons_fa, cons_info, th_out, tidehunter=tidehunter, c
     extract_tidehunter_cons(th_out, cons_fa, cons_info, cons_min_len, cons_min_copy, cons_min_frac)
 
 def run_trf(in_long, cons_fa, cons_info, trf_out, trf=trf, match=match, mismatch=mismatch, indel=indel, match_frac=match_frac, indel_frac=indel_frac, min_score=min_score, max_period=max_period, cons_min_len=cons_min_len, cons_min_copy=cons_min_copy, cons_min_frac=cons_min_frac):
-    ut.exec_cmd(sys.stderr, 'Tandem Repeat Finder', '{} {} {} {} {} {} {} {} {} -h -ngs > {}'.format(trf, in_long, match, mismatch, indel, match_frac,
+    ut.exec_cmd(sys.stderr, 'Tandem Repeats Finder', '{} {} {} {} {} {} {} {} {} -h -ngs > {}'.format(trf, in_long, match, mismatch, indel, match_frac,
                                                      indel_frac, min_score, max_period, trf_out))
     read_len = get_read_len(in_long, os.path.dirname(os.path.abspath(cons_fa)))
     # extract_cons(cons_fa, cons_info, trf_out, read_len, cons_min_len, cons_min_copy, cons_min_frac)
@@ -235,7 +235,7 @@ def run_trf_parall(in_long, cons_fa, cons_info, trf_out, trf=trf, match=match, m
     out_dir = os.path.dirname(os.path.abspath(trf_out)) + '/'
     ut.exec_cmd(sys.stderr, 'fxtools', '{} sx {} {} {}'.format(fxtools, in_long, threads, out_dir))
     fp_list = [sys.stderr] * threads
-    header_list = ['Tandem Repeat Finder'] * threads
+    header_list = ['Tandem Repeats Finder'] * threads
     tmp_in_long = [out_dir+os.path.basename(in_long) + '.' + str(i) for i in range(1, threads + 1)]
     tmp_trf_out = [trf_out + '.' + str(i) for i in range(1, threads + 1)]
 
@@ -243,9 +243,9 @@ def run_trf_parall(in_long, cons_fa, cons_info, trf_out, trf=trf, match=match, m
                 for in_tmp_long, trf_tmp_out in zip(tmp_in_long, tmp_trf_out)]
     ut.exec_cmd_parall(fp_list, header_list, cmd_list)
     if os.path.exists(trf_out):
-        ut.exec_cmd(sys.stderr, 'Tandem Repeat Finder', 'rm {}'.format(trf_out))
+        ut.exec_cmd(sys.stderr, 'Tandem Repeats Finder', 'rm {}'.format(trf_out))
     for tmp in tmp_trf_out:
-        ut.exec_cmd(sys.stderr, 'Tandem Repeat Finder', 'cat {} >> {}; rm {}'.format(tmp, trf_out, tmp))
+        ut.exec_cmd(sys.stderr, 'Tandem Repeats Finder', 'cat {} >> {}; rm {}'.format(tmp, trf_out, tmp))
     read_len = get_read_len(in_long, os.path.dirname(os.path.abspath(cons_fa)))
     # extract_cons(cons_fa, cons_info, trf_out, read_len, cons_min_len, cons_min_copy, cons_min_frac)
     extract_multi_cons(cons_fa, cons_info, trf_out, read_len, cons_min_len, cons_min_copy, cons_min_frac)
@@ -264,13 +264,13 @@ def run_rf_core(args):
 def parser_argv():
     # parse command line arguments
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-                                     description="Running Tandem Repeat Finder(TRF) to find consensus sequence")
+                                     description="Running Tandem Repeats Finder(TRF) to find consensus sequence")
     parser.add_argument("in_long_read", metavar='long.fa', type=str, help='Long-read data generated from isoCirc sequencing technique.')
     parser.add_argument("tr_out", metavar='tr.out', type=str, help='Output file.')
     parser.add_argument("cons_fa", metavar='cons.fa', type=str, help='Consensus sequence file.')
     parser.add_argument("cons_info", metavar='cons.info', type=str, help='Consensus information file.')
 
-    parser.add_argument('-T', '--use-tidehunter', default=False, help='Use TideHunter as the tandem repeat detection tool.', action='store_true')
+    parser.add_argument('-T', '--use-tidehunter', default=False, help='Use TideHunter as the tandem repeats detection tool.', action='store_true')
 
     parser.add_argument('--trf', type=str, help='Path to trf program.', default=trf)
     parser.add_argument('--tidehunter', type=str, help='Path to TideHunter.', default=tidehunter)

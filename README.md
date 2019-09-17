@@ -25,7 +25,7 @@ xxx
 IsoCirc is dependent on two open-source software: [`bedtools`(>= v2.25.0)](https://bedtools.readthedocs.io/) and minimap2 [`minimap2`(>= 2.11)](https://github.com/lh3/minimap2).
 Please make sure they are installed before running IsoCirc.
 
-### <a name="pip"></a>Install IsoCirc with `pip`
+### <a name="pip"></a>Install IsoCirc with `pip` (Note: this does not work for now, will do after being published)
 **IsoCirc** is written with `python`, please use `pip` to install **IsoCirc**:
 ```
 pip install isocirc            # first time installation
