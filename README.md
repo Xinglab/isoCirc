@@ -44,7 +44,7 @@ python setup.py install          # install main package
 ## <a name="start"></a>Getting started with toy example in `test_data`
 ```
 cd IsoCirc/test_data
-isocirc -t 1 test_read.fa chr16_samp.fa chr16_samp.gtf chr16_circRNA.bed output
+isocirc -t 1 read_toy.fa chr16_toy.fa chr16_toy.gtf chr16_circRNA_toy.bed output
 ```
 
 Command example:

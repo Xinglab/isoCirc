@@ -1,4 +1,4 @@
-# IsoCirc: circular RNA profiling and analysis using long-read sequencing 
+# IsoCirc: circRNA profiling and analysis using long-read sequencing 
 
 ## <a name="isocirc"></a>What is IsoCirc ?
 xxx
@@ -25,7 +25,7 @@ xxx
 IsoCirc is dependent on two open-source software: [`bedtools`(>= v2.25.0)](https://bedtools.readthedocs.io/) and minimap2 [`minimap2`(>= 2.11)](https://github.com/lh3/minimap2).
 Please make sure they are installed before running IsoCirc.
 
-### <a name="pip"></a>Install IsoCirc with `pip`
+### <a name="pip"></a>Install IsoCirc with `pip` (Note: this does not work for now, will do after being published)
 **IsoCirc** is written with `python`, please use `pip` to install **IsoCirc**:
 ```
 pip install isocirc            # first time installation
@@ -44,7 +44,7 @@ python setup.py install          # install main package
 ## <a name="start"></a>Getting started with toy example in `test_data`
 ```
 cd IsoCirc/test_data
-isocirc -t 1 test_read.fa chr16_samp.fa chr16_samp.gtf chr16_circRNA.bed output
+isocirc -t 1 read_toy.fa chr16_toy.fa chr16_toy.gtf chr16_circRNA_toy.bed output
 ```
 
 Command example:
@@ -55,25 +55,25 @@ isocirc -t 8 long_circRNA.fa reference.fa gene_anno.gtf circRNA.bed output_folde
 
 Detailed arguments:
 ```
-usage: isocirc [-h] [-v] [--type {ont,pb}] [-t THREADS] [--bedtools BEDTOOLS]
-               [--minimap2 MINIMAP2] [--short-read short.fa] [--lordec LORDEC]
-               [--kmer KMER] [--solid SOLID] [-T] [--trf TRF]
-               [--tidehunter TIDEHUNTER] [--match MATCH] [--mismatch MISMATCH]
-               [--indel INDEL] [--match-frac MATCH_FRAC]
-               [--indel-frac INDEL_FRAC] [--min-score MIN_SCORE]
-               [--max-period MAX_PERIOD] [--min-len MIN_LEN]
-               [--min-copy MIN_COPY] [--min-frac MIN_FRAC]
-               [--high-max-ratio HIGH_MAX_RATIO]
-               [--high-min-ratio HIGH_MIN_RATIO]
-               [--high-iden-ratio HIGH_IDEN_RATIO]
-               [--high-repeat-ratio HIGH_REPEAT_RATIO]
-               [--low-repeat-ratio LOW_REPEAT_RATIO] [--Alu ALU]
-               [--flank-len FLANK_LEN] [--all-repeat ALL_REPEAT] [-s SITE_DIS]
-               [-S END_DIS] [--cano-motif {GT/AG,all}] [--bsj-xnum BSJ_XNUM]
-               [--key-bsj-xnum KEY_BSJ_XNUM] [--min-circ-dis MIN_CIRC_DIS]
-               [--rescue-low] [--sj-xnum SJ_XNUM]
-               [--sj-flank-len SJ_FLANK_LEN]
-               long.fa ref.fa anno.gtf circRNA.bed/gtf out_dir
+usage: isocirc.py [-h] [-v] [--type {ont,pb}] [-t THREADS]
+                  [--bedtools BEDTOOLS] [--minimap2 MINIMAP2]
+                  [--short-read short.fa] [--lordec LORDEC] [--kmer KMER]
+                  [--solid SOLID] [-T] [--trf TRF] [--tidehunter TIDEHUNTER]
+                  [--match MATCH] [--mismatch MISMATCH] [--indel INDEL]
+                  [--match-frac MATCH_FRAC] [--indel-frac INDEL_FRAC]
+                  [--min-score MIN_SCORE] [--max-period MAX_PERIOD]
+                  [--min-len MIN_LEN] [--min-copy MIN_COPY]
+                  [--min-frac MIN_FRAC] [--high-max-ratio HIGH_MAX_RATIO]
+                  [--high-min-ratio HIGH_MIN_RATIO]
+                  [--high-iden-ratio HIGH_IDEN_RATIO]
+                  [--high-repeat-ratio HIGH_REPEAT_RATIO]
+                  [--low-repeat-ratio LOW_REPEAT_RATIO] [--Alu ALU]
+                  [--flank-len FLANK_LEN] [--all-repeat ALL_REPEAT]
+                  [-s SITE_DIS] [-S END_DIS] [--cano-motif {GT/AG,all}]
+                  [--bsj-xid BSJ_XID] [--key-bsj-xid KEY_BSJ_XID]
+                  [--min-circ-dis MIN_CIRC_DIS] [--rescue-low]
+                  [--sj-xid SJ_XID] [--key-sj-xid KEY_SJ_XID]
+                  long.fa ref.fa anno.gtf circRNA.bed/gtf out_dir
 
 isocirc: circular RNA profiling and analysis using long-read sequencing
 
@@ -165,23 +165,27 @@ Evaluating circRNA with annotation:
 
 circRNA filtering criteria:
   --cano-motif {GT/AG,all}
-                        Canonical back-splicing motif (GT/AG or all three
+                        Canonical back-splice motif (GT/AG or all three
                         motifs: GT/AG, GC/AG, AT/AC). (default: GT/AG)
-  --bsj-xnum BSJ_XNUM   Maximum allowed mis/ins/del for sequences around the
-                        back-splicing junction. (default: 1)
-  --key-bsj-xnum KEY_BSJ_XNUM
-                        Maximum allowed mis/ins/del for the back-splicing
-                        motif. (default: 0)
+  --bsj-xid BSJ_XID     Maximum allowed mis/ins/del for 20 bp sequence
+                        alignment around the back-splice junction. (default:
+                        1)
+  --key-bsj-xid KEY_BSJ_XID
+                        Maximum allowed mis/ins/del for 4 bp sequence
+                        alignment around the back-splice junction. (default:
+                        0)
   --min-circ-dis MIN_CIRC_DIS
                         Minimum distance of the start and end coordinates of
                         circRNA. (default: 150)
   --rescue-low          Use high mapping quality reads to rescue low mapping
                         quality reads. (default: False)
-  --sj-flank-len SJ_FLANK_LEN
-                        Length of flanking sequences around the internal
-                        splice junction. (default: 2)
-  --sj-xnum SJ_XNUM     Maximum allowed mis/ins/del for sequences around the
-                        internal splice junction. (default: 0)
+  --sj-xid SJ_XID       Maximum allowed mis/ins/del for 20 bp sequence
+                        alignment around the internal splice junction.
+                        (default: 1)
+  --key-sj-xid KEY_SJ_XID
+                        Maximum allowed mis/ins/del for 4 bp sequence
+                        alignment around the internal splice junction.
+                        (default: 0)
 ```
 
 ## <a name="input_output"></a>Input and output
@@ -202,7 +206,7 @@ IsoCirc output three result file in a user specified directory:
 ### <a name="detailed"></a>Explanation of detailed information
 For detailed information output file, 30 columns are generated for each circRNA isoform:
 
-| No. | Column name         |  Explanation | 
+| No. | Column name    |  Explanation | 
 |:---:|   :---         | ---        |
 |  1  | isoformID      | assigned isoform ID |
 |  2  | chrom          | chromosome ID |
@@ -215,12 +219,12 @@ For detailed information output file, 30 columns are generated for each circRNA 
 |  9  | blockSize      | size of each block, separated by `,` |
 |  10 | blockStarts    | relative start coordinates of each block, separated by `,`, refer to `bed12` format for further details |
 |  11 | refMapLen      | total length of circRNA |
-|  12 | blockType    | category for each block, E:exon, I:intron, N:intergenic |
+|  12 | blockType      | category for each block, E:exon, I:intron, N:intergenic |
 |  13 | blockAnno      | detailed annotation for each block, format: "TransID:E1(100)+I(50)+E2(30)", TransID is the id of corresponding transcript, E1 and E2 are the 1st and 2nd exon of the transcript.Multiple blocks are seperated by `,`, multiple transcripts of one block are seperated by `;` |
 |  14 | isKnownSS      | `True` if splice-site is known in whole gene annotation, `False` if not, separated by `,` |
 |  15 | isKnownSJ      | `True` if splice-junction is known in whole gene annotation, `False` if not, separated by `,` | 
 |  16 | isCanoSJ       | `True` if splice-junction is canonical (GT-AG/GC-AG/AT-AC), `False` if not, separated by `,`|
-|  17 | isHighSJ       | `True` if splice-junction is high-confidence, `False` if not, separated by `,`  |
+|  17 | isHighSJ       | `True` if alignment around the splice-junction is high-quality, `False` if not, separated by `,`  |
 |  18 | isKnownExon    | `True` if block is known exon in whole gene annotation, `False` if not, separated by ‘,’ | 
 |  19 | isKnownBSJ     | `True` if back-splice-junction is known in circRNA annotation, `False` if not, separated by `,` if multiple circRNA annotations are provided | 
 |  20 | isCanoBSJ      | `True` if back-splice-junction has canonical motif (GT/AG), `False` if not | 
@@ -228,8 +232,8 @@ For detailed information output file, 30 columns are generated for each circRNA 
 |  22 | CDS            | number of bases that are mapped to CDS region |
 |  23 | UTR            | number of bases that are mapped to UTR region |
 |  24 | lincRNA        | number of bases that are mapped to lincRNA region |
-|  25 | antisense    | number of bases that are mapped to antisense region |
-|  26 | rRNA         | number of bases that are mapped to rRNA region |
+|  25 | antisense      | number of bases that are mapped to antisense region |
+|  26 | rRNA           | number of bases that are mapped to rRNA region |
 |  27 | Alu            | number of bases that are mapped to Alu element, `NA` if Alu annotation is not provided |
 |  28 | allRepeat      | number of bases that are mapped to all repeat element, `NA` if repeat annotation is not provided |
 |  29 | upFlankAlu     | flanking alu element in upstream, `NA` if none or Alu annotation is not provided |
@@ -238,31 +242,31 @@ For detailed information output file, 30 columns are generated for each circRNA 
 |  32 | readIDs        | ID of reads that come from this circRNA isoform, separated by `,`  |
 
 ### <a name="stats"></a>Stats numbers
-| No. | Name         |  Explanation | 
-|:---:|   :---       | ---          |
-|  1  | Total reads                   | Number of raw reads in the sample |
-|  2  | Total reads with cons         | Number of reads with consensus sequence called|
-|  3  | Total mappable reads with cons| Number of reads with consensus sequence called, mappable to the genome|
-|  4  | Total reads with candidate BSJ| Number of reads with consensus sequence called, mappable to the genome, and with BSJs ("candidate BSJs")|
-|  5  | Total candidate BSJs          | Number of candidate BSJs (circular RNA species)|
-|  6  | Total known candidate BSJs    | Number of candidate BSJs that are known (reported in existing circular RNA BSJ database - circBase / MiOncoCirc)|
-|  7  | Total reads with high confidence BSJs| Number of reads with consensus sequence called, mappable to the genome, and with high-confidence BSJs (based on additional inspection of alignment around BSJs) |
-|  8  | Total high confidence BSJs    | Number of high-confidence BSJs, i.e. high-confidence circular RNA species (based on additional inspection alignment around BSJs)|
-|  9  | Total known high confidence BSJs| Number of high-confidence BSJs that are known (reported in existing circular RNA BSJ database - circBase / MiOncoCirc). |
-|  10 | Total isoforms with high confidence BSJs | Number of unique circular RNA isoforms with high-confidence BSJs|
-|  11 | Total isoforms with high confidence BSJs cano SJs | Number of unique circular RNA isoforms with high-confidence BSJs, and all internal splice sites are canonical (full-length circular RNA isoforms) |
-|  12 | Total reads with high confidence BSJs cano SJs | Number of reads for unique circular RNA isoforms with high-confidence BSJs, and all internal splice sites are canonical (full-length circular RNA isoforms)|
-|  13 | Total isoforms with high confidence BSJs cano high SJs | Number of unique circular RNA isoforms with high-confidence BSJs, and all internal splice sites are canonical and high-confidence (based on additional inspection of alignment around internal splice sites)|
-|  14 | Total reads with high confidence BSJs cano high SJs | Number of reads for unique circular RNA isoforms with high-confidence BSJs, and all internal splice sites are canonical and high-confidence (based on additional inspection of alignment around internal splice sites)|
-|  15 | Total isoforms with high confidence BSJ known SSs | Number of unique circular RNA isoforms with known (known is based in existing transcript GTF annotations for splice sites in linear RNA) |
-|  16 | Total reads with high confidence BSJ known SSs | Number of reads for unique circular RNA isoforms with known (known is based in existing transcript GTF annotations for splice sites in linear RNA) |
-|  17 | Total isoforms with high confidence BSJs cano high SJs known SSs |Number of unique circular RNA isoforms with high-confidence BSJs, and all internal splice sites are canonical, high-confidence (based on additional inspection of alignment around internal splice sites) and known (known is based in existing transcript GTF annotations for splice sites in linear RNA)|
-|  18 | Total reads with high confidence BSJs cano high SJs known SSs |Number of reads for unique circular RNA isoforms with high-confidence BSJs, and all internal splice sites are canonical, high-confidence (based on additional inspection of alignment around internal splice sites) and known (known is based in existing transcript GTF annotations for splice sites in linear RNA)|
+| No. | Name           |  Explanation | 
+|:---:|   :---         | ---          |
+|  1  | Total reads                                      | Number of raw reads in the sample |
+|  2  | Total reads with cons                            | Number of reads with consensus sequence called |
+|  3  | Total mappable reads with cons                   | Number of reads with consensus sequence called, mappable to the genome |
+|  4  | Total reads with candidate BSJ                   | Number of reads with consensus sequence called, mappable to the genome, and with BSJs ("candidate BSJs") |
+|  5  | Total candidate BSJs                             | Number of candidate BSJs (circRNA species) |
+|  6  | Total known candidate BSJs                       | Number of candidate BSJs that are known (reported in existing circRNA BSJ database - circBase / MiOncoCirc) |
+|  7  | Total reads with high BSJs                       | Number of reads with consensus sequence called, mappable to the genome, and with high-confidence BSJs (based on additional inspection of alignment around BSJs) |
+|  8  | Total high BSJs                                  | Number of high-confidence BSJs |
+|  9  | Total known high BSJs                            | Number of high-confidence BSJs that are known |
+|  10 | Total isoforms with high BSJs                    | Number of unique circRNA isoforms with high-confidence BSJs |
+|  11 | Total isoforms with high BSJs cano SJs           | Number of unique circRNA isoforms with high-confidence BSJs, and all internal splice sites are canonical |
+|  12 | Total isoforms with high BSJs high SJs           | Number of unique circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence (canonical, high-quality alignment around internal splice sites) |
+|  13 | Total isoforms with high BSJ known SSs           | Number of unique circRNA isoforms with with high-confidence BSJs, and all internal splice sites are known (known is based in existing transcript GTF annotations for splice sites in linear RNA) |
+|  14 | Total isoforms with high BSJs high SJs known SSs | Number of unique circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence and known |
+|  15 | Total full-length isoforms                       | Number of unique circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence or known |
+|  16 | Total reads for full-length isoforms             | Number of reads for unique circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence or known |
 
- * cons: consensus sequence
  * BSJ:  back-splice junction
  * SJ:   splice junction
  * SS:   splice site
+ * cons: consensus sequence
+ * cano: canonical
+ * high: high-confidence (canonical and high-quality alignment around SJ/BSJ)
 
 ## <a name="FAQ"></a>FAQ
 ## <a name="contact"></a>Contact
