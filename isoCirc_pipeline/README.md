@@ -229,17 +229,20 @@ For detailed information output file, 30 columns are generated for each circRNA 
 |  19 | isKnownBSJ     | `True` if back-splice-junction is known in circRNA annotation, `False` if not, separated by `,` if multiple circRNA annotations are provided | 
 |  20 | isCanoBSJ      | `True` if back-splice-junction has canonical motif (GT/AG), `False` if not | 
 |  21 | canoBSJMotif   | strand and motif of back-splice-junction, e.g., `-GT/AG`, `NA` if back-splice-junction is not canonical | 
-|  22 | CDS            | number of bases that are mapped to CDS region |
-|  23 | UTR            | number of bases that are mapped to UTR region |
-|  24 | lincRNA        | number of bases that are mapped to lincRNA region |
-|  25 | antisense      | number of bases that are mapped to antisense region |
-|  26 | rRNA           | number of bases that are mapped to rRNA region |
-|  27 | Alu            | number of bases that are mapped to Alu element, `NA` if Alu annotation is not provided |
-|  28 | allRepeat      | number of bases that are mapped to all repeat element, `NA` if repeat annotation is not provided |
-|  29 | upFlankAlu     | flanking alu element in upstream, `NA` if none or Alu annotation is not provided |
-|  30 | downFlankAlu   | flanking alu element in downstream, `NA` if none or Alu annotation is not provided |
-|  31 | readCount      | number of reads that come from this circRNA isoform |
-|  32 | readIDs        | ID of reads that come from this circRNA isoform, separated by `,`  |
+|  22 | isFullLength   | `True` if the isoform is considered as `full-length isoform`, `False` if not |
+|  23 | BSJCate        | catelogs of the back-splice-junction: `FSM`/`NIC`/`NNC`, see explanation below. |
+|  24 | interIsoCate   | catelogs of the internal isoform: `FSM`/`NIC`/`NNC` |
+|  25 | CDS            | number of bases that are mapped to CDS region |
+|  26 | UTR            | number of bases that are mapped to UTR region |
+|  27 | lincRNA        | number of bases that are mapped to lincRNA region |
+|  28 | antisense      | number of bases that are mapped to antisense region |
+|  29 | rRNA           | number of bases that are mapped to rRNA region |
+|  30 | Alu            | number of bases that are mapped to Alu element, `NA` if Alu annotation is not provided |
+|  31 | allRepeat      | number of bases that are mapped to all repeat element, `NA` if repeat annotation is not provided |
+|  32 | upFlankAlu     | flanking alu element in upstream, `NA` if none or Alu annotation is not provided |
+|  33 | downFlankAlu   | flanking alu element in downstream, `NA` if none or Alu annotation is not provided |
+|  34 | readCount      | number of reads that come from this circRNA isoform |
+|  35 | readIDs        | ID of reads that come from this circRNA isoform, separated by `,`  |
 
 ### <a name="stats"></a>Stats numbers
 | No. | Name           |  Explanation | 
@@ -267,6 +270,9 @@ For detailed information output file, 30 columns are generated for each circRNA 
  * cons: consensus sequence
  * cano: canonical
  * high: high-confidence (canonical and high-quality alignment around SJ/BSJ)
+ * FSM: full splice match
+ * NIC: novel in catelog
+ * NNC: novel and not in catelog
 
 ## <a name="FAQ"></a>FAQ
 ## <a name="contact"></a>Contact

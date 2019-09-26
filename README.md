@@ -1,16 +1,16 @@
-# IsoCirc: circRNA profiling and analysis using long-read sequencing 
+# isoCirc: circRNA profiling and analysis using long-read sequencing 
 
-## <a name="isocirc"></a>What is IsoCirc ?
+## <a name="isocirc"></a>What is isoCirc ?
 xxx
 xxx
 
 ## Table of Contents
 
-- [What is IsoCirc?](#isocirc)
+- [What is isoCirc?](#isocirc)
 - [Installation](#install)
   - [Dependencies](#depen)
-  - [Install IsoCirc with `pip`](#pip)
-  - [Install IsoCirc from source](#src)
+  - [Install isoCirc with `pip`](#pip)
+  - [Install isoCirc from source](#src)
 - [Getting started](#start)
 - [Input and output](#input_output)
   - [Input files](#input)
@@ -22,20 +22,20 @@ xxx
 
 ## <a name="install"></a>Installation
 ### <a name="depen"></a>Dependencies 
-IsoCirc is dependent on two open-source software: [`bedtools`(>= v2.25.0)](https://bedtools.readthedocs.io/) and minimap2 [`minimap2`(>= 2.11)](https://github.com/lh3/minimap2).
-Please make sure they are installed before running IsoCirc.
+isoCirc is dependent on two open-source software: [`bedtools`(>= v2.25.0)](https://bedtools.readthedocs.io/) and minimap2 [`minimap2`(>= 2.11)](https://github.com/lh3/minimap2).
+Please make sure they are installed before running isoCirc.
 
-### <a name="pip"></a>Install IsoCirc with `pip` (Note: this does not work for now, will do after being published)
-**IsoCirc** is written with `python`, please use `pip` to install **IsoCirc**:
+### <a name="pip"></a>Install isoCirc with `pip` (Note: this does not work for now, will do after being published)
+**isoCirc** is written with `python`, please use `pip` to install **isoCirc**:
 ```
 pip install isocirc            # first time installation
 pip install isocirc --upgrade  # update to the latest version
 ```
-### <a name="src"></a>Install IsoCirc from source
-Alternatively, you can install **IsoCirc** from source:
+### <a name="src"></a>Install isoCirc from source
+Alternatively, you can install **isoCirc** from source:
 ```
-git clone https://github.com/Xinglab/IsoCirc.git
-cd IsoCirc/IsoCirc_pipeline
+git clone https://github.com/Xinglab/isoCirc.git
+cd isoCirc/isoCirc_pipeline
 pip install -r requirements.txt  # install dependencies
 export PATH=$PATH:$PWD/bin       # To permanently modify your PATH, you need to add it to your ~/.profile or ~/.bashrc file. 
 python setup.py install          # install main package
@@ -43,7 +43,7 @@ python setup.py install          # install main package
  
 ## <a name="start"></a>Getting started with toy example in `test_data`
 ```
-cd IsoCirc/test_data
+cd isoCirc/test_data
 isocirc -t 1 read_toy.fa chr16_toy.fa chr16_toy.gtf chr16_circRNA_toy.bed output
 ```
 
@@ -190,12 +190,12 @@ circRNA filtering criteria:
 
 ## <a name="input_output"></a>Input and output
 ### <a name="input_file"></a>Input files
-IsoCirc takes long-read that contains muliple copies of circRNA sequence as input.
+isoCirc takes long-read that contains muliple copies of circRNA sequence as input.
 
 It also require reference genome sequence and gene annotation to be provided.
 
 ### <a name="output_file"></a>Output files
-IsoCirc output three result file in a user specified directory:
+isoCirc output three result file in a user specified directory:
 
 | No. | File name         |  Explanation | 
 |:---:|   :---            | ---        |
@@ -229,17 +229,20 @@ For detailed information output file, 30 columns are generated for each circRNA 
 |  19 | isKnownBSJ     | `True` if back-splice-junction is known in circRNA annotation, `False` if not, separated by `,` if multiple circRNA annotations are provided | 
 |  20 | isCanoBSJ      | `True` if back-splice-junction has canonical motif (GT/AG), `False` if not | 
 |  21 | canoBSJMotif   | strand and motif of back-splice-junction, e.g., `-GT/AG`, `NA` if back-splice-junction is not canonical | 
-|  22 | CDS            | number of bases that are mapped to CDS region |
-|  23 | UTR            | number of bases that are mapped to UTR region |
-|  24 | lincRNA        | number of bases that are mapped to lincRNA region |
-|  25 | antisense      | number of bases that are mapped to antisense region |
-|  26 | rRNA           | number of bases that are mapped to rRNA region |
-|  27 | Alu            | number of bases that are mapped to Alu element, `NA` if Alu annotation is not provided |
-|  28 | allRepeat      | number of bases that are mapped to all repeat element, `NA` if repeat annotation is not provided |
-|  29 | upFlankAlu     | flanking alu element in upstream, `NA` if none or Alu annotation is not provided |
-|  30 | downFlankAlu   | flanking alu element in downstream, `NA` if none or Alu annotation is not provided |
-|  31 | readCount      | number of reads that come from this circRNA isoform |
-|  32 | readIDs        | ID of reads that come from this circRNA isoform, separated by `,`  |
+|  22 | isFullLength   | `True` if the isoform is considered as `full-length isoform`, `False` if not |
+|  23 | BSJCate        | catelogs of the back-splice-junction: `FSM`/`NIC`/`NNC`, see explanation below. |
+|  24 | interIsoCate   | catelogs of the internal isoform: `FSM`/`NIC`/`NNC` |
+|  25 | CDS            | number of bases that are mapped to CDS region |
+|  26 | UTR            | number of bases that are mapped to UTR region |
+|  27 | lincRNA        | number of bases that are mapped to lincRNA region |
+|  28 | antisense      | number of bases that are mapped to antisense region |
+|  29 | rRNA           | number of bases that are mapped to rRNA region |
+|  30 | Alu            | number of bases that are mapped to Alu element, `NA` if Alu annotation is not provided |
+|  31 | allRepeat      | number of bases that are mapped to all repeat element, `NA` if repeat annotation is not provided |
+|  32 | upFlankAlu     | flanking alu element in upstream, `NA` if none or Alu annotation is not provided |
+|  33 | downFlankAlu   | flanking alu element in downstream, `NA` if none or Alu annotation is not provided |
+|  34 | readCount      | number of reads that come from this circRNA isoform |
+|  35 | readIDs        | ID of reads that come from this circRNA isoform, separated by `,`  |
 
 ### <a name="stats"></a>Stats numbers
 | No. | Name           |  Explanation | 
@@ -267,6 +270,9 @@ For detailed information output file, 30 columns are generated for each circRNA 
  * cons: consensus sequence
  * cano: canonical
  * high: high-confidence (canonical and high-quality alignment around SJ/BSJ)
+ * FSM: full splice match
+ * NIC: novel in catelog
+ * NNC: novel and not in catelog
 
 ## <a name="FAQ"></a>FAQ
 ## <a name="contact"></a>Contact
@@ -275,4 +281,4 @@ Yan Gao gaoy1@email.chop.edu
 
 Yi Xing yi.xing@pennmedicine.upenn.edu
 
-[github issues](https://github.com/Xinglab/IsoCirc/issues)
+[github issues](https://github.com/Xinglab/isoCirc/issues)
