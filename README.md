@@ -230,8 +230,8 @@ For detailed information output file, 30 columns are generated for each circRNA 
 |  20 | isCanoBSJ      | `True` if back-splice-junction has canonical motif (GT/AG), `False` if not | 
 |  21 | canoBSJMotif   | strand and motif of back-splice-junction, e.g., `-GT/AG`, `NA` if back-splice-junction is not canonical | 
 |  22 | isFullLength   | `True` if the isoform is considered as `full-length isoform`, `False` if not |
-|  23 | BSJCate        | catelogs of the back-splice-junction: `FSM`/`NIC`/`NNC`, see explanation below. |
-|  24 | interIsoCate   | catelogs of the internal isoform: `FSM`/`NIC`/`NNC` |
+|  23 | BSJCate        | catelog of the back-splice-junction: `FSM`/`NIC`/`NNC`, see explanation below. |
+|  24 | interIsoCate   | catelog of the internal isoform: `FSM`/`NIC`/`NNC` |
 |  25 | CDS            | number of bases that are mapped to CDS region |
 |  26 | UTR            | number of bases that are mapped to UTR region |
 |  27 | lincRNA        | number of bases that are mapped to lincRNA region |
