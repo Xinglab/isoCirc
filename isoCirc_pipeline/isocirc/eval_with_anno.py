@@ -58,7 +58,7 @@ def circRNA_isoform_bed12(circRNA_bed, circRNA_out, iso_to_name_dict):
         bed_fp.write('#' + __program__ + '\t' + __version__ + '\n')
         for iso_id, read_ids in iso_to_name_dict.items():
             out1 = circRNA_out[read_ids[0]]
-            bed_fp.write('{}\t{}\t{}\t{}{}\t0\t{}\t0\t0\t0\t{}\t{}\t{}\n'.format(out1['chrom'], out1['startCoor0base'], out1['endCoor'], __program__, iso_id, out1['mapStrand'], out1['blockCount'], out1['blockSize'], out1['blockStarts']))
+            bed_fp.write('{}\t{}\t{}\t{}{}\t0\t{}\t0\t0\t0\t{}\t{}\t{}\n'.format(out1['chrom'], out1['startCoor0base'], out1['endCoor'], __program__, iso_id, out1['canoBSJMotif'][0], out1['blockCount'], out1['blockSize'], out1['blockStarts']))
 
 
 # add 'isFullLength', 'isFSM', 'isNIC', 'isNNC', # FSM: full splice match, NIC: novel in catelog, NNC, novel and not in catelog
@@ -157,11 +157,13 @@ def get_site_gene_name_id(five_site_name_id_fn, three_site_name_id_fn, id_dict, 
             tot_dict[ele[0]][(ele[1], ele[2], ele[3])] += 1
 
     for read_id, tup in tot_dict.items():
-        gene_id, gene_name, gene_strand = max(tup, key=tup.get)
-        if tup[(gene_id, gene_name, gene_strand)] > 0:
-            id_dict[read_id] = gene_id
-            name_dict[read_id] = gene_name
-            strand_dict[read_id] = gene_strand
+        max_cnt = max(tup.values())
+        if max_cnt == 0: continue
+        for (gene_id, gene_name, gene_strand), cnt in tup.items():
+            if cnt == max_cnt:
+                id_dict[read_id] = gene_id
+                name_dict[read_id] = gene_name
+                strand_dict[read_id] = gene_strand
 
 
 def get_ovlp_gene_name_id(name_id_fn, id_dict, name_dict, strand_dict):
@@ -169,7 +171,7 @@ def get_ovlp_gene_name_id(name_id_fn, id_dict, name_dict, strand_dict):
     for r in id_dict:
         assign_read[r] = ''
 
-    with open(name_id_fn) as in_fp:
+    with open(name_id_fn) as in_fp: # read_id, gene_id, gene_name, gene_strand
         for line in in_fp:
             if line.startswith('#'): continue
             ele = line.rsplit()
@@ -341,7 +343,7 @@ def get_flank_Alu(flank_out, flank_dict):
 
 # TODO seperate intersecting and circRNA filtering
 # input with dict{'CDS':'CDS.bed'}
-def intersect_with_bed(out_dir, cons_bed12, site_dis, end_dis, all_anno, all_anno_bed, itst_anno_dict, flank_len, bedtools):
+def intersect_with_bed(out_dir, cons_bed12, all_anno, all_anno_bed, itst_anno_dict, flank_len, bedtools):
     itst_out_dict = dd(lambda: dd(lambda: 'NA'))
     cons_bam_exon_gtf = cons_bed12 + '.exon.gtf'
     ut.exec_cmd(sys.stderr, 'bed2exonGtf', '{} {} {}'.format(bed2exonGtf, cons_bed12, cons_bam_exon_gtf))
@@ -371,7 +373,7 @@ def intersect_with_bed(out_dir, cons_bed12, site_dis, end_dis, all_anno, all_ann
     # gene bed * required
     gene_id_dict, gene_name_dict, gene_strand_dict = itst_out_dict['geneID'], itst_out_dict['geneName'], itst_out_dict['geneStrand']
     five_site_gene_name_id, three_site_gene_name_id = cons_bed12 + '.five.site.gene.out', cons_bed12 + '.three.site.gene.out'
-    bed12_to_gene_id(cons_bed12, all_anno, site_dis, end_dis, five_site_gene_name_id, three_site_gene_name_id)
+    bed12_to_gene_id(cons_bed12, all_anno, 0, 0, five_site_gene_name_id, three_site_gene_name_id)
     get_site_gene_name_id(five_site_gene_name_id, three_site_gene_name_id, gene_id_dict, gene_name_dict, gene_strand_dict)
 
     ovlp_gene_name_id = cons_bed12 + '.ovlp.gene.out'
@@ -787,7 +789,7 @@ def eval_with_anno(high_bam, low_bam, long_len, cons_info, cons,
         sorted_iso_to_name_dict = ui.uniq_isoform_with_unsorted_coors(circRNA_coors, True)
         circRNA_isoform_bed12(circRNA_bed, circRNA_out, sorted_iso_to_name_dict)
         # 4. intersect with annoation
-        itst_out_dict = intersect_with_bed(out_dir, circRNA_bed, site_dis, end_dis, all_anno, all_anno_bed, itst_anno_dict, flank_len, bedtools)
+        itst_out_dict = intersect_with_bed(out_dir, circRNA_bed, all_anno, all_anno_bed, itst_anno_dict, flank_len, bedtools)
         # 5. output isoform result
         output_isoform_eval(iso_fp, circRNA_out, itst_out_dict, all_trans, sorted_iso_to_name_dict)
     bs.stats_core(long_len, cons_info, high_bam, isoform_out_fn, all_bsj_stats_dict, stats_out_fn)
@@ -820,7 +822,7 @@ def parser_argv():
     parser.add_argument('low_bam', metavar='low.bam', type=str, help='Unsorted low mapping quality alignment file of consensus sequence.')
     parser.add_argument('ref', metavar='ref.fa', type=str, help='Reference genome sequence.')
     parser.add_argument('all_anno', metavar='all.gtf', type=str, help='Whole gene annotation file in GTF format.')
-    parser.add_argument('circRNA_anno', metavar='circRNA.bed/gtf', type=str, help='circRNA annotation file in BED12 or GTF format. Use \',\' to separate multiple circRNA annotation files.')
+    parser.add_argument('circRNA_anno', metavar='circRNA.bed/gtf', type=str, help='circRNA annotation file in BED or GTF format. Use \',\' to separate multiple circRNA annotation files.')
     parser.add_argument('out', metavar='{}.out'.format(__program__), type=str, help='Isoform-wise circRNA output file of {} result.'.format(__program__))
     parser.add_argument('bed', metavar='{}.bed'.format(__program__), type=str, help='BED12 format file of circRNA output file.'.format(__program__))
     parser.add_argument('stats_out', metavar='{}_stats.out'.format(__program__), type=str, help='Stats output file of {} result.'.format(__program__))

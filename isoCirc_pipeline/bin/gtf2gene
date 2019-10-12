@@ -14,7 +14,7 @@ tmp=${1}.tmp
 #
 
 # 0. gene_gtf => gene.bed
-gawk -v OFS="\t" '
+awk -v OFS="\t" '
     ($3=="gene") {
     gene_id='NA';
     gene_name='NA';
@@ -30,11 +30,11 @@ gawk -v OFS="\t" '
 ' $in_gtf > $gene_bed
 
 # 1. intersect gene_bed with exon_gtf
-#echo "bedtools intersect -a $gene_bed -b $exon_gtf -split -wb > $tmp"
-bedtools intersect -a $gene_bed -b $exon_gtf -split -wb > $tmp
+#echo "bedtools intersect -s -a $gene_bed -b $exon_gtf -split -wb > $tmp"
+bedtools intersect -s -a $gene_bed -b $exon_gtf -split -wb > $tmp
 
 # 2. extract gene id and gene name
-gawk -v OFS="\t" '
+awk -v OFS="\t" '
     (match($0, /gene_id \"([^\"]+)\";/, arr)) {
         read_id=arr[1]
         split($4, gene, ",")

@@ -12,8 +12,8 @@ out_bed=$3
 tmp=${out_bed}.tmp.out
 
 # 0. intersect exon.gtf and in_bed
-#>&2 echo "bedtools intersect -a ${exon_gtf} -b ${in_bed} -split > $tmp"
-bedtools intersect -a ${exon_gtf} -b ${in_bed} -split > $tmp
+#>&2 echo "bedtools intersect -s -a ${exon_gtf} -b ${in_bed} -split > $tmp"
+bedtools intersect -s -a ${exon_gtf} -b ${in_bed} -split > $tmp
 
 # 2. gtf => bed
 #>&2 echo "gtf2bed $tmp $out_bed"

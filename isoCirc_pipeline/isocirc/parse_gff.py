@@ -864,8 +864,7 @@ def get_block_from_coor(coor=[]):
 # TODO 5'/3' site
 # site: exonic base
 def bed12_to_site_bed(in_bed_fn, out_five_site_fn, out_three_site_fn, site_dis, end_dis):
-    with open(in_bed_fn) as in_bed, open(out_five_site_fn, 'w') as five_out_bed, open(out_three_site_fn,
-                                                                                      'w') as three_out_bed:
+    with open(in_bed_fn) as in_bed, open(out_five_site_fn, 'w') as five_out_bed, open(out_three_site_fn, 'w') as three_out_bed:
         for line in in_bed:
             if line.startswith('#'): continue
             ele = line.rsplit()
