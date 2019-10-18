@@ -61,7 +61,7 @@ def circRNA_isoform_bed12(circRNA_bed, circRNA_out, iso_to_name_dict):
             bed_fp.write('{}\t{}\t{}\t{}{}\t0\t{}\t0\t0\t0\t{}\t{}\t{}\n'.format(out1['chrom'], out1['startCoor0base'], out1['endCoor'], __program__, iso_id, out1['canoBSJMotif'][0], out1['blockCount'], out1['blockSize'], out1['blockStarts']))
 
 
-# add 'isFullLength', 'isFSM', 'isNIC', 'isNNC', # FSM: full splice match, NIC: novel in catelog, NNC, novel and not in catelog
+# add 'isFullLength', 'isFSM', 'isNIC', 'isNNC', # FSM: full splice match, NIC: novel in catalog, NNC, novel and not in catalog
 def output_isoform_eval(out_fp, all_out, itst_out_dict, all_trans, iso_to_name_dict={}):
     ut.err_format_time('output_isoform_eval', 'Writing isoform-wise evaluation result to file ...')
     for iso_id, read_ids in iso_to_name_dict.items():

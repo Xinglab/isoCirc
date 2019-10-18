@@ -219,7 +219,7 @@ For detailed information output file, 30 columns are generated for each circRNA 
 |  9  | blockSize      | size of each block, separated by `,` |
 |  10 | blockStarts    | relative start coordinates of each block, separated by `,`, refer to `bed12` format for further details |
 |  11 | refMapLen      | total length of circRNA |
-|  12 | blockType      | category for each block, E:exon, I:intron, N:intergenic |
+|  12 | blockType      | category of each block, E:exon, I:intron, N:intergenic |
 |  13 | blockAnno      | detailed annotation for each block, format: "TransID:E1(100)+I(50)+E2(30)", TransID is the id of corresponding transcript, E1 and E2 are the 1st and 2nd exon of the transcript.Multiple blocks are seperated by `,`, multiple transcripts of one block are seperated by `;` |
 |  14 | isKnownSS      | `True` if splice-site is known in whole gene annotation, `False` if not, separated by `,` |
 |  15 | isKnownSJ      | `True` if splice-junction is known in whole gene annotation, `False` if not, separated by `,` | 
@@ -230,8 +230,8 @@ For detailed information output file, 30 columns are generated for each circRNA 
 |  20 | isCanoBSJ      | `True` if back-splice-junction has canonical motif (GT/AG), `False` if not | 
 |  21 | canoBSJMotif   | strand and motif of back-splice-junction, e.g., `-GT/AG`, `NA` if back-splice-junction is not canonical | 
 |  22 | isFullLength   | `True` if the isoform is considered as `full-length isoform`, `False` if not |
-|  23 | BSJCate        | catelog of the back-splice-junction: `FSM`/`NIC`/`NNC`, see explanation below. |
-|  24 | interIsoCate   | catelog of the internal isoform: `FSM`/`NIC`/`NNC` |
+|  23 | BSJCate        | category of the back-splice-junction: `FSM`/`NIC`/`NNC`, see explanation below. |
+|  24 | interIsoCate   | category of the internal isoform: `FSM`/`NIC`/`NNC` |
 |  25 | CDS            | number of bases that are mapped to CDS region |
 |  26 | UTR            | number of bases that are mapped to UTR region |
 |  27 | lincRNA        | number of bases that are mapped to lincRNA region |
@@ -269,7 +269,6 @@ For detailed information output file, 30 columns are generated for each circRNA 
 |  20 | Total reads for full-length isoforms with NIC BSJ| Number of reads for full-length circRNA isoforms with NIC BSJ |
 |  21 | Total full-length isoforms with NNC BSJ | Number of full-length circRNA isoforms with NNC  BSJ|
 |  22 | Total reads for full-length isoforms with NNC BSJ | Number of reads for full-length circRNA isoforms with NNC BSJ |
-
 |  23 | Total full-length isoforms with FSM FSJ | Number of full-length circRNA isoforms with FSM  FSJ|
 |  24 | Total reads for full-length isoforms with FSM FSJ | Number of reads for full-length circRNA isoforms with FSM FSJ|
 |  25 | Total full-length isoforms with NIC FSJ | Number of full-length circRNA isoforms with NIC internal FSJ|
@@ -285,8 +284,8 @@ For detailed information output file, 30 columns are generated for each circRNA 
  * cano: canonical
  * high: high-confidence (canonical and high-quality alignment around SJ/BSJ)
  * FSM: full splice match
- * NIC: novel in catelog
- * NNC: novel and not in catelog
+ * NIC: novel in catalog
+ * NNC: novel and not in catalog
 
 ## <a name="FAQ"></a>FAQ
 ## <a name="contact"></a>Contact

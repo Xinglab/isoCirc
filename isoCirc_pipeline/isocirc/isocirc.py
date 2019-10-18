@@ -20,7 +20,7 @@ isoform_output_header = ['#isoformID', 'chrom', 'startCoor0base', 'endCoor', # 1
 						 'blockType', 'blockAnno', # 12-13
 						 'isKnownSS', 'isKnownSJ', 'isCanoSJ', 'isHighSJ', 'isKnownExon', # 14-18
 						 'isKnownBSJ', 'isCanoBSJ', 'canoBSJMotif', # 19-21
-					     'isFullLength', 'BSJCate', 'interIsoCate', # FSM: full splice match, NIC: novel in catelog, NNC, novel and not in catelog
+					     'isFullLength', 'BSJCate', 'interIsoCate', # FSM: full splice match, NIC: novel in catalog, NNC, novel and not in catalog
 						 'CDS', 'UTR', 'lincRNA', 'antisense',  # 22-25 gene_type/biotype 
 						 'rRNA', 'Alu', 'allRepeat', 'upFlankAlu', 'downFlankAlu', # 26-30 repeat element
 						 'readCount', 'readIDs'] # 31-32
