@@ -83,7 +83,7 @@ def output_isoform_eval(out_fp, all_out, itst_out_dict, all_trans, iso_to_name_d
             bsj_cate = 'NIC'
         else: bsj_cate = 'NNC'
         out1['BSJCate'] = bsj_cate
-        iso_cate, start, gene_id = None, int(out1['startCoor0base']), out1['geneID']
+        iso_cate, start, gene_ids = None, int(out1['startCoor0base']), out1['geneID'].rsplit(',')
         if int(out1['blockCount']) == 1:
             iso_cate = 'FSM'
         else:
@@ -94,13 +94,15 @@ def output_isoform_eval(out_fp, all_out, itst_out_dict, all_trans, iso_to_name_d
             for s, l in zip(start_array, size_array):
                 iso_coor.extend([start+int(s)+1, start+int(s)+int(l)])
             int_iso_coor_str = '_'.join(map(str, iso_coor[1:-1]))
-            for trans in all_trans[gene_id]:
-                if int_iso_coor_str in trans:
-                    idx = trans.index(int_iso_coor_str)
-                    cnt = trans[:idx].count('_')
-                    if cnt % 2 == 1:
-                        iso_cate = 'FSM'
-                        break
+            for gene_id in gene_ids:
+                for trans in all_trans[gene_id]:
+                    if int_iso_coor_str in trans:
+                        idx = trans.index(int_iso_coor_str)
+                        cnt = trans[:idx].count('_')
+                        if cnt % 2 == 1:
+                            iso_cate = 'FSM'
+                            break
+                if iso_cate: break
             if not iso_cate:
                 iso_cate = 'NIC' if 'False' not in out1['isKnownSS'][1:-1] else 'NNC'
         out1['interIsoCate'] = iso_cate
@@ -161,9 +163,9 @@ def get_site_gene_name_id(five_site_name_id_fn, three_site_name_id_fn, id_dict, 
         if max_cnt == 0: continue
         for (gene_id, gene_name, gene_strand), cnt in tup.items():
             if cnt == max_cnt:
-                id_dict[read_id] = gene_id
-                name_dict[read_id] = gene_name
-                strand_dict[read_id] = gene_strand
+                id_dict[read_id] = gene_id if id_dict[read_id] == 'NA' else id_dict[read_id] + ',' + gene_id 
+                name_dict[read_id] = gene_name if name_dict[read_id] == 'NA' else name_dict[read_id] + ',' + gene_name 
+                strand_dict[read_id] = gene_strand if strand_dict[read_id] == 'NA' else strand_dict[read_id] + ',' + gene_strand
 
 
 def get_ovlp_gene_name_id(name_id_fn, id_dict, name_dict, strand_dict):
@@ -176,9 +178,9 @@ def get_ovlp_gene_name_id(name_id_fn, id_dict, name_dict, strand_dict):
             if line.startswith('#'): continue
             ele = line.rsplit()
             if ele[0] not in assign_read:
-                id_dict[ele[0]] = (ele[1] if id_dict[ele[0]] == 'NA' else (id_dict[ele[0]] + ',' + ele[1]))
-                name_dict[ele[0]] = (ele[2] if name_dict[ele[0]] == 'NA' else (name_dict[ele[0]] + ',' + ele[2]))
-                strand_dict[ele[0]] = (ele[3] if strand_dict[ele[0]] == 'NA' else (strand_dict[ele[0]] + ',' + ele[3]))
+                id_dict[ele[0]] = ele[1] if id_dict[ele[0]] == 'NA' else id_dict[ele[0]] + ',' + ele[1]
+                name_dict[ele[0]] = ele[2] if name_dict[ele[0]] == 'NA' else name_dict[ele[0]] + ',' + ele[2]
+                strand_dict[ele[0]] = ele[3] if strand_dict[ele[0]] == 'NA' else strand_dict[ele[0]] + ',' + ele[3]
 
 
 def get_block_info(in_bed, ref_map_len_dict, start_coor_dict, end_coor_dict, block_count_dict, block_size_dict,

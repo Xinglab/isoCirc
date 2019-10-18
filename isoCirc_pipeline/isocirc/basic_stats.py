@@ -11,7 +11,7 @@ from __init__ import __program__
 from __init__ import __version__
 
 isoform_output_header = isocirc.isoform_output_header
-isoform_output_header_idx = isocirc.isoform_output_header_idx
+idx = isocirc.isoform_output_header_idx
 
 def get_error_rate(in_sam_fn=''):
     map_read_name = dict()
@@ -77,17 +77,17 @@ def pb_stats_core(long_read_len, cons_info, cons_bam, isoform_out, all_bsj_stats
             if line.startswith('#'): continue
             tot_isoform += 1
             ele = line.rsplit()
-            tot_circRNA_read_n += int(ele[isoform_output_header_idx['readCount']])
-            if ele[isoform_output_header_idx['isKnownBSJ']] == 'True':
+            tot_circRNA_read_n += int(ele[idx['readCount']])
+            if ele[idx['isKnownBSJ']] == 'True':
                 tot_known_bsj += 1
-                subreads_cnt = ps.get_subreads_cnt(ele[isoform_output_header_idx['readIDs']])
-                polyreads_cnt = ps.get_polyreads_cnt(ele[isoform_output_header_idx['readIDs']])
+                subreads_cnt = ps.get_subreads_cnt(ele[idx['readIDs']])
+                polyreads_cnt = ps.get_polyreads_cnt(ele[idx['readIDs']])
                 tot_known_bsj_subread_n += subreads_cnt
                 tot_known_bsj_polyread_n += polyreads_cnt
-            elif ele[isoform_output_header_idx['isCanoBSJ']] == 'True':
+            elif ele[idx['isCanoBSJ']] == 'True':
                 tot_cano_bsj += 1
-                subreads_cnt = ps.get_subreads_cnt(ele[isoform_output_header_idx['readIDs']])
-                polyreads_cnt = ps.get_polyreads_cnt(ele[isoform_output_header_idx['readIDs']])
+                subreads_cnt = ps.get_subreads_cnt(ele[idx['readIDs']])
+                polyreads_cnt = ps.get_polyreads_cnt(ele[idx['readIDs']])
                 tot_cano_bsj_subread_n += subreads_cnt
                 tot_cano_bsj_polyread_n += polyreads_cnt
 
@@ -141,57 +141,61 @@ def stats_core(long_read_len, cons_info, cons_bam, isoform_out, all_bsj_stats_di
     tot_full_iso_bsj_fsm_iso, tot_full_iso_bsj_fsm_read, tot_full_iso_bsj_nic_iso, tot_full_iso_bsj_nic_read, tot_full_iso_bsj_nnc_iso, tot_full_iso_bsj_nnc_read = 0,0,0,0,0,0
     tot_full_iso_int_fsm_iso, tot_full_iso_int_fsm_read, tot_full_iso_int_nic_iso, tot_full_iso_int_nic_read, tot_full_iso_int_nnc_iso, tot_full_iso_int_nnc_read = 0,0,0,0,0,0
     bsj_dict = dict()
+    iso_dict = dict()
     with open(isoform_out) as in_fp:
         for line in in_fp:
             if line.startswith('#'): continue
-            tot_isoform += 1
             ele = line.rsplit()
-            read_cnt = int(ele[isoform_output_header_idx['readCount']])
-            bsj = (ele[isoform_output_header_idx['chrom']], ele[isoform_output_header_idx['startCoor0base']], ele[isoform_output_header_idx['endCoor']])
+            read_cnt = int(ele[idx['readCount']])
+            bsj = (ele[idx['chrom']], ele[idx['startCoor0base']], ele[idx['endCoor']])
             if bsj not in bsj_dict:
                 bsj_dict[bsj] = 1
                 tot_bsj += 1
-                for i, known_bsj in enumerate(ele[isoform_output_header_idx['isKnownBSJ']].rsplit(',')):
+                for i, known_bsj in enumerate(ele[idx['isKnownBSJ']].rsplit(',')):
                     tot_known_bsj[i] += (known_bsj == 'True')
-                tot_known_bsj[i+1] += ('False' not in ele[isoform_output_header_idx['isKnownBSJ']])
+                tot_known_bsj[i+1] += ('False' not in ele[idx['isKnownBSJ']])
             tot_circRNA_read_n += read_cnt
-            if 'False' not in ele[isoform_output_header_idx['isKnownSS']]:
+
+            iso = (ele[idx['chrom']], ele[idx['startCoor0base']], ele[idx['endCoor']], ele[idx['blockCount']], ele[idx['blockSize']], ele[idx['blockStarts']])
+            if iso not in iso_dict:
+                isoform_inc_cnt = 1
+                iso_dict[iso] = 1
+            else:
+                isoform_inc_cnt = 0
+            tot_isoform += isoform_inc_cnt
+            if 'False' not in ele[idx['isKnownSS']]:
                 tot_read_with_known_ss += read_cnt
-                tot_iso_with_known_ss += 1
-            full_len = False
-            if 'False' not in ele[isoform_output_header_idx['isCanoSJ']]:
-                tot_iso_with_cano_sj += 1
+                tot_iso_with_known_ss += isoform_inc_cnt
+            if 'False' not in ele[idx['isCanoSJ']]:
+                tot_iso_with_cano_sj += isoform_inc_cnt
                 tot_read_with_cano_sj += read_cnt
-                if 'False' not in ele[isoform_output_header_idx['isHighSJ']]:
-                    tot_iso_with_high_sj += 1
+                if 'False' not in ele[idx['isHighSJ']]:
+                    tot_iso_with_high_sj += isoform_inc_cnt
                     tot_read_with_high_sj += read_cnt
-                    full_len = True
-                    if 'False' not in ele[isoform_output_header_idx['isKnownSS']]:
-                        tot_iso_with_high_sj_known_ss += 1
+                    if 'False' not in ele[idx['isKnownSS']]:
+                        tot_iso_with_high_sj_known_ss += isoform_inc_cnt
                         tot_read_with_high_sj_known_ss += read_cnt
-            if 'False' not in ele[isoform_output_header_idx['isKnownSS']]:
-                full_len = True
-            if full_len:
-                tot_full_iso += 1
+            if ele[idx['isFullLength']] == 'True':
+                tot_full_iso += isoform_inc_cnt
                 tot_full_read += read_cnt
-                if ele[isoform_output_header_idx['BSJCate']] == 'FSM':
-                    tot_full_iso_bsj_fsm_iso += 1
+                if ele[idx['BSJCate']] == 'FSM':
+                    tot_full_iso_bsj_fsm_iso += isoform_inc_cnt
                     tot_full_iso_bsj_fsm_read += read_cnt
-                elif ele[isoform_output_header_idx['BSJCate']] == 'NIC':
-                    tot_full_iso_bsj_nic_iso += 1
+                elif ele[idx['BSJCate']] == 'NIC':
+                    tot_full_iso_bsj_nic_iso += isoform_inc_cnt
                     tot_full_iso_bsj_nic_read += read_cnt
                 else:
-                    tot_full_iso_bsj_nnc_iso += 1
+                    tot_full_iso_bsj_nnc_iso += isoform_inc_cnt
                     tot_full_iso_bsj_nnc_read += read_cnt
 
-                if ele[isoform_output_header_idx['interIsoCate']] == 'FSM':
-                    tot_full_iso_int_fsm_iso += 1
+                if ele[idx['interIsoCate']] == 'FSM':
+                    tot_full_iso_int_fsm_iso += isoform_inc_cnt
                     tot_full_iso_int_fsm_read += read_cnt
-                elif ele[isoform_output_header_idx['interIsoCate']] == 'NIC':
-                    tot_full_iso_int_nic_iso += 1
+                elif ele[idx['interIsoCate']] == 'NIC':
+                    tot_full_iso_int_nic_iso += isoform_inc_cnt
                     tot_full_iso_int_nic_read += read_cnt
                 else:
-                    tot_full_iso_int_nnc_iso += 1
+                    tot_full_iso_int_nnc_iso += isoform_inc_cnt
                     tot_full_iso_int_nnc_read += read_cnt
 
     ut.err_format_time('basic_stats_core', 'Writing basic stats to file ... ')
@@ -206,16 +210,16 @@ def stats_core(long_read_len, cons_info, cons_bam, isoform_out, all_bsj_stats_di
         out.write('5_Total_candidate_BSJs\t{:,}\n'.format(all_bsj_stats_dict['bsj_n']))
         if len(all_bsj_stats_dict['known_bsj_n']) > 2:
             for i in all_bsj_stats_dict['known_bsj_n']:
-                idx = 'all' if i == len(all_bsj_stats_dict['known_bsj_n']) - 1 else i
-                out.write('6_Total_candidate_BSJs_known_in_{}\t{:,}\n'.format(idx, all_bsj_stats_dict['known_bsj_n'][i]))
+                bsj_idx = 'all' if i == len(all_bsj_stats_dict['known_bsj_n']) - 1 else i
+                out.write('6_Total_candidate_BSJs_known_in_{}\t{:,}\n'.format(bsj_idx, all_bsj_stats_dict['known_bsj_n'][i]))
         else:
             out.write('6_Total_known_candidate_BSJs\t{:,}\n'.format(all_bsj_stats_dict['known_bsj_n'][0]))
         out.write('7_Total_reads_with_high_confidence_BSJs\t{:,}\n'.format(tot_circRNA_read_n))
         out.write('8_Total_high_confidence_BSJs\t{:,}\n'.format(tot_bsj))
         if len(tot_known_bsj) > 2:
             for i in tot_known_bsj:
-                idx = 'all' if i == len(tot_known_bsj) - 1 else i
-                out.write('9_Total_high_confidence_BSJs_known_in_{}\t{:,}\n'.format(idx, tot_known_bsj[i]))
+                bsj_idx = 'all' if i == len(tot_known_bsj) - 1 else i
+                out.write('9_Total_high_confidence_BSJs_known_in_{}\t{:,}\n'.format(bsj_idx, tot_known_bsj[i]))
         else:
             out.write('9_Total_known_high_confidence_BSJs\t{:,}\n'.format(tot_known_bsj[0]))
         out.write('10_Total_isoforms_with_high_BSJs\t{:,}\n'.format(tot_isoform))
