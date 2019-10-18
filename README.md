@@ -269,7 +269,6 @@ For detailed information output file, 30 columns are generated for each circRNA 
 |  20 | Total reads for full-length isoforms with NIC BSJ| Number of reads for full-length circRNA isoforms with NIC BSJ |
 |  21 | Total full-length isoforms with NNC BSJ | Number of full-length circRNA isoforms with NNC  BSJ|
 |  22 | Total reads for full-length isoforms with NNC BSJ | Number of reads for full-length circRNA isoforms with NNC BSJ |
-
 |  23 | Total full-length isoforms with FSM FSJ | Number of full-length circRNA isoforms with FSM  FSJ|
 |  24 | Total reads for full-length isoforms with FSM FSJ | Number of reads for full-length circRNA isoforms with FSM FSJ|
 |  25 | Total full-length isoforms with NIC FSJ | Number of full-length circRNA isoforms with NIC internal FSJ|
