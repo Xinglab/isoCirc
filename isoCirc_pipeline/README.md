@@ -263,7 +263,6 @@ For detailed information output file, 30 columns are generated for each circRNA 
 |  14 | Total isoforms with high BSJs high SJs known SSs | Number of circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence and known |
 |  15 | Total full-length isoforms                       | Number of circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence or known |
 |  16 | Total reads for full-length isoforms             | Number of reads for circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence or known |
-
 |  17 | Total full-length isoforms with FSM BSJ | Number of full-length circRNA isoforms with FSM BSJ |
 |  18 | Total reads for full-length isoforms with FSM BSJ | Number of reads for full-length circRNA isoforms with FSM BSJ |
 |  19 | Total full-length isoforms with NIC BSJ | Number of full-length circRNA isoforms with NIC  BSJ|
