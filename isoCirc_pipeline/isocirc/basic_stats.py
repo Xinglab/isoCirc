@@ -237,12 +237,12 @@ def stats_core(long_read_len, cons_info, cons_bam, isoform_out, all_bsj_stats_di
         out.write('21_Total_full_length_isoforms_with_NNC_BSJ\t{:,}\n'.format(tot_full_iso_bsj_nnc_iso))
         out.write('22_Total_reads_for_full_length_isoforms_with_NNC_BSJ\t{:,}\n'.format(tot_full_iso_bsj_nnc_read))
 
-        out.write('23_Total_full_length_and_internal_FSM_isoforms\t{:,}\n'.format(tot_full_iso_int_fsm_iso))
-        out.write('24_Total_reads_full_length_and_internal_FSM_isoforms\t{:,}\n'.format(tot_full_iso_int_fsm_read))
-        out.write('25_Total_full_length_and_internal_NIC_isoforms\t{:,}\n'.format(tot_full_iso_int_nic_iso))
-        out.write('26_Total_reads_for_full_length_and_internal_NIC_isoforms\t{:,}\n'.format(tot_full_iso_int_nic_read))
-        out.write('27_Total_full_length_and_internal_NNC_isoforms\t{:,}\n'.format(tot_full_iso_int_nnc_iso))
-        out.write('28_Total_reads_for_full_length_and_internal_NNC_isoforms\t{:,}\n'.format(tot_full_iso_int_nnc_read))
+        out.write('23_Total_full_length_isoform_with_FSM_FSJ\t{:,}\n'.format(tot_full_iso_int_fsm_iso))
+        out.write('24_Total_reads_full_length_isoforms_with_FSM_FSJ\t{:,}\n'.format(tot_full_iso_int_fsm_read))
+        out.write('25_Total_full_length_isoforms_with_NIC_FSJ\t{:,}\n'.format(tot_full_iso_int_nic_iso))
+        out.write('26_Total_reads_for_full_length_isoforms_with_NIC_FSJ\t{:,}\n'.format(tot_full_iso_int_nic_read))
+        out.write('27_Total_full_length_isoforms_with_NNC_FSJ\t{:,}\n'.format(tot_full_iso_int_nnc_iso))
+        out.write('28_Total_reads_for_full_length_isoforms_with_NNC_FSJ\t{:,}\n'.format(tot_full_iso_int_nnc_read))
     ut.err_format_time('basic_stats_core', 'Writing basic stats to file done!')
 
 def basic_stats(args):

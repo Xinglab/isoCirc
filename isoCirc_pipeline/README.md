@@ -1,16 +1,16 @@
-# IsoCirc: circRNA profiling and analysis using long-read sequencing 
+# isoCirc: circRNA profiling and analysis using long-read sequencing 
 
-## <a name="isocirc"></a>What is IsoCirc ?
+## <a name="isocirc"></a>What is isoCirc ?
 xxx
 xxx
 
 ## Table of Contents
 
-- [What is IsoCirc?](#isocirc)
+- [What is isoCirc?](#isocirc)
 - [Installation](#install)
   - [Dependencies](#depen)
-  - [Install IsoCirc with `pip`](#pip)
-  - [Install IsoCirc from source](#src)
+  - [Install isoCirc with `pip`](#pip)
+  - [Install isoCirc from source](#src)
 - [Getting started](#start)
 - [Input and output](#input_output)
   - [Input files](#input)
@@ -22,20 +22,20 @@ xxx
 
 ## <a name="install"></a>Installation
 ### <a name="depen"></a>Dependencies 
-IsoCirc is dependent on two open-source software: [`bedtools`(>= v2.25.0)](https://bedtools.readthedocs.io/) and minimap2 [`minimap2`(>= 2.11)](https://github.com/lh3/minimap2).
-Please make sure they are installed before running IsoCirc.
+isoCirc is dependent on two open-source software: [`bedtools`(>= v2.25.0)](https://bedtools.readthedocs.io/) and minimap2 [`minimap2`(>= 2.11)](https://github.com/lh3/minimap2).
+Please make sure they are installed before running isoCirc.
 
-### <a name="pip"></a>Install IsoCirc with `pip` (Note: this does not work for now, will do after being published)
-**IsoCirc** is written with `python`, please use `pip` to install **IsoCirc**:
+### <a name="pip"></a>Install isoCirc with `pip` (Note: this does not work for now, will do after being published)
+**isoCirc** is written with `python`, please use `pip` to install **isoCirc**:
 ```
 pip install isocirc            # first time installation
 pip install isocirc --upgrade  # update to the latest version
 ```
-### <a name="src"></a>Install IsoCirc from source
-Alternatively, you can install **IsoCirc** from source:
+### <a name="src"></a>Install isoCirc from source
+Alternatively, you can install **isoCirc** from source:
 ```
-git clone https://github.com/Xinglab/IsoCirc.git
-cd IsoCirc/IsoCirc_pipeline
+git clone https://github.com/Xinglab/isoCirc.git
+cd isoCirc/isoCirc_pipeline
 pip install -r requirements.txt  # install dependencies
 export PATH=$PATH:$PWD/bin       # To permanently modify your PATH, you need to add it to your ~/.profile or ~/.bashrc file. 
 python setup.py install          # install main package
@@ -43,7 +43,7 @@ python setup.py install          # install main package
  
 ## <a name="start"></a>Getting started with toy example in `test_data`
 ```
-cd IsoCirc/test_data
+cd isoCirc/test_data
 isocirc -t 1 read_toy.fa chr16_toy.fa chr16_toy.gtf chr16_circRNA_toy.bed output
 ```
 
@@ -190,12 +190,12 @@ circRNA filtering criteria:
 
 ## <a name="input_output"></a>Input and output
 ### <a name="input_file"></a>Input files
-IsoCirc takes long-read that contains muliple copies of circRNA sequence as input.
+isoCirc takes long-read that contains muliple copies of circRNA sequence as input.
 
 It also require reference genome sequence and gene annotation to be provided.
 
 ### <a name="output_file"></a>Output files
-IsoCirc output three result file in a user specified directory:
+isoCirc output three result file in a user specified directory:
 
 | No. | File name         |  Explanation | 
 |:---:|   :---            | ---        |
@@ -230,8 +230,8 @@ For detailed information output file, 30 columns are generated for each circRNA 
 |  20 | isCanoBSJ      | `True` if back-splice-junction has canonical motif (GT/AG), `False` if not | 
 |  21 | canoBSJMotif   | strand and motif of back-splice-junction, e.g., `-GT/AG`, `NA` if back-splice-junction is not canonical | 
 |  22 | isFullLength   | `True` if the isoform is considered as `full-length isoform`, `False` if not |
-|  23 | BSJCate        | catelogs of the back-splice-junction: `FSM`/`NIC`/`NNC`, see explanation below. |
-|  24 | interIsoCate   | catelogs of the internal isoform: `FSM`/`NIC`/`NNC` |
+|  23 | BSJCate        | catelog of the back-splice-junction: `FSM`/`NIC`/`NNC`, see explanation below. |
+|  24 | interIsoCate   | catelog of the internal isoform: `FSM`/`NIC`/`NNC` |
 |  25 | CDS            | number of bases that are mapped to CDS region |
 |  26 | UTR            | number of bases that are mapped to UTR region |
 |  27 | lincRNA        | number of bases that are mapped to lincRNA region |
@@ -256,15 +256,30 @@ For detailed information output file, 30 columns are generated for each circRNA 
 |  7  | Total reads with high BSJs                       | Number of reads with consensus sequence called, mappable to the genome, and with high-confidence BSJs (based on additional inspection of alignment around BSJs) |
 |  8  | Total high BSJs                                  | Number of high-confidence BSJs |
 |  9  | Total known high BSJs                            | Number of high-confidence BSJs that are known |
-|  10 | Total isoforms with high BSJs                    | Number of unique circRNA isoforms with high-confidence BSJs |
-|  11 | Total isoforms with high BSJs cano SJs           | Number of unique circRNA isoforms with high-confidence BSJs, and all internal splice sites are canonical |
-|  12 | Total isoforms with high BSJs high SJs           | Number of unique circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence (canonical, high-quality alignment around internal splice sites) |
-|  13 | Total isoforms with high BSJ known SSs           | Number of unique circRNA isoforms with with high-confidence BSJs, and all internal splice sites are known (known is based in existing transcript GTF annotations for splice sites in linear RNA) |
-|  14 | Total isoforms with high BSJs high SJs known SSs | Number of unique circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence and known |
-|  15 | Total full-length isoforms                       | Number of unique circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence or known |
-|  16 | Total reads for full-length isoforms             | Number of reads for unique circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence or known |
+|  10 | Total isoforms with high BSJs                    | Number of circRNA isoforms with high-confidence BSJs |
+|  11 | Total isoforms with high BSJs cano SJs           | Number of circRNA isoforms with high-confidence BSJs, and all internal splice sites are canonical |
+|  12 | Total isoforms with high BSJs high SJs           | Number of circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence (canonical, high-quality alignment around internal splice sites) |
+|  13 | Total isoforms with high BSJ known SSs           | Number of circRNA isoforms with with high-confidence BSJs, and all internal splice sites are known (known is based in existing transcript GTF annotations for splice sites in linear RNA) |
+|  14 | Total isoforms with high BSJs high SJs known SSs | Number of circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence and known |
+|  15 | Total full-length isoforms                       | Number of circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence or known |
+|  16 | Total reads for full-length isoforms             | Number of reads for circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence or known |
+
+|  17 | Total full-length isoforms with FSM BSJ | Number of full-length circRNA isoforms with FSM BSJ |
+|  18 | Total reads for full-length isoforms with FSM BSJ | Number of reads for full-length circRNA isoforms with FSM BSJ |
+|  19 | Total full-length isoforms with NIC BSJ | Number of full-length circRNA isoforms with NIC  BSJ|
+|  20 | Total reads for full-length isoforms with NIC BSJ| Number of reads for full-length circRNA isoforms with NIC BSJ |
+|  21 | Total full-length isoforms with NNC BSJ | Number of full-length circRNA isoforms with NNC  BSJ|
+|  22 | Total reads for full-length isoforms with NNC BSJ | Number of reads for full-length circRNA isoforms with NNC BSJ |
+
+|  23 | Total full-length isoforms with FSM FSJ | Number of full-length circRNA isoforms with FSM  FSJ|
+|  24 | Total reads for full-length isoforms with FSM FSJ | Number of reads for full-length circRNA isoforms with FSM FSJ|
+|  25 | Total full-length isoforms with NIC FSJ | Number of full-length circRNA isoforms with NIC internal FSJ|
+|  26 | Total reads for full-length isoforms with NIC FSJ | Number of reads for full-length circRNA isoforms with NIC FSJ|
+|  27 | Total full-length isoforms with NNC FSJ | Number of full-length circRNA isoforms with NNC FSJ|
+|  28 | Total reads for full-length isoforms with NNC FSJ | Number of reads for full-length circRNA isoforms with NNC FSJ|
 
  * BSJ:  back-splice junction
+ * FSJ:  forward-splice junction
  * SJ:   splice junction
  * SS:   splice site
  * cons: consensus sequence
@@ -281,4 +296,5 @@ Yan Gao gaoy1@email.chop.edu
 
 Yi Xing yi.xing@pennmedicine.upenn.edu
 
-[github issues](https://github.com/Xinglab/IsoCirc/issues)
+[github issues](https://github.com/Xinglab/isoCirc/issues)
+
