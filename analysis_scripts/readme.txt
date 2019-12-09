@@ -10,3 +10,13 @@ The three input files are /path/to/seperate_chromosomes/, /path/to/isoCirc_outpu
 The output file first recorded length of chromosomes and number of circRNAs in each.
 Next it list each circRNA ID, sequence and miRNA seed found in its sequence. Only miRNA seeds found more than 3 times in a circRNA are listed.
 An example output of this script is 'miRNA_binding_site_isoforms_isocirc_pb3.txt'. I also told Yan about the details of the output format.
+
+4) isoform_analysis.tar.gz is a zipped TAR file containing a variety of scripts for analyzing the circRNA isoforms detected by isoCirc. 
+The functions of these scripts include:
+* assignment of IDs to circRNA isoforms found in the output file of the isoCirc pipeline 
+* visualization of various statistics on circRNA isoforms (e.g. exon number per isoform, transcript length per isoform, 
+read count per isoform, etc.)
+* identification of tissue-specific and tissue-stable circRNA isoforms using isoCirc output for sequencing of 12 human tissues
+* visualization of proportions of circRNA isoforms across 12 human tissues for a user-specific gene of interest
+Details regarding each of the scripts can be found in the README files contained within the TAR
+Decompress the file by running: tar -zxvf isoform_analysis.tar.gz
