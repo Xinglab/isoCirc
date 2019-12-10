@@ -45,10 +45,7 @@ pip install isocirc --upgrade  # update to the latest version
 Alternatively, you can install **isoCirc** from source:
 ```
 git clone https://github.com/Xinglab/isoCirc.git
-cd isoCirc/isoCirc_pipeline
-pip install -r requirements.txt  # install dependencies
-export PATH=$PATH:$PWD/bin       # To permanently modify your PATH, you need to add it to your ~/.profile or ~/.bashrc file. 
-python setup.py install          # install main package
+cd isoCirc/isoCirc_pipeline && pip install .
 ```
  
 ## <a name="start"></a>Getting started with toy example in `test_data`
