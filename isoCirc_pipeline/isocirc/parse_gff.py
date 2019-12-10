@@ -2,12 +2,12 @@ import os, sys, re
 from collections import defaultdict as dd
 import gffutils as gu
 import pysam as ps
-import utils as ut
 import numpy as np
 import itertools
-import parse_bam as pb
 from Bio.Seq import Seq
 
+import isocirc.utils as ut
+import isocirc.parse_bam as pb
 
 def restore_gff_db(gtf_fn):
     gtf_db = None

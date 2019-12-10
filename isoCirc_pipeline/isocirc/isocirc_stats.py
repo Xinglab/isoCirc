@@ -1,19 +1,17 @@
 import argparse
-from plot import percAreaPlot as pap
-from plot import disToKnownPlot as dkp
-from plot import stackedBarPlot as sbp
-from plot import histogramPlot as hp
 from collections import defaultdict as dd
 from collections import OrderedDict as od
 import sys
 import math
-import utils as ut
 import copy
-import isocirc
-from __init__ import __program__
 
-isoform_output_header = isocirc.isoform_output_header
-isoform_output_header_idx = isocirc.isoform_output_header_idx
+from isocirc.__init__ import isoform_output_header_idx
+from isocirc.__init__ import isoform_output_header
+from isocirc.plot import percAreaPlot as pap
+from isocirc.plot import disToKnownPlot as dkp
+from isocirc.plot import stackedBarPlot as sbp
+from isocirc.plot import histogramPlot as hp
+import isocirc.utils as ut
 
 # genomic region category
 hier_order = ['rRNA', 'Alu', 'OtherRepeat', 'Exon', 'Exon&Intron', 'Intron', 'Intergenic']

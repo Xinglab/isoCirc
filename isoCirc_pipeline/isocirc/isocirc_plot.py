@@ -1,18 +1,19 @@
 import argparse
-from plot import percAreaPlot as pap
-from plot import disToKnownPlot as dkp
-from plot import stackedBarPlot as sbp
-from plot import histogramPlot as hp
 from collections import defaultdict as dd
 from collections import OrderedDict as od
 import sys
 import math
-import utils as ut
 import copy
-import isocirc
-from __init__ import __program__
 
-eval_header_idx = isocirc.isoform_output_header_idx
+import isocirc.utils as ut
+from isocirc.__init__ import __program__
+from isocirc.__init__ import isoform_output_header_idx
+from isocirc.plot import percAreaPlot as pap
+from isocirc.plot import disToKnownPlot as dkp
+from isocirc.plot import stackedBarPlot as sbp
+from isocirc.plot import histogramPlot as hp
+
+eval_header_idx = isoform_output_header_idx
 
 
 def increase_dict(d, start, end, inc_cnt):
@@ -281,8 +282,11 @@ def parser_argv():
     parser.add_argument('plot_type', metavar='type', type=str, help='Plot type', choices=['knownBSJ', 'regionArea'])
     return parser.parse_args()
 
-if __name__ == '__main__':
+def main():
     # stats_plot_core(sys.argv[1], 30, 20, 10, sys.argv[1])
     # circ_len_plot(sys.argv[1], sys.argv[1] + '.circRNA_len.png')
     args = parser_argv()
     plot_core(args)
+
+if __name__ == '__main__':
+    main()

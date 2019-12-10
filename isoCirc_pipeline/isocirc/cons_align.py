@@ -1,12 +1,12 @@
 import argparse
 import os
 import sys
-import utils as ut
 from pyfaidx import Fasta
 import pysam as ps
+
+import isocirc.utils as ut
+
 minimap2 = 'minimap2' #dir_path + '/bin/minimap2'
-
-
 threads = 8
 
 # def rotated_cons_based_on_sam(cons_fa, rotated_cons, sam_fn):

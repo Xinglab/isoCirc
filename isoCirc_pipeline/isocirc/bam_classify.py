@@ -1,8 +1,9 @@
 import argparse
 import pysam as ps
-import parse_bam as pb
-import utils as ut
 import sys
+
+import isocirc.parse_bam as pb
+import isocirc.utils as ut
 
 high_max_ratio = 1.1
 high_min_ratio = 0.9

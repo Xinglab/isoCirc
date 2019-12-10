@@ -1,17 +1,19 @@
 import argparse
-import sys
-import os
-import parse_bam as pb
+import sys, os
 import pysam
-import utils as ut
-import isocirc_stats as ps
-import isocirc
 from collections import defaultdict as dd
-from __init__ import __program__
-from __init__ import __version__
 
-isoform_output_header = isocirc.isoform_output_header
-idx = isocirc.isoform_output_header_idx
+import isocirc.isocirc_stats as ps
+import isocirc.parse_bam as pb
+import isocirc.utils as ut
+import isocirc.hcBSJ_fullIso as hf
+from isocirc.__init__ import isoform_output_header
+from isocirc.__init__ import isoform_output_header_idx
+from isocirc.__init__ import __program__
+from isocirc.__init__ import __version__
+
+# isoform_output_header = hf.hcBSJ_fullIso.isoform_output_header
+idx = isoform_output_header_idx
 
 def get_error_rate(in_sam_fn=''):
     map_read_name = dict()

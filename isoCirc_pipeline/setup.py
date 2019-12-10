@@ -7,16 +7,18 @@ setup(
 	name=__program__,
 	# packages=['isocirc'],
 	packages=find_packages(),
+        #package_dir = {"": "src"},
 	version='{}'.format(__version__),
-	scripts=['bin/bed2exonGtf',
-			 'bin/bed2gtf',
-			 'bin/gtf2bed',
-			 'bin/gtf2gene',
-			 'bin/itst_gtf_bed',
-			 'bin/itst_gtf_gtf',
-			 'bin/isocirc2bed12'
-			 ],
-	data_files=[
+        scripts=['isocirc/isocirc',
+            'bin/bed2exonGtf',
+            'bin/bed2gtf',
+            'bin/gtf2bed',
+            'bin/gtf2gene',
+            'bin/itst_gtf_bed',
+            'bin/itst_gtf_gtf',
+            'bin/isocirc2bed12'
+            ],
+        data_files=[
 			('bin', 
 			 ['bin/bedToGenePred',
 			 'bin/fxtools',
@@ -24,17 +26,14 @@ setup(
 			 'bin/genePredToGtf',
 			 'bin/gtfToGenePred',
 			 'bin/lordec-correct',
-			 'bin/minimap2',
 			 'bin/trf409.legacylinux64'])
 	],
-	entry_points={
-		'console_scripts': [
-		'{}=isocirc.isocirc:main'.format(__program__), 
-		'{}_eval=isocirc.eval_with_anno:main'.format(__program__), 
-		'{}_comp=isocirc.isocirc_comp:main'.format(__program__),
-		'{}_plot=isocirc.isocirc_plot.py:main'.format(__program__),
-		]
-	},
+	# entry_points={
+		# 'console_scripts': [
+		# '{}_eval=isocirc.hcBSJ_fullIso:main'.format(__program__), 
+		# '{}_comp=isocirc.isocirc_comp:main'.format(__program__),
+		# '{}_plot=isocirc.isocirc_plot:main'.format(__program__),
+		# ] },
 	install_requires=[
 		'biopython',
 		'gffutils',
@@ -45,11 +44,11 @@ setup(
 		'pyfaidx',
 		'pysam',
 	],
-	url='https://github.com/Xinglab/IsoCirc',
-	license='MIT',
-	author='yan',
-	author_email='yangaoucla@gmail.com',
-	description='IsoCirc: circular RNA profiling and analysis using long-read sequencing',
+	url='https://github.com/Xinglab/isoCirc',
+	license='GLP',
+	author='Yan Gao',
+	author_email='yangao07@hit.edu.cn',
+	description='isoCirc catalogs full-length circular RNA isoforms in human transcriptomes',
 	long_description=open('README.md').read(),
 	long_description_content_type="text/markdown",
 )

@@ -1,22 +1,25 @@
 import argparse
-import re
-import sys
-import os
+import re,sys,os
 import threading
 from threading import Thread
 from collections import defaultdict as dd
 import pysam as ps
-import parse_bam as pb
-import parse_gff as pg
-import uniq_isoform as ui
-import basic_stats as bs
 from pyfaidx import Fasta
 from Bio.Seq import Seq
-import utils as ut
-import isocirc
-from __init__ import __program__
-from __init__ import __version__
 
+import isocirc.parse_bam as pb
+import isocirc.parse_gff as pg
+import isocirc.uniq_isoform as ui
+import isocirc.basic_stats as bs
+import isocirc.utils as ut
+from isocirc.__init__ import __program__
+from isocirc.__init__ import __version__
+from isocirc.__init__ import whole_output_header
+from isocirc.__init__ import whole_output_header_idx
+from isocirc.__init__ import isoform_output_header
+from isocirc.__init__ import isoform_output_header_idx
+
+threads = 8
 flank_len = 500
 site_dis = 0
 end_dis = 10
@@ -29,10 +32,7 @@ gtfToGenePred = 'gtfToGenePred'
 genePredToBed = 'genePredToBed'
 gtf2bed = 'gtf2bed'  # dir_path + '/bin/gtf2bed'
 
-whole_output_header = isocirc.whole_output_header
-whole_output_header_idx = isocirc.whole_output_header_idx
-isoform_output_header = isocirc.isoform_output_header
-isoform_output_header_idx = isocirc.isoform_output_header_idx
+
 cigar_op_dict = pb.cigar_op_dict
 
 itst_bed_name = ['CDS', 'UTR', 'lincRNA', 'antisense', 'rRNA', 'Alu', 'allRepeat']
@@ -849,10 +849,10 @@ def parser_argv():
     parser.add_argument('circRNA_anno', metavar='circRNA.bed/gtf', type=str, help='circRNA annotation file in BED or GTF format. Use \',\' to separate multiple circRNA annotation files.')
     parser.add_argument('out', metavar='{}.out'.format(__program__), type=str, help='Isoform-wise circRNA output file.')
     parser.add_argument('bed', metavar='{}.bed'.format(__program__), type=str, help='BED12 file of \'{}.out\'.'.format(__program__))
-    parser.add_argument('stats_out', metavar='{}_stats.out'.format(__program__), type=str, help='Basic stats numbers of \'{}.out\''.foramt(__program__))
+    parser.add_argument('stats_out', metavar='{}_stats.out'.format(__program__), type=str, help='Basic stats numbers of \'{}.out\''.format(__program__))
 
     # parser.add_argument('--type', type=str, help='Type of sequencing data: Oxford Nanopore(ont) or Pacific Biosciences (pb).', choices=['ont', 'pb'], default='ont')
-    parser.add_argument('-t', '--threads', type=int, default=isocirc.threads, help='Number of thread to use.')
+    parser.add_argument('-t', '--threads', type=int, default=threads, help='Number of thread to use.')
     parser.add_argument('--bedtools', help='Path to bedtools.', default=bedtools)
 
 

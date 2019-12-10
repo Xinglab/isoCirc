@@ -1,9 +1,10 @@
 import argparse
 import sys
 import os
-import utils as ut
 import mappy as mp
 import itertools
+
+import isocirc.utils as ut
 
 cons_header_ele = ['repeat_start', 'repeat_end', 'period_size', 'copy_number', 'consensus_length', 'match_frac',
                    'indel_frac', 'align_score', 'A', 'C', 'G', 'T', 'entropy', 'cons_seq', 'repeat_seq',

@@ -1,13 +1,21 @@
 #!/usr/bin/env python
-import utils as ut
-from __init__ import __version__
-from __init__ import __program__
-
 import argparse
 from collections import defaultdict as dd
 import itertools
-import hcBSJ_fullIso as hf
 
+import isocirc.utils as ut
+import isocirc.hcBSJ_fullIso as hf
+from isocirc.__init__ import __program__
+from isocirc.__init__ import __version__
+from isocirc.__init__ import whole_output_header
+from isocirc.__init__ import whole_output_header_idx
+from isocirc.__init__ import isoform_output_header
+from isocirc.__init__ import isoform_output_header_idx
+
+whole_output_header = hf.whole_output_header
+whole_output_header_idx = hf.whole_output_header_idx
+isoform_output_header = hf.isoform_output_header
+isoform_output_header_idx = hf.isoform_output_header_idx
 '''
 Compare PARRIS results between different long-read datasets, or long-read and short-read datasets
 '''
@@ -32,10 +40,6 @@ ciri_header_idx = {h: i for i, h in enumerate(ciri_header)}
 # isoform_output_header = ['#isoformID'] + whole_output_header[1:] + ['readCount', 'readIDs']
 # isoform_output_header_idx = {h: i for i, h in enumerate(isoform_output_header)}
 
-whole_output_header = hf.whole_output_header
-whole_output_header_idx = hf.whole_output_header_idx
-isoform_output_header = hf.isoform_output_header
-isoform_output_header_idx = hf.isoform_output_header_idx
 
 def print_ovlp(out_fp, ovlp_entry, line1, line2):
     if ovlp_entry == 'A':

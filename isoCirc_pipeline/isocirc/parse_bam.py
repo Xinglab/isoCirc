@@ -1,9 +1,10 @@
 import sys, re
 import pysam as ps
-import utils as ut
 from collections import defaultdict as dd
 import copy
 from Bio import pairwise2
+
+import isocirc.utils as ut
 
 #### cigar operation:
 BAM_CMATCH = 0  # M

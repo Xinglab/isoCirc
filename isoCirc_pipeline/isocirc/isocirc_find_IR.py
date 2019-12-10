@@ -1,12 +1,13 @@
 #!/usr/bin/env python
-import utils as ut
-from __init__ import __version__
-from __init__ import __program__
-
 import argparse
 from collections import defaultdict as dd
 import itertools
 import re
+
+import isocirc.utils as ut
+import isocirc.hcBSJ_fullIso as hf
+from isocirc.__init__ import __version__
+from isocirc.__init__ import __program__
 
 '''
 Compare PARRIS results between different long-read datasets, or long-read and short-read datasets
@@ -16,21 +17,11 @@ ciri_header = ['circRNA_ID','chr','circRNA_start','circRNA_end', '#junction_read
                'junction_reads_ratio', 'circRNA_type', 'gene_id', 'strand', 'junction_reads_ID']
 ciri_header_idx = {h: i for i, h in enumerate(ciri_header)}
 
-whole_output_header = ['#readID', 'chrom', 'startCoor0based', 'endCoor', 'mapStrand', 'geneStrand', 'geneID', 'geneName', # 'transID', 'transName',
-                       'blockCount', 'blockSize', 'blockStarts', 'refMapLen',  # mapping information
-                       'blockType', 'blockAnno',  # #evaluation with whole annotation for each block
-                       'readLen', 'consLen', 'consMapLen', 'copyNum', 'consFrac',  # original read and consensus sequence information
-                       'novelFlag', 'circID', 'circLen',  # annotated circRNA information
-                       'isKnownBSJ', 'isCanoBSJ', 'disToCanoBSJ', 'canoBSJMotif', 'alignAroundCanoBSJ', # back-splicing junction
-                       'isKnownCircSS', 'isKnownCircSJ', 'isKnownCircExon', 'disToKnownCircSS', # evaluation with circRNA annotation
-                       'isKnownSS', 'isKnownSJ', 'isKnownExon', 'disToKnownSS',
-                       'isCanoSJ', 'disToCanoSJ', 'canoSJStrand', # evaluation with whole annotation
-                       'CDS', 'UTR', 'lincRNA', 'antisense', # $3; gene_type/biotype
-                       'rRNA', 'Alu', 'allRepeat', 'upFlankAlu', 'downFlankAlu']  # repeat element
-whole_output_header_idx = {h: i for i, h in enumerate(whole_output_header)}
 
-isoform_output_header = ['#isoformID'] + whole_output_header[1:] + ['readCount', 'readIDs']
-isoform_output_header_idx = {h: i for i, h in enumerate(isoform_output_header)}
+whole_output_header = hf.whole_output_header
+whole_output_header_idx = hf.whole_output_header_idx
+isoform_output_header = hf.isoform_output_header
+isoform_output_header_idx = hf.isoform_output_header_idx
 
 def isocirc_find_IR_core(in_fn, min_exon_len, idx):
     with open(in_fn) as in_fp:

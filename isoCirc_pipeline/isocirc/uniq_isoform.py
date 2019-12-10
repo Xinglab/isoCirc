@@ -1,6 +1,7 @@
 import sys
-import utils as ut
 from collections import defaultdict as dd
+import isocirc.utils as ut
+# from .utils import *
 
 # TODO polish uniq-isoform
 # coor= [site1, site2, site3, site4 ...]

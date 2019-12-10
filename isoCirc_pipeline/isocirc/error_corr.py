@@ -1,7 +1,8 @@
 import argparse
 import sys
 import os
-import utils as ut
+
+import isocirc.utils as ut
 
 lordec = 'lordec-correct' #dir_path + '/deps/lordec-src_0.9/lordec-correct'
 kmer=21
