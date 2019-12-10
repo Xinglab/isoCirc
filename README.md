@@ -1,4 +1,4 @@
-# isoCirc: cataloging full-length circular RNA isoforms in human transcriptomes
+# isoCirc catalogs full-length circular RNA isoforms in human transcriptomes
 [![Github All Releases](https://img.shields.io/github/downloads/Xinglab/isoCirc/total.svg?label=Download)](https://github.com/Xinglab/isoCirc/releases)
 [![Latest Release](https://img.shields.io/github/release/Xinglab/isoCirc.svg?label=Release)](https://github.com/Xinglab/isoCirc/releases/latest)
 <!-- [![Build Status](https://travis-ci.org/yangao07/TideHunter.svg?branch=master)](https://travis-ci.org/yangao07/TideHunter) -->
