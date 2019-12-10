@@ -10,7 +10,7 @@ high_iden_ratio = 0.75 #TODO old: 0.75
 high_repeat_ratio = 0.6
 low_repeat_ratio = 1.9
 
-max_ins_len = 50
+max_ins_len = 50 # max ins/del length within a single block
 max_del_len = 50
 
 
@@ -22,11 +22,17 @@ max_del_len = 50
 # partial mapped, map / cons < 0.9
 
 def get_iden_ratio(r):
+    new_block = 1
+    ins_len, del_len = 0, 0
     for tuples in r.cigartuples:
-        if tuples[0] == pb.BAM_CINS and tuples[1] > max_ins_len:
-            return -1.0
-        if tuples[0] == pb.BAM_CDEL and tuples[1] > max_del_len:
-            return -1.0
+        if tuples[0] == pb.BAM_CINS:
+            ins_len += tuples[1]
+            if ins_len > max_ins_len: return -1.0
+        elif tuples[0] == pb.BAM_CDEL:
+            del_len += tuples[1]
+            if del_len > max_del_len: return -1.0
+        elif tuples[0] == pb.BAM_CREF_SKIP:
+            ins_len, del_len = 0, 0
     map_len = pb.get_aligned_read_length(r)
     if not r.has_tag('NM'): ut.fatal_format_time('bam_classify', 'No NM tag found.\n')
     NM = int(r.get_tag('NM'))

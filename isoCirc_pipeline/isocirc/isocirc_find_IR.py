@@ -16,7 +16,7 @@ ciri_header = ['circRNA_ID','chr','circRNA_start','circRNA_end', '#junction_read
                'junction_reads_ratio', 'circRNA_type', 'gene_id', 'strand', 'junction_reads_ID']
 ciri_header_idx = {h: i for i, h in enumerate(ciri_header)}
 
-whole_output_header = ['#readID', 'chrom', 'startCoor0base', 'endCoor', 'mapStrand', 'geneStrand', 'geneID', 'geneName', # 'transID', 'transName',
+whole_output_header = ['#readID', 'chrom', 'startCoor0based', 'endCoor', 'mapStrand', 'geneStrand', 'geneID', 'geneName', # 'transID', 'transName',
                        'blockCount', 'blockSize', 'blockStarts', 'refMapLen',  # mapping information
                        'blockType', 'blockAnno',  # #evaluation with whole annotation for each block
                        'readLen', 'consLen', 'consMapLen', 'copyNum', 'consFrac',  # original read and consensus sequence information
@@ -50,7 +50,7 @@ def isocirc_find_IR_core(in_fn, min_exon_len, idx):
                 eids, elens, ilens = [], [], []
                 for ei in eis:
                     if ei[0] == 'E': # exon
-                        [eid, elen] = map(int, re.split('\(|\)', ei[1:])[:-1])
+                        [eid, elen] = list(map(int, re.split('\(|\)', ei[1:])[:-1]))
                         eids.append(eid)
                         elens.append(elen)
                     else: # intron

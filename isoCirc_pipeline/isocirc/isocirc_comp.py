@@ -6,7 +6,7 @@ from __init__ import __program__
 import argparse
 from collections import defaultdict as dd
 import itertools
-import eval_with_anno as ea
+import hcBSJ_fullIso as hf
 
 '''
 Compare PARRIS results between different long-read datasets, or long-read and short-read datasets
@@ -16,7 +16,7 @@ ciri_header = ['circRNA_ID','chr','circRNA_start','circRNA_end', '#junction_read
                'junction_reads_ratio', 'circRNA_type', 'gene_id', 'strand', 'junction_reads_ID']
 ciri_header_idx = {h: i for i, h in enumerate(ciri_header)}
 
-# whole_output_header = ['#readID', 'chrom', 'startCoor0base', 'endCoor', 'mapStrand', 'geneStrand', 'geneID', 'geneName', # 'transID', 'transName',
+# whole_output_header = ['#readID', 'chrom', 'startCoor0based', 'endCoor', 'mapStrand', 'geneStrand', 'geneID', 'geneName', # 'transID', 'transName',
 #                        'blockCount', 'blockSize', 'blockStarts', 'refMapLen',  # mapping information
 #                        'blockType', 'blockAnno',  # #evaluation with whole annotation for each block
 #                        'readLen', 'consLen', 'consMapLen', 'copyNum', 'consFrac',  # original read and consensus sequence information
@@ -32,10 +32,10 @@ ciri_header_idx = {h: i for i, h in enumerate(ciri_header)}
 # isoform_output_header = ['#isoformID'] + whole_output_header[1:] + ['readCount', 'readIDs']
 # isoform_output_header_idx = {h: i for i, h in enumerate(isoform_output_header)}
 
-whole_output_header = ea.whole_output_header
-whole_output_header_idx = ea.whole_output_header_idx
-isoform_output_header = ea.isoform_output_header
-isoform_output_header_idx = ea.isoform_output_header_idx
+whole_output_header = hf.whole_output_header
+whole_output_header_idx = hf.whole_output_header_idx
+isoform_output_header = hf.isoform_output_header
+isoform_output_header_idx = hf.isoform_output_header_idx
 
 def print_ovlp(out_fp, ovlp_entry, line1, line2):
     if ovlp_entry == 'A':
@@ -123,7 +123,7 @@ def get_detailed_long_whole_input(in_fn):
             if line.startswith('#'): continue
             ele = line.split()
             chrom = ele[whole_output_header_idx['chrom']]
-            start = int(ele[whole_output_header_idx['startCoor0base']])
+            start = int(ele[whole_output_header_idx['startCoor0based']])
             end = int(ele[whole_output_header_idx['endCoor']])
             coors = []
             for s, l in zip(map(int,ele[whole_output_header_idx['blockStarts']].rsplit(',')), map(int,ele[whole_output_header_idx['blockSize']].rsplit(','))):
@@ -139,7 +139,7 @@ def get_long_whole_input(in_fn):
             if line.startswith('#'): continue
             ele = line.split()
             chrom = ele[whole_output_header_idx['chrom']]
-            start = int(ele[whole_output_header_idx['startCoor0base']])
+            start = int(ele[whole_output_header_idx['startCoor0based']])
             end = int(ele[whole_output_header_idx['endCoor']])
             long_dict[(chrom, start, end)].append(line)
     return long_dict
@@ -151,7 +151,7 @@ def get_detailed_long_isoform_input(in_fn):
             if line.startswith('#'): continue
             ele = line.split()
             chrom = ele[whole_output_header_idx['chrom']]
-            start = int(ele[whole_output_header_idx['startCoor0base']])
+            start = int(ele[whole_output_header_idx['startCoor0based']])
             end = int(ele[whole_output_header_idx['endCoor']])
             coors = []
             for s, l in zip(map(int,ele[isoform_output_header_idx['blockStarts']].rsplit(',')), map(int,ele[isoform_output_header_idx['blockSize']].rsplit(','))):
@@ -167,7 +167,7 @@ def get_long_isoform_input(in_fn):
             if line.startswith('#'): continue
             ele = line.split()
             chrom = ele[whole_output_header_idx['chrom']]
-            start = int(ele[whole_output_header_idx['startCoor0base']])
+            start = int(ele[whole_output_header_idx['startCoor0based']])
             end = int(ele[whole_output_header_idx['endCoor']])
             long_dict[(chrom, start, end)].append(line)
     return long_dict

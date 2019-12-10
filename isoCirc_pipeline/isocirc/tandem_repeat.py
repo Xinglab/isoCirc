@@ -72,7 +72,8 @@ def get_relation(seq1, seq2):
 def get_read_len(read_fn, out_dir, fxtools=fxtools):
     read_len = {}
     read_len_fn = out_dir + '/' + os.path.basename(os.path.abspath(read_fn)) + '.len'
-    ut.exec_cmd(sys.stderr, 'fxtools', '{} lp {} > {} 2> /dev/null'.format(fxtools, read_fn, read_len_fn))
+    if not os.path.exists(read_len_fn):
+        ut.exec_cmd(sys.stderr, 'fxtools', '{} lp {} > {} 2> /dev/null'.format(fxtools, read_fn, read_len_fn))
     with open(read_len_fn, 'r') as len_fp:
         for line in len_fp:
             read_len[line.rsplit()[0]] = int(line.rsplit()[1])
@@ -252,28 +253,28 @@ def run_trf_parall(in_long, cons_fa, cons_info, trf_out, trf=trf, match=match, m
 
 
 def run_rf_core(args):
-    if args.use_tidehunter:
-        run_tidehunter(args.in_long_read, args.cons_fa, args.cons_info, args.tr_out, args.tidehunter, args.min_len, args.min_copy, args.min_frac, args.threads)
+    # if args.use_tidehunter:
+        # run_tidehunter(args.in_long_read, args.cons_fa, args.cons_info, args.tr_out, args.tidehunter, args.min_len, args.min_copy, args.min_frac, args.threads)
+    # else:
+    if args.threads > 1:
+        run_trf_parall(args.in_long_read, args.cons_fa, args.cons_info, args.tr_out, args.trf, args.match, args.mismatch, args.indel, args.match_frac, args.indel_frac, args.min_score, args.max_period, args.min_len, args.min_copy, args.min_frac, args.threads)
     else:
-        if args.threads > 1:
-            run_trf_parall(args.in_long_read, args.cons_fa, args.cons_info, args.tr_out, args.trf, args.match, args.mismatch, args.indel, args.match_frac, args.indel_frac, args.min_score, args.max_period, args.min_len, args.min_copy, args.min_frac, args.threads)
-        else:
-            run_trf(args.in_long_read, args.cons_fa, args.cons_info, args.tr_out, args.trf, args.match, args.mismatch, args.indel, args.match_frac, args.indel_frac, args.min_score, args.max_period, args.min_len, args.min_copy, args.min_frac)
+        run_trf(args.in_long_read, args.cons_fa, args.cons_info, args.tr_out, args.trf, args.match, args.mismatch, args.indel, args.match_frac, args.indel_frac, args.min_score, args.max_period, args.min_len, args.min_copy, args.min_frac)
 
 
 def parser_argv():
     # parse command line arguments
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-                                     description="Running Tandem Repeats Finder(TRF) to find consensus sequence")
-    parser.add_argument("in_long_read", metavar='long.fa', type=str, help='Long-read data generated from isoCirc sequencing technique.')
+                                     description="Consensus calling with Tandem Repeats Finder(TRF)")
+    parser.add_argument("in_long_read", metavar='long.fa', type=str, help='Long read sequencing data generated with isoCirc.')
     parser.add_argument("tr_out", metavar='tr.out', type=str, help='Output file.')
     parser.add_argument("cons_fa", metavar='cons.fa', type=str, help='Consensus sequence file.')
     parser.add_argument("cons_info", metavar='cons.info', type=str, help='Consensus information file.')
 
-    parser.add_argument('-T', '--use-tidehunter', default=False, help='Use TideHunter as the tandem repeats detection tool.', action='store_true')
+    # parser.add_argument('-T', '--use-tidehunter', default=False, help='Use TideHunter as the tandem repeats detection tool.', action='store_true')
 
     parser.add_argument('--trf', type=str, help='Path to trf program.', default=trf)
-    parser.add_argument('--tidehunter', type=str, help='Path to TideHunter.', default=tidehunter)
+    # parser.add_argument('--tidehunter', type=str, help='Path to TideHunter.', default=tidehunter)
 
     parser.add_argument('--threads', type=int, help='Number of thread to use.', default=threads)
     parser.add_argument('-m', '--match', type=int, help='Match score.', default=match)
@@ -293,5 +294,6 @@ def parser_argv():
 
 if __name__ == '__main__':
     args = parser_argv()
-
     run_rf_core(args)
+    # read_len = get_read_len(sys.argv[4], './')
+    # extract_multi_cons(sys.argv[1], sys.argv[2], sys.argv[3], read_len)

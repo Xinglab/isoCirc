@@ -188,7 +188,7 @@ def exon_block_number_plot(in_isoform_res, cnt_max=20, out_plot='exon_block_num.
 
     subgroup=[1,1,1]
     title='circRNA block number'
-    xticks = map(str, range(1, cnt_max))
+    xticks = list(map(str, range(1, cnt_max)))
     xticks.append('>= {}'.format(cnt_max))
     xlabel = 'Block number'
     ylabel = 'circRNA isoform number'
@@ -247,7 +247,7 @@ def isoform_num_per_gene_plot(in_isoform_res, iso_max=10, out_plot='iso_per_gene
         iso_num_dict['Known circRNA'][cnt_idx] += 1
     subgroup = [1]
     title = 'circRNA isoform number per gene'
-    xticks = map(str, range(1, iso_max))
+    xticks = list(map(str, range(1, iso_max)))
     xticks.append('>= {}'.format(iso_max))
     xlabel = 'circRNA isoform number'
     ylabel = 'Gene number'

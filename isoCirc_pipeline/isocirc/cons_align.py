@@ -38,7 +38,7 @@ def cons_align_core(args):
 
 def parser_argv():
     # parse command line arguments
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter, description="Extract consensus sequence and align it to genome")
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter, description="Mapping of consensus sequence (minimap2)")
     parser.add_argument("ref_fa", type=str, metavar='ref.fa', help='Reference genome sequence file.')
     parser.add_argument("cons_fa", metavar='cons.fa', type=str, help='Consensus sequence file.')
     parser.add_argument("cons_all_sam", metavar='cons.fa.sam', type=str, help='Consensus SAM alignment file.')

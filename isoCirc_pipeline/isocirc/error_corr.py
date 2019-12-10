@@ -20,7 +20,7 @@ def error_corr_core(args):
 def parser_argv():
     # parse command line arguments
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter, description="Hybrid error-correction for long-read data")
-    parser.add_argument("in_long_read", metavar='long.fa', type=argparse.FileType('r'), help='Long-read data generated from isoCirc sequencing technique.')
+    parser.add_argument("in_long_read", metavar='long.fa', type=argparse.FileType('r'), help='Raw long-read sequencing data.')
     parser.add_argument("in_short_read", metavar='short.fa', type=argparse.FileType('r'), help='Short-read data. Use \',\' to connect multiple or paired-end short read data.')
     parser.add_argument("out_long_read", metavar='correct_long.fa', type=argparse.FileType('w'), help='Corrected long-read data.')
 

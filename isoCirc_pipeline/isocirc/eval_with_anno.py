@@ -58,7 +58,7 @@ def circRNA_isoform_bed12(circRNA_bed, circRNA_out, iso_to_name_dict):
         bed_fp.write('#' + __program__ + '\t' + __version__ + '\n')
         for iso_id, read_ids in iso_to_name_dict.items():
             out1 = circRNA_out[read_ids[0]]
-            bed_fp.write('{}\t{}\t{}\t{}{}\t0\t{}\t0\t0\t0\t{}\t{}\t{}\n'.format(out1['chrom'], out1['startCoor0base'], out1['endCoor'], __program__, iso_id, out1['canoBSJMotif'][0], out1['blockCount'], out1['blockSize'], out1['blockStarts']))
+            bed_fp.write('{}\t{}\t{}\t{}{}\t0\t{}\t0\t0\t0\t{}\t{}\t{}\n'.format(out1['chrom'], out1['startCoor0based'], out1['endCoor'], __program__, iso_id, out1['canoBSJMotif'][0], out1['blockCount'], out1['blockSize'], out1['blockStarts']))
 
 
 # add 'isFullLength', 'isFSM', 'isNIC', 'isNNC', # FSM: full splice match, NIC: novel in catalog, NNC, novel and not in catalog
@@ -67,15 +67,37 @@ def output_isoform_eval(out_fp, all_out, itst_out_dict, all_trans, iso_to_name_d
     for iso_id, read_ids in iso_to_name_dict.items():
         iso_name = '{}{}'.format(__program__, iso_id)
         out_array = [iso_name]
-        out1 = all_out[read_ids[0]]
+        out1 = all_out[read_ids[0]] # XXX everything except isHighSJ (high mapping quality SJ) are the same for all the reads
         # 0. write intersect info and cons_info to eval_out
         out1['geneID'], out1['geneName'], out1['geneStrand'] = itst_out_dict['geneID'][str(iso_name)], itst_out_dict['geneName'][str(iso_name)], itst_out_dict['geneStrand'][str(iso_name)]
         out1['CDS'], out1['UTR'], out1['lincRNA'], out1['antisense'] = itst_out_dict['CDS'][str(iso_name)], itst_out_dict['UTR'][str(iso_name)], itst_out_dict['lincRNA'][str(iso_name)], itst_out_dict['antisense'][str(iso_name)]
         out1['rRNA'], out1['Alu'], out1['allRepeat'], out1['upFlankAlu'], out1['downFlankAlu'] = itst_out_dict['rRNA'][str(iso_name)], itst_out_dict['Alu'][str(iso_name)], itst_out_dict['allRepeat'][str(iso_name)], itst_out_dict['upFlankAlu'][str(iso_name)], itst_out_dict['downFlankAlu'][str(iso_name)]
         # block type, anno
         out1['blockType'], out1['blockAnno'] = itst_out_dict['blockType'][str(iso_name)], itst_out_dict['blockAnno'][str(iso_name)]
-        # full-length
-        out1['isFullLength'] = 'False' if 'False' in out1['isKnownSS'] and ('False' in out1['isCanoSJ'] or 'False' in out1['isHighSJ']) else 'True'
+        # full-length: BSJ is already high-confidenc, only check FSJ (internal SJ) XXX
+        if int(out1['blockCount']) == 1:
+            out1['isFullLength'] = 'True'
+        else:
+            known_fsj_ss = out1['isKnownSS'].rsplit(',')[1:-1]
+            if 'False' not in known_fsj_ss:
+                out1['isFullLength'] = 'True'
+            else:
+                out1['isFullLength'] = 'True'
+                known_sj = []
+                for i in range(int(len(known_fsj_ss) / 2)):
+                    known_sj.append(','.join([known_fsj_ss[i*2], known_fsj_ss[i*2+1]]))
+                cano_sj = out1['isCanoSJ'].rsplit(',')
+                high_sj = ['False'] * len(cano_sj)
+                for read_id in read_ids:
+                    for i, high1 in enumerate(all_out[read_id]['isHighSJ'].rsplit(',')):
+                        if high1 == 'True':
+                            high_sj[i] = 'True'
+                if len(known_sj) != len(cano_sj) or len(cano_sj) != len(high_sj):
+                    ut.fatal_format_time('output_isoform_eval', 'Unmatched list size.')
+                for k, c, h in zip(known_sj, cano_sj, high_sj):
+                    if 'False' in k and ('False' in c or 'False' in h):
+                        out1['isFullLength'] = 'False'
+                        break
         # FSM/NIC/NNC for BSJ and interIso
         if 'True' in out1['isKnownBSJ']:
             bsj_cate = 'FSM'
@@ -83,7 +105,7 @@ def output_isoform_eval(out_fp, all_out, itst_out_dict, all_trans, iso_to_name_d
             bsj_cate = 'NIC'
         else: bsj_cate = 'NNC'
         out1['BSJCate'] = bsj_cate
-        iso_cate, start, gene_ids = None, int(out1['startCoor0base']), out1['geneID'].rsplit(',')
+        iso_cate, start, gene_ids = None, int(out1['startCoor0based']), out1['geneID'].rsplit(',')
         if int(out1['blockCount']) == 1:
             iso_cate = 'FSM'
         else:
@@ -105,7 +127,7 @@ def output_isoform_eval(out_fp, all_out, itst_out_dict, all_trans, iso_to_name_d
                 if iso_cate: break
             if not iso_cate:
                 iso_cate = 'NIC' if 'False' not in out1['isKnownSS'][1:-1] else 'NNC'
-        out1['interIsoCate'] = iso_cate
+        out1['FSJCate'] = iso_cate
 
         for h in isoform_output_header[1:-2]:
             out_array.append(str(out1[h]))
@@ -471,7 +493,7 @@ def circRNA_filter_core(eval_out, bsj_motifs=['GT/AG'], bsj_xid=1, bsj_key_xid=0
         if key_xid > bsj_key_xid:
             return False
         # filter #6/7
-        if (int(eval_out['endCoor']) + int(eval_out['disToCanoBSJ'].split(',')[1])) - (int(eval_out['startCoor0base']) + int(eval_out['disToCanoBSJ'].split(',')[0])) < min_circ_dis:
+        if (int(eval_out['endCoor']) + int(eval_out['disToCanoBSJ'].split(',')[1])) - (int(eval_out['startCoor0based']) + int(eval_out['disToCanoBSJ'].split(',')[0])) < min_circ_dis:
             return False
     return True
 
@@ -495,7 +517,7 @@ def get_one_cons_out(mul_cons):
     for i, cons_out in enumerate(mul_cons):
         if cons_out['chimInfo'] == 'NA': continue
         # print cons_out['#readID'], cons_out['chimInfo']
-        _ids = map(int, re.split('RC|ID', cons_out['chimInfo']))
+        _ids = list(map(int, re.split('RC|ID', cons_out['chimInfo'])))
         ids = []
         for id in _ids:
             if id in clu_id:
@@ -555,7 +577,7 @@ def get_one_cons_out(mul_cons):
 # 5. filtered.bsj.coors + filterted.out + ovlp.bed => circRNA.out
 def circRNA_bsj_filter(all_out, cano_motifs=['GT/AG'], bsj_xid=1, key_bsj_xid=0, min_circ_dis=150):
     # filtered_coors: adjusted coors by disToCanoBSJ
-    filtered_bsj_coors, all_bsj, all_bsj_stats_dict = dict(), dict(), dd(lambda:0) # 'read_with_bsj_n'/'bsj_n'/'known_bsj_n'
+    filtered_bsj_coors, all_bsj, all_bsj_stats_dict = dict(), dict(), dd(lambda:0) # ead_with_bsj_n'/'bsj_n'/'known_bsj_n'
     all_bsj_stats_dict['known_bsj_n'] = dd(lambda:0)
     last_read_name, mul_cons = '', []
     for id, eval_out in all_out.items():
@@ -564,7 +586,7 @@ def circRNA_bsj_filter(all_out, cano_motifs=['GT/AG'], bsj_xid=1, key_bsj_xid=0,
             if mul_cons:
                 out1 = get_one_cons_out(mul_cons)
                 if out1['isCanoBSJ']:
-                    bsj = (out1['chrom'], int(out1['startCoor0base']) + int(out1['disToCanoBSJ'].split(',')[0]), int(out1['endCoor']) + int(out1['disToCanoBSJ'].split(',')[1]))
+                    bsj = (out1['chrom'], int(out1['startCoor0based']) + int(out1['disToCanoBSJ'].split(',')[0]), int(out1['endCoor']) + int(out1['disToCanoBSJ'].split(',')[1]))
 
                     # all bsj
                     all_bsj_stats_dict['read_with_bsj_n'] += 1
@@ -584,7 +606,7 @@ def circRNA_bsj_filter(all_out, cano_motifs=['GT/AG'], bsj_xid=1, key_bsj_xid=0,
     if mul_cons:
         out1 = get_one_cons_out(mul_cons)
         if out1['isCanoBSJ']:
-            bsj = (out1['chrom'], int(out1['startCoor0base']) + int(out1['disToCanoBSJ'].split(',')[0]), int(out1['endCoor']) + int(out1['disToCanoBSJ'].split(',')[1]))
+            bsj = (out1['chrom'], int(out1['startCoor0based']) + int(out1['disToCanoBSJ'].split(',')[0]), int(out1['endCoor']) + int(out1['disToCanoBSJ'].split(',')[1]))
             # all bsj
             all_bsj_stats_dict['read_with_bsj_n'] += 1
             if bsj not in all_bsj:
@@ -610,17 +632,17 @@ def circRNA_rescue(all_out, bsj_coors, h_bam, anno_site, anno_exon):
             if mul_cons:
                 out1 = get_one_cons_out(mul_cons)
                 if 'NA' not in out1['disToCanoBSJ']:
-                    chrom, adj_start, adj_end = out1['chrom'], int(out1['startCoor0base']) + int(out1['disToCanoBSJ'].split(',')[0]), int(out1['endCoor']) + int(out1['disToCanoBSJ'].split(',')[1])
+                    chrom, adj_start, adj_end = out1['chrom'], int(out1['startCoor0based']) + int(out1['disToCanoBSJ'].split(',')[0]), int(out1['endCoor']) + int(out1['disToCanoBSJ'].split(',')[1])
                     chrom_id = h_bam.get_tid(chrom)
                     # print(last_read_name, chrom, adj_start, adj_end)
                     if (chrom, adj_start, adj_end) in bsj_coors:
                         # coors
                         filtered_coors[filtered_id] = [chrom_id]
-                        filtered_coors[filtered_id].extend(pg.get_coor_from_block(out1['startCoor0base'], out1['blockSize'], out1['blockStarts']))
+                        filtered_coors[filtered_id].extend(pg.get_coor_from_block(out1['startCoor0based'], out1['blockSize'], out1['blockStarts']))
                         filtered_coors[filtered_id][1] = adj_start + 1
                         filtered_coors[filtered_id][-1] = adj_end
                         # all_out
-                        out1['startCoor0base'], out1['endCoor'] = adj_start, adj_end
+                        out1['startCoor0based'], out1['endCoor'] = adj_start, adj_end
                         start, out1['blockSize'], out1['blockStarts'] = pg.get_block_from_coor(filtered_coors[filtered_id][1:])
                         if start < 0 or min(map(int, out1['blockSize'].rsplit(','))) < 0 or min(map(int, out1['blockStarts'].rsplit(','))):
                             filtered_coors.pop(filtered_id)
@@ -633,7 +655,7 @@ def circRNA_rescue(all_out, bsj_coors, h_bam, anno_site, anno_exon):
                             out1['isKnownSS'] = ','.join(is_known_ss)
 
                             is_known_exon = out1['isKnownExon'].rsplit(',')
-                            block_sizes = map(int, out1['blockSize'].rsplit(','))
+                            block_sizes = list(map(int, out1['blockSize'].rsplit(',')))
                             is_known_exon[0] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', adj_start+1, adj_start + block_sizes[0]) in anno_exon else 'False'
                             is_known_exon[-1] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', adj_end-block_sizes[-1]+1, adj_end) in anno_exon else 'False'
                             out1['isKnownExon'] = ','.join(is_known_exon)
@@ -646,17 +668,17 @@ def circRNA_rescue(all_out, bsj_coors, h_bam, anno_site, anno_exon):
     if mul_cons:
         out1 = get_one_cons_out(mul_cons)
         if 'NA' not in out1['disToCanoBSJ']:
-            chrom, adj_start, adj_end = out1['chrom'], int(out1['startCoor0base']) + int(out1['disToCanoBSJ'].split(',')[0]), int(out1['endCoor']) + int(out1['disToCanoBSJ'].split(',')[1])
+            chrom, adj_start, adj_end = out1['chrom'], int(out1['startCoor0based']) + int(out1['disToCanoBSJ'].split(',')[0]), int(out1['endCoor']) + int(out1['disToCanoBSJ'].split(',')[1])
             chrom_id = h_bam.get_tid(chrom)
             # print(last_read_name, chrom, adj_start, adj_end)
             if (chrom, adj_start, adj_end) in bsj_coors:
                 # coors
                 filtered_coors[filtered_id] = [chrom_id]
-                filtered_coors[filtered_id].extend(pg.get_coor_from_block(out1['startCoor0base'], out1['blockSize'], out1['blockStarts']))
+                filtered_coors[filtered_id].extend(pg.get_coor_from_block(out1['startCoor0based'], out1['blockSize'], out1['blockStarts']))
                 filtered_coors[filtered_id][1] = adj_start + 1
                 filtered_coors[filtered_id][-1] = adj_end
                 # all_out
-                out1['startCoor0base'], out1['endCoor'] = adj_start, adj_end
+                out1['startCoor0based'], out1['endCoor'] = adj_start, adj_end
                 start, out1['blockSize'], out1['blockStarts'] = pg.get_block_from_coor(filtered_coors[filtered_id][1:])
                 if start < 0 or min(map(int, out1['blockSize'].rsplit(','))) < 0 or min(map(int, out1['blockStarts'].rsplit(','))):
 
@@ -671,7 +693,7 @@ def circRNA_rescue(all_out, bsj_coors, h_bam, anno_site, anno_exon):
 
 
                     is_known_exon = out1['isKnownExon'].rsplit(',')
-                    block_sizes = map(int, out1['blockSize'].rsplit(','))
+                    block_sizes = list(map(int, out1['blockSize'].rsplit(',')))
                     is_known_exon[0] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', adj_start+1, adj_start + block_sizes[0]) in anno_exon else 'False'
                     is_known_exon[-1] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', adj_end-block_sizes[-1]+1, adj_end) in anno_exon else 'False'
                     out1['isKnownExon'] = ','.join(is_known_exon)
@@ -689,7 +711,7 @@ def eval_core(id, r, cons_info_dict, ref_fa, cons_fa, all_site, all_exon, all_sj
 
     eval_out = {i: 'NA' for i in whole_output_header}  # for each BAM record
     eval_out['#readID'], eval_out['chrom'], eval_out['mapStrand'], eval_out['consMapLen'] = r.query_name, r.reference_name, '-' if r.is_reverse else '+', pb.get_aligned_read_length(r)
-    eval_out['startCoor0base'], eval_out['endCoor'] = r.reference_start, r.reference_end
+    eval_out['startCoor0based'], eval_out['endCoor'] = r.reference_start, r.reference_end
     eval_out['blockCount'] = len(r_block)
     _s, eval_out['blockSize'], eval_out['blockStarts'] = pg.get_block_from_coor(coors)
     eval_out['refMapLen'] = sum(map(int, eval_out['blockSize'].rsplit(',')))
@@ -704,11 +726,12 @@ def eval_core(id, r, cons_info_dict, ref_fa, cons_fa, all_site, all_exon, all_sj
     is_high_sj = pb.parse_sj_alignment(r, min_xid=sj_xid, key_min_xid=key_sj_xid)
 
     # 2. check bsj
-    bsj = (r.reference_id, r.is_reverse, int(eval_out['endCoor']) + 1, int(eval_out['startCoor0base']))
+    bsj = (r.reference_id, r.is_reverse, int(eval_out['endCoor']) + 1, int(eval_out['startCoor0based']))
     force_strand = ''
     if '+' in splice_strand and '-' not in splice_strand: force_strand = '+'
     elif '-' in splice_strand and '+' not in splice_strand: force_strand = '-'
-    is_known_bsj, is_cano_bsj, dis_to_cano_bsj, bsj_motif, align_bsj = pg.is_known_cano_bsj(bsj, circ_sj, ref_seq, cons_fa[r.query_name][:].seq.upper(), int(eval_out['startCoor0base']), int(eval_out['endCoor']), r.is_reverse, r.cigartuples, int(eval_out['refMapLen']), int(eval_out['consMapLen']), int(eval_out['consLen']), end_dis, force_strand)
+    bsj_dis_to_known_ss = [dis_to_known_ss[0], dis_to_known_ss[-1]]
+    is_known_bsj, is_cano_bsj, dis_to_cano_bsj, bsj_motif, align_bsj = pg.is_known_cano_bsj(bsj, circ_sj, ref_seq, cons_fa[r.query_name][:].seq.upper(), int(eval_out['startCoor0based']), int(eval_out['endCoor']), r.is_reverse, r.cigartuples, int(eval_out['refMapLen']), int(eval_out['consMapLen']), int(eval_out['consLen']), end_dis, force_strand, bsj_dis_to_known_ss)
 
     eval_out['isKnownBSJ'], eval_out['isCanoBSJ'], eval_out['disToCanoBSJ'], eval_out['canoBSJMotif'], eval_out['alignAroundCanoBSJ'] = is_known_bsj, is_cano_bsj, dis_to_cano_bsj, bsj_motif, align_bsj
 
@@ -719,7 +742,7 @@ def eval_core(id, r, cons_info_dict, ref_fa, cons_fa, all_site, all_exon, all_sj
 
 def eval_with_anno(high_bam, low_bam, long_len, cons_info, cons,
                    ref, all_anno, circ_anno, itst_anno_dict, bedtools=bedtools,
-                   flank_len=flank_len, site_dis=site_dis, end_dis=end_dis,
+                   flank_len=flank_len,
                    cano_motif='GT/AG', bsj_xid=1, key_bsj_xid=0, min_circ_dis=150, rescue_low = False,
                    sj_xid=1, key_sj_xid=0,
                    isoform_out_fn='iso.out', circRNA_bed='circRNA.bed', stats_out_fn='stats.out'):
@@ -806,8 +829,8 @@ def eval_with_anno_core(args):
 
     eval_with_anno(args.high_bam, args.low_bam, args.long_len, args.cons_info,
         args.cons_fa, args.ref, args.all_anno, args.circRNA_anno, itst_anno_dict, args.bedtools,
-        args.flank_len, args.site_dis, args.end_dis,
-        args.cano_motif, args.bsj_xid, args.key_bsj_xid, args.min_circ_dis, args.rescue_low,
+        args.flank_len, args.cano_motif, 
+        args.bsj_xid, args.key_bsj_xid, args.min_circ_dis, args.rescue_low,
         args.sj_xid, args.key_sj_xid,
         args.out, args.bed, args.stats_out)
 
@@ -816,36 +839,38 @@ def parser_argv():
     # parse command line arguments
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter,
                                      description="Evaluate circRNA long-read with gene annotation")
-    parser.add_argument('long_fa', metavar='long.fa', type=str, help='Read file of original long-reads.')
-    parser.add_argument('long_len', metavar='long.fa.len', type=str, help='Read lenght file of original long-reads.')
-    parser.add_argument('cons_info', metavar='cons.info', type=str, help='Information file of extracted consensus sequence.')
-    parser.add_argument('cons_fa', metavar='cons.fa', type=str, help='Two tandem copies of consensus sequence in FASTA format.')
-    parser.add_argument('high_bam', metavar='high.bam', type=str, help='Unsorted high mapping quality alignment file of consensus sequence.')
-    parser.add_argument('low_bam', metavar='low.bam', type=str, help='Unsorted low mapping quality alignment file of consensus sequence.')
+    parser.add_argument('long_fa', metavar='long.fa', type=str, help='Long read sequencing data generated with isoCirc.')
+    parser.add_argument('long_len', metavar='long.fa.len', type=str, help='Read length file of long-read data.')
+    parser.add_argument('cons_info', metavar='cons.info', type=str, help='Consensus information file.')
+    parser.add_argument('cons_fa', metavar='cons.fa', type=str, help='Concatemer of two copies of consensus sequence in FASTA format.')
+    parser.add_argument('high_bam', metavar='high.bam', type=str, help='Unsorted high-quality alignment file of consensus sequence.')
+    parser.add_argument('low_bam', metavar='low.bam', type=str, help='Unsorted low-quality alignment file of consensus sequence.')
     parser.add_argument('ref', metavar='ref.fa', type=str, help='Reference genome sequence.')
-    parser.add_argument('all_anno', metavar='all.gtf', type=str, help='Whole gene annotation file in GTF format.')
+    parser.add_argument('all_anno', metavar='all.gtf', type=str, help='Gene annotation file in GTF format.')
     parser.add_argument('circRNA_anno', metavar='circRNA.bed/gtf', type=str, help='circRNA annotation file in BED or GTF format. Use \',\' to separate multiple circRNA annotation files.')
-    parser.add_argument('out', metavar='{}.out'.format(__program__), type=str, help='Isoform-wise circRNA output file of {} result.'.format(__program__))
-    parser.add_argument('bed', metavar='{}.bed'.format(__program__), type=str, help='BED12 format file of circRNA output file.'.format(__program__))
-    parser.add_argument('stats_out', metavar='{}_stats.out'.format(__program__), type=str, help='Stats output file of {} result.'.format(__program__))
+    parser.add_argument('out', metavar='{}.out'.format(__program__), type=str, help='Isoform-wise circRNA output file.')
+    parser.add_argument('bed', metavar='{}.bed'.format(__program__), type=str, help='BED12 file of \'{}.out\'.'.format(__program__))
+    parser.add_argument('stats_out', metavar='{}_stats.out'.format(__program__), type=str, help='Basic stats numbers of \'{}.out\''.foramt(__program__))
 
     # parser.add_argument('--type', type=str, help='Type of sequencing data: Oxford Nanopore(ont) or Pacific Biosciences (pb).', choices=['ont', 'pb'], default='ont')
     parser.add_argument('-t', '--threads', type=int, default=isocirc.threads, help='Number of thread to use.')
     parser.add_argument('--bedtools', help='Path to bedtools.', default=bedtools)
 
+
+    # parser.add_argument('-s', '--site-dis', type=int, default=site_dis, help='Maximum allowed distance between circRNA internal splice-site and annoated splice-site.')
+    # parser.add_argument('-S', '--end-dis', type=int, default=end_dis, help='Maximum allowed distance between circRNA back-splice-site and annoated splice-site.')
+    parser.add_argument('--cano-motif', type=str, default='GT/AG', help='Canonical back-splice motif (GT/AG or all three motifs: GT/AG, GC/AG, AT/AC).', choices=['GT/AG', 'all'])
+    parser.add_argument('--bsj-xid', type=int, default=1, help='Maximum allowed mis/ins/del for 20-bp exonic sequence flanking the BSJ (10-bp each side).')
+    parser.add_argument('--key-bsj-xid', type=int, default=0, help='Maximum allowed mis/ins/del for 4-bp exonic sequence flanking the BSJ (2-bp each side).')
+    parser.add_argument('--min-circ-dis', type=int, default=150, help='Minimum distance between the genomic coordinates of the two back-splice sites.')
+    parser.add_argument('--rescue-low', default=False, action='store_true', help='Use high mapping quality reads to rescue low mapping quality reads.')
+
+    parser.add_argument('--sj-xid', type=int, default=1, help='Maximum allowed mis/ins/del for 20-bp exonic sequence flanking the FSJ (10-bp each side).')
+    parser.add_argument('--key-sj-xid', type=int, default=0, help='Maximum allowed mis/ins/del for 4-bp exonic sequence flanking the FSJ (2-bp each side).')
+
     parser.add_argument('--Alu', type=str, default='', help='Alu repetitive element annotation in BED format. ')
     parser.add_argument('--flank-len', type=int, default=flank_len, help='Length of upstream and downstream flanking sequence to search for Alu.')
     parser.add_argument('--all-repeat', type=str, default='', help='All repetitive element annotation in BED format.')
-
-    parser.add_argument('-s', '--site-dis', type=int, default=site_dis, help='Maximum allowed distance between circRNA internal splice-site and annoated splice-site.')
-    parser.add_argument('-S', '--end-dis', type=int, default=end_dis, help='Maximum allowed distance between circRNA back-splice-site and annoated splice-site.')
-    parser.add_argument('--cano-motif', type=str, default='GT/AG', help='Canonical back-splice motif (GT/AG or all three motifs: GT/AG, GC/AG, AT/AC).', choices=['GT/AG', 'all'])
-    parser.add_argument('--bsj-xid', type=int, default=1, help='Maximum allowed mis/ins/del for 20 bp sequence alignment around the back-splice junction.')
-    parser.add_argument('--key-bsj-xid', type=int, default=0, help='Maximum allowed mis/ins/del for 4 bp sequence alignment around the back-splice junction.')
-    parser.add_argument('--min-circ-dis', type=int, default=150, help='Minimum distance of the start and end coordinates of circRNA.')
-    parser.add_argument('--rescue-low', default=False, action='store_true', help='Use high mapping quality reads to rescue low mapping quality reads.')
-    parser.add_argument('--sj-xid', type=int, default=1, help='Maximum allowed mis/ins/del for 20 bp sequence alignment around the internal splice junction.')
-    parser.add_argument('--key-sj-xid', type=int, default=0, help='Maximum allowed mis/ins/del for 4bp sequence alignment around the internal splice junction.')
     return parser.parse_args()
 
 

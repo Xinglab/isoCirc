@@ -621,7 +621,7 @@ def get_cano_bsj_align(up_dis, down_dis, bsj_strand, ref_seq, read_seq, start, e
 # NEW_CHANGE
 # delta_aln_len = consMapLen - consLen
 # constrain: | canoBSJLen - consLen | <= dis
-def is_known_cano_bsj(bsj, anno_bsj, ref_seq, read_seq, start, end, is_reverse, cigartuples, ref_map_len, cons_map_len, cons_len, end_dis, force_strand):
+def is_known_cano_bsj(bsj, anno_bsj, ref_seq, read_seq, start, end, is_reverse, cigartuples, ref_map_len, cons_map_len, cons_len, end_dis, force_strand, dis_to_known_ss):
     known, cano, up_dis, down_dis, strand, cano_motif, alignBSJ = [], False, 'NA', 'NA', 'NA', 'NA', 'NA'
     for anno_bsj1 in anno_bsj:
         known.append(False)
@@ -707,7 +707,7 @@ def is_known_cano_bsj(bsj, anno_bsj, ref_seq, read_seq, start, end, is_reverse, 
                     cano_motif1 = strand1 + cano_motif1
                     score, alignBSJ1 = get_cano_bsj_align(up_dis1, down_dis1, strand1, ref_seq, read_seq, start, end, end_dis, is_reverse, cigartuples, ref_map_len, cons_len)
                     delta_dis = abs(up_dis1 - down_dis1 - delta_ref_aln_cons)
-                    if score > max_score or score == max_score and delta_dis < dis:
+                    if score > max_score or (score == max_score and delta_dis < dis):
                         cano = True
                         up_dis, down_dis = up_dis1, down_dis1
                         cano_motif = cano_motif1
@@ -836,8 +836,8 @@ def get_coor_from_block(start0base, block_size, block_starts):
     starts = block_starts.split(',')
     if '' in starts:
         starts.remove('')
-    isize = map(int, size)
-    istarts = map(int, starts)
+    isize = list(map(int, size))
+    istarts = list(map(int, starts))
     coor = []
     for l, s in zip(isize, istarts):
         coor.append(int(start0base) + s + 1)

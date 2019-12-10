@@ -142,12 +142,14 @@ def stats_core(long_read_len, cons_info, cons_bam, isoform_out, all_bsj_stats_di
     tot_full_iso_int_fsm_iso, tot_full_iso_int_fsm_read, tot_full_iso_int_nic_iso, tot_full_iso_int_nic_read, tot_full_iso_int_nnc_iso, tot_full_iso_int_nnc_read = 0,0,0,0,0,0
     bsj_dict = dict()
     iso_dict = dict()
+    full_iso = dict()
+    # non_full_iso = dict()
     with open(isoform_out) as in_fp:
         for line in in_fp:
             if line.startswith('#'): continue
             ele = line.rsplit()
             read_cnt = int(ele[idx['readCount']])
-            bsj = (ele[idx['chrom']], ele[idx['startCoor0base']], ele[idx['endCoor']])
+            bsj = (ele[idx['chrom']], ele[idx['startCoor0based']], ele[idx['endCoor']])
             if bsj not in bsj_dict:
                 bsj_dict[bsj] = 1
                 tot_bsj += 1
@@ -156,7 +158,14 @@ def stats_core(long_read_len, cons_info, cons_bam, isoform_out, all_bsj_stats_di
                 tot_known_bsj[i+1] += ('False' not in ele[idx['isKnownBSJ']])
             tot_circRNA_read_n += read_cnt
 
-            iso = (ele[idx['chrom']], ele[idx['startCoor0base']], ele[idx['endCoor']], ele[idx['blockCount']], ele[idx['blockSize']], ele[idx['blockStarts']])
+            iso = (ele[idx['chrom']], ele[idx['startCoor0based']], ele[idx['endCoor']], ele[idx['blockCount']], ele[idx['blockSize']], ele[idx['blockStarts']])
+            # is_full = ele[idx['isFullLength']] == 'True'
+            # if is_full and iso in non_full_iso:
+                # print('Full\t{}'.format(ele[0]))
+            # if not is_full and iso in full_iso:
+                # print('Non-full\t{}'.format(ele[0]))
+            # if is_full: full_iso[iso] = 1
+            # else: non_full_iso[iso] = 1
             if iso not in iso_dict:
                 isoform_inc_cnt = 1
                 iso_dict[iso] = 1
@@ -176,6 +185,7 @@ def stats_core(long_read_len, cons_info, cons_bam, isoform_out, all_bsj_stats_di
                         tot_iso_with_high_sj_known_ss += isoform_inc_cnt
                         tot_read_with_high_sj_known_ss += read_cnt
             if ele[idx['isFullLength']] == 'True':
+                full_iso[iso] = 1
                 tot_full_iso += isoform_inc_cnt
                 tot_full_read += read_cnt
                 if ele[idx['BSJCate']] == 'FSM':
@@ -188,10 +198,10 @@ def stats_core(long_read_len, cons_info, cons_bam, isoform_out, all_bsj_stats_di
                     tot_full_iso_bsj_nnc_iso += isoform_inc_cnt
                     tot_full_iso_bsj_nnc_read += read_cnt
 
-                if ele[idx['interIsoCate']] == 'FSM':
+                if ele[idx['FSJCate']] == 'FSM':
                     tot_full_iso_int_fsm_iso += isoform_inc_cnt
                     tot_full_iso_int_fsm_read += read_cnt
-                elif ele[idx['interIsoCate']] == 'NIC':
+                elif ele[idx['FSJCate']] == 'NIC':
                     tot_full_iso_int_nic_iso += isoform_inc_cnt
                     tot_full_iso_int_nic_read += read_cnt
                 else:
@@ -227,7 +237,7 @@ def stats_core(long_read_len, cons_info, cons_bam, isoform_out, all_bsj_stats_di
         out.write('12_Total_isoforms_with_high_BSJs_high_SJs\t{:,}\n'.format(tot_iso_with_high_sj))
         out.write('13_Total_isoforms_with_high_BSJ_known_SSs\t{:,}\n'.format(tot_iso_with_known_ss))
         out.write('14_Total_isoforms_with_high_BSJs_high_SJs_known_SSs\t{:,}\n'.format(tot_iso_with_high_sj_known_ss))
-        out.write('15_Total_full_length_isoforms\t{:,}\n'.format(tot_full_iso))
+        out.write('15_Total_full_length_isoforms\t{:,}\n'.format(len(full_iso))) #tot_full_iso))
         out.write('16_Total_reads_for_full_length_isoforms\t{:,}\n'.format(tot_full_read))
         # FSM/NIC/NNC
         out.write('17_Total_full_length_isoforms_with_FSM_BSJ\t{:,}\n'.format(tot_full_iso_bsj_fsm_iso))
