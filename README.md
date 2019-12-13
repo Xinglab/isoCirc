@@ -126,8 +126,8 @@ Consensus calling with Tandem Repeats Finder (TRF)):
 
 Filtering and mapping of consensus sequences (minimap2):
   --min-len MIN_LEN     Minimum consensus length to keep (default: 30)
-  --min-copy MIN_COPY   Minimum copy number of consensus to keep (default:
-                        2.0)
+  --min-copy MIN_COPY   Minimum copy number of consensus to keep 
+                        (default: 2.0)
   --min-frac MIN_FRAC   Minimum fraction of original long read to keep
                         (default: 0.0)
   --high-max-ratio HIGH_MAX_RATIO
@@ -209,7 +209,7 @@ isoCirc outputs three result files in a user-specified directory:
 |  10 | blockStarts     | relative start coordinates of each block, separated by `,`. refer to `bed12` format for further details |
 |  11 | refMapLen       | total length of circRNA |
 |  12 | blockType       | category of each block. E: exon, I: intron, N: intergenic |
-|  13 | blockAnno       | detailed annotation for each block, in format: "TransID:E1(100)+I(50)+E2(30)", where TransID is ID of corresponding transcript; E1 and E2 are 1st and 2nd exon of transcript; multiple blocks are seperated by `,`; and multiple transcripts of one block are seperated by `;` |
+|  13 | blockAnno       | detailed annotation for each block, in format: "TransID:E1(100)+I(50)+E2(30)", where TransID is ID of corresponding transcript; E1 and E2 are 1st and 2nd exon of transcript; multiple blocks are separated by `,`; and multiple transcripts of one block are separated by `;` |
 |  14 | isKnownSS      | `True` if SS is catalogued in gene annotation, `False` if not, separated by `,` |
 |  15 | isKnownSJ      | `True` if SJ is catalogued in gene annotation, `False` if not, separated by `,` | 
 |  16 | isCanoSJ       | `True` if SJ is canonical (GT-AG/GC-AG/AT-AC), `False` if not, separated by `,`|
@@ -226,10 +226,10 @@ isoCirc outputs three result files in a user-specified directory:
 |  27 | lincRNA        | number of bases that are mapped to lincRNA region |
 |  28 | antisense      | number of bases that are mapped to antisense region |
 |  29 | rRNA           | number of bases that are mapped to rRNA region |
-|  30 | Alu            | number of bases that are mapped to Alu element, `NA` if Alu annotation is not provided |
-|  31 | allRepeat      | number of bases that are mapped to all repeat element, `NA` if repeat annotation is not provided |
-|  32 | upFlankAlu     | flanking Alu element in upstream, `NA` if none or Alu annotation is not provided |
-|  33 | downFlankAlu   | flanking Alu element in downstream, `NA` if none or Alu annotation is not provided |
+|  30 | Alu            | number of bases that are mapped to Alu element; `NA` if Alu annotation is not provided |
+|  31 | allRepeat      | number of bases that are mapped to all repeat elements; `NA` if repeat annotation is not provided |
+|  32 | upFlankAlu     | flanking Alu element in upstream; `NA` if none or Alu annotation is not provided |
+|  33 | downFlankAlu   | flanking Alu element in downstream; `NA` if none or Alu annotation is not provided |
 |  34 | readCount      | number of reads that come from this circRNA isoform |
 |  35 | readIDs        | ID of reads that come from this circRNA isoform, separated by `,`  |
 
@@ -248,7 +248,7 @@ isoCirc outputs three result files in a user-specified directory:
 |  10 | Total isoforms with high BSJs                     | Number of circRNA isoforms with high-confidence BSJs |
 |  11 | Total isoforms with high BSJs cano SJs            | Number of circRNA isoforms with high-confidence BSJs, and all internal splice sites are canonical |
 |  12 | Total isoforms with high BSJs high SJs            | Number of circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence (canonical, high-quality alignment around internal splice sites) |
-|  13 | Total isoforms with high BSJ known SSs            | Number of circRNA isoforms with with high-confidence BSJs, and all internal splice sites are known (based on existing transcript GTF annotations for splice sites in linear RNA) |
+|  13 | Total isoforms with high BSJ known SSs            | Number of circRNA isoforms with high-confidence BSJs, and all internal splice sites are known (based on existing transcript GTF annotations for splice sites in linear RNA) |
 |  14 | Total isoforms with high BSJs high SJs known SSs  | Number of circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence and known |
 |  15 | Total full-length isoforms                        | Number of circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence or known |
 |  16 | Total reads for full-length isoforms              | Number of reads for circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence or known |
