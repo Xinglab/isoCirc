@@ -32,10 +32,10 @@ using rolling circle amplification (RCA) followed by long-read sequencing.
 
 ## <a name="install"></a>Installation
 ### <a name="depen"></a>Dependencies 
-isoCirc is dependent on two open-source software: [`bedtools`(>= v2.25.0)](https://bedtools.readthedocs.io/) and minimap2 [`minimap2`(>= 2.11)](https://github.com/lh3/minimap2).
-Please make sure they are installed before running isoCirc.
+isoCirc is dependent on two open-source software packages: [`bedtools`(>= v2.25.0)](https://bedtools.readthedocs.io/) and minimap2 [`minimap2`(>= 2.11)](https://github.com/lh3/minimap2).
+Please ensure these packages are installed before running isoCirc.
 
-### <a name="pip"></a>Install isoCirc with `pip` (Note: this does not work for now, will do after being published)
+### <a name="pip"></a>Install isoCirc with `pip` (Note: does not currently work, will work after publication)
 **isoCirc** is written with `python`, please use `pip` to install **isoCirc**:
 ```
 pip install isocirc            # first time installation
@@ -84,132 +84,132 @@ usage: isocirc.py [-h] [-v] [-t THREADS] [--bedtools BEDTOOLS]
 isocirc: circular RNA profiling and analysis using long-read sequencing
 
 positional arguments:
-  long.fa               Long read sequencing data generated with isoCirc.
-  ref.fa                Reference genome sequence file.
-  anno.gtf              Gene annotation file in GTF format.
-  circRNA.bed/gtf       circRNA database annotation file in BED or GTF format.
-                        Use ',' to separate multiple circRNA annotation files.
-  out_dir               Output directory for final result and temporary files.
+  long.fa               Long-read sequencing data generated with isoCirc
+  ref.fa                Reference genome sequence file
+  anno.gtf              Gene annotation file in GTF format
+  circRNA.bed/gtf       circRNA database annotation file in BED or GTF format
+                        Use ',' to separate multiple circRNA annotation files
+  out_dir               Output directory for final result and temporary files
 
 optional arguments:
-  -h, --help            show this help message and exit
-  -v, --version         show program's version number and exit
+  -h, --help            Show this help message and exit
+  -v, --version         Show program's version number and exit
 
 General options:
   -t THREADS, --threads THREADS
-                        Number of thread to use. (default: 8)
-  --bedtools BEDTOOLS   Path to bedtools. (default: bedtools)
-  --minimap2 MINIMAP2   Path to minimap2. (default: minimap2)
+                        Number of threads to use. (default: 8)
+  --bedtools BEDTOOLS   Path to bedtools (default: bedtools)
+  --minimap2 MINIMAP2   Path to minimap2 (default: minimap2)
 
 Hybrid error-correction with short-read data (LoRDEC):
   --short-read short.fa
                         Short-read data for error correction. Use ',' to
-                        connect multiple or paired-end short read data.
+                        connect multiple or paired-end short read data
                         (default: )
-  --lordec LORDEC       Path to lordec-correct. (default: lordec-correct)
-  --kmer KMER           k-mer size. (default: 21)
-  --solid SOLID         Solid k-mer abundance threshold. (default: 3)
+  --lordec LORDEC       Path to lordec-correct (default: lordec-correct)
+  --kmer KMER           k-mer size (default: 21)
+  --solid SOLID         Solid k-mer abundance threshold (default: 3)
 
 Consensus calling with Tandem Repeats Finder (TRF)):
-  --trf TRF             Path to trf program. (default: trf409.legacylinux64)
-  --match MATCH         Match score. (default: 2)
-  --mismatch MISMATCH   Mismatch penalty. (default: 7)
-  --indel INDEL         Indel penalty. (default: 7)
+  --trf TRF             Path to trf program (default: trf409.legacylinux64)
+  --match MATCH         Match score (default: 2)
+  --mismatch MISMATCH   Mismatch penalty (default: 7)
+  --indel INDEL         Indel penalty (default: 7)
   --match-frac MATCH_FRAC
-                        Match probability. (default: 80)
+                        Match probability (default: 80)
   --indel-frac INDEL_FRAC
-                        Indel probability. (default: 10)
+                        Indel probability (default: 10)
   --min-score MIN_SCORE
-                        Minimum alignment score to report. (default: 100)
+                        Minimum alignment score to report (default: 100)
   --max-period MAX_PERIOD
-                        Maximum period size to report. (default: 2000)
+                        Maximum period size to report (default: 2000)
 
 Filtering and mapping of consensus sequences (minimap2):
-  --min-len MIN_LEN     Minimum consensus length to keep. (default: 30)
-  --min-copy MIN_COPY   Minimum copy number of consensus to keep. (default:
+  --min-len MIN_LEN     Minimum consensus length to keep (default: 30)
+  --min-copy MIN_COPY   Minimum copy number of consensus to keep (default:
                         2.0)
-  --min-frac MIN_FRAC   Minimum fraction of original long read to keep.
+  --min-frac MIN_FRAC   Minimum fraction of original long read to keep
                         (default: 0.0)
   --high-max-ratio HIGH_MAX_RATIO
                         Maximum mappedLen / consLen ratio for high-quality
-                        alignment. (default: 1.1)
+                        alignment (default: 1.1)
   --high-min-ratio HIGH_MIN_RATIO
                         Minimum mappedLen /consLen ratio for high-quality
-                        alignment. (default: 0.9)
+                        alignment (default: 0.9)
   --high-iden-ratio HIGH_IDEN_RATIO
                         Minimum identicalBases/ consLen ratio for high-quality
-                        alignment. (default: 0.75)
+                        alignment (default: 0.75)
   --high-repeat-ratio HIGH_REPEAT_RATIO
                         Maximum mappedLen / consLen ratio for high-quality
-                        self-tandem consensus. (default: 0.6)
+                        self-tandem consensus (default: 0.6)
   --low-repeat-ratio LOW_REPEAT_RATIO
                         Minimum mappedLen / consLen ratio for low-quality
-                        self-tandem alignment. (default: 1.9)
+                        self-tandem alignment (default: 1.9)
 
 Identifying high-confidence BSJs and full-length circRNAs:
   --cano-motif {GT/AG,all}
                         Canonical back-splice motif (GT/AG or all three
-                        motifs: GT/AG, GC/AG, AT/AC). (default: GT/AG)
+                        motifs: GT/AG, GC/AG, AT/AC) (default: GT/AG)
   --bsj-xid BSJ_XID     Maximum allowed mis/ins/del for 20-bp exonic sequence
-                        flanking the BSJ (10-bp each side). (default: 1)
+                        flanking BSJ (10-bp each side) (default: 1)
   --key-bsj-xid KEY_BSJ_XID
                         Maximum allowed mis/ins/del for 4-bp exonic sequence
-                        flanking the BSJ (2-bp each side). (default: 0)
+                        flanking BSJ (2-bp each side) (default: 0)
   --min-circ-dis MIN_CIRC_DIS
-                        Minimum distance between the genomic coordinates of
-                        the two back-splice sites. (default: 150)
-  --rescue-low          Use high mapping quality reads to rescue low mapping
-                        quality reads. (default: False)
+                        Minimum distance between genomic coordinates of
+                        the two back-splice sites (default: 150)
+  --rescue-low          Use high-mapping quality reads to rescue low-mapping
+                        quality reads (default: False)
   --sj-xid SJ_XID       Maximum allowed mis/ins/del for 20-bp exonic sequence
-                        flanking the FSJ (10-bp each side). (default: 1)
+                        flanking FSJ (10-bp each side) (default: 1)
   --key-sj-xid KEY_SJ_XID
                         Maximum allowed mis/ins/del for 4-bp exonic sequence
-                        flanking the FSJ (2-bp each side). (default: 0)
+                        flanking FSJ (2-bp each side) (default: 0)
 
 Other options:
-  --Alu ALU             Alu repetitive element annotation in BED format.
+  --Alu ALU             Alu repetitive element annotation in BED format
                         (default: )
   --flank-len FLANK_LEN
                         Length of upstream and downstream flanking sequence to
-                        search for Alu. (default: 500)
+                        search for Alu (default: 500)
   --all-repeat ALL_REPEAT
-                        All repetitive element annotation in BED format.
+                        All repetitive element annotation in BED format
                         (default: )
 ```
 
 ## <a name="input_output"></a>Input and output
 ### <a name="input_file"></a>Input files
-isoCirc takes long-read that contains muliple copies of circRNA sequence as input.
+isoCirc takes a long read containing multiple copies of a circRNA sequence as input
 
-It also require reference genome sequence and gene annotation to be provided.
+It also requires a reference genome sequence and gene annotation to be provided.
 
 ### <a name="output_file"></a>Output files
-isoCirc outputs three result files in a user specified directory:
+isoCirc outputs three result files in a user-specified directory:
 
 | No. | File name         |  Explanation | 
 |:---:|   :---            | ---        |
-|  1  | isocirc.out       | isoform-wise detailed information for each circRNA with ahigh-confidence BSJ, in tabular format |
+|  1  | isocirc.out       | detailed information of each circRNA isoform with a high-confidence BSJ, in tabular format |
 |  2  | isocirc.bed       | bed12 format file of `isocirc.out` |
 |  3  | isocirc_stats.out | basic summary stats numbers for `isocirc.out` |
 
 ### <a name="detailed"></a>Explanation of detailed information
-For detailed information output file, 30 columns are generated for each circRNA isoform:
+30 columns are generated for each circRNA isoform:
 
-| No. | Column name    |  Explanation | 
-|:---:|   :---         | ---        |
-|  1  | isoformID      | assigned isoform ID |
-|  2  | chrom          | chromosome ID |
+| No. | Column name     |  Explanation | 
+|:---:|   :---          | ---        |
+|  1  | isoformID       | assigned isoform ID |
+|  2  | chrom           | chromosome ID |
 |  3  | startCoor0based | start coordinate of circRNA, 0-based |
-|  4  | endCoor        | end coordinate of circRNA |
-|  5  | geneStrand     | gene strand (+/-) |
-|  6  | geneID         | gene ID  |
-|  7  | geneName       | gene name  |
-|  8  | blockCount     | number of block |
-|  9  | blockSize      | size of each block, separated by `,` |
-|  10 | blockStarts    | relative start coordinates of each block, separated by `,`, refer to `bed12` format for further details |
-|  11 | refMapLen      | total length of circRNA |
-|  12 | blockType      | category of each block, E:exon, I:intron, N:intergenic |
-|  13 | blockAnno      | detailed annotation for each block, format: "TransID:E1(100)+I(50)+E2(30)", TransID is the id of corresponding transcript, E1 and E2 are the 1st and 2nd exon of the transcript.Multiple blocks are seperated by `,`, multiple transcripts of one block are seperated by `;` |
+|  4  | endCoor         | end coordinate of circRNA |
+|  5  | geneStrand      | gene strand (+/-) |
+|  6  | geneID          | gene ID  |
+|  7  | geneName        | gene name  |
+|  8  | blockCount      | number of block |
+|  9  | blockSize       | size of each block, separated by `,` |
+|  10 | blockStarts     | relative start coordinates of each block, separated by `,`. refer to `bed12` format for further details |
+|  11 | refMapLen       | total length of circRNA |
+|  12 | blockType       | category of each block. E: exon, I: intron, N: intergenic |
+|  13 | blockAnno       | detailed annotation for each block. format: "TransID:E1(100)+I(50)+E2(30)", where TransID is ID of corresponding transcript, E1 and E2 are 1st and 2nd exon of transcript. Multiple blocks are seperated by `,` and multiple transcripts of one block are seperated by `;` |
 |  14 | isKnownSS      | `True` if SS is catalogued in gene annotation, `False` if not, separated by `,` |
 |  15 | isKnownSJ      | `True` if SJ is catalogued in gene annotation, `False` if not, separated by `,` | 
 |  16 | isCanoSJ       | `True` if SJ is canonical (GT-AG/GC-AG/AT-AC), `False` if not, separated by `,`|
