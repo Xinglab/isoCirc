@@ -33,9 +33,9 @@ using rolling circle amplification (RCA) followed by long-read sequencing.
 ## <a name="install"></a>Installation
 ### <a name="depen"></a>Dependencies 
 isoCirc is dependent on two open-source software packages: [`bedtools`(>= v2.25.0)](https://bedtools.readthedocs.io/) and minimap2 [`minimap2`(>= 2.11)](https://github.com/lh3/minimap2).
-Please ensure these packages are installed before running isoCirc.
+Please ensure that these packages are installed before running isoCirc.
 
-### <a name="pip"></a>Install isoCirc with `pip` (Note: does not currently work, will work after publication)
+### <a name="pip"></a>Install isoCirc with `pip` (Note: does not currently work, will work on after publication)
 **isoCirc** is written with `python`, please use `pip` to install **isoCirc**:
 ```
 pip install isocirc            # first time installation
@@ -97,14 +97,14 @@ optional arguments:
 
 General options:
   -t THREADS, --threads THREADS
-                        Number of threads to use. (default: 8)
+                        Number of threads to use (default: 8)
   --bedtools BEDTOOLS   Path to bedtools (default: bedtools)
   --minimap2 MINIMAP2   Path to minimap2 (default: minimap2)
 
 Hybrid error-correction with short-read data (LoRDEC):
   --short-read short.fa
-                        Short-read data for error correction. Use ',' to
-                        connect multiple or paired-end short read data
+                        Short-read data for error correction 
+                        Use ',' to connect multiple or paired-end short-read data
                         (default: )
   --lordec LORDEC       Path to lordec-correct (default: lordec-correct)
   --kmer KMER           k-mer size (default: 21)
