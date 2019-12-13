@@ -111,7 +111,7 @@ Hybrid error-correction with short-read data (LoRDEC):
   --solid SOLID         Solid k-mer abundance threshold (default: 3)
 
 Consensus calling with Tandem Repeats Finder (TRF)):
-  --trf TRF             Path to trf program (default: trf409.legacylinux64)
+  --trf TRF             Path to TRF program (default: trf409.legacylinux64)
   --match MATCH         Match score (default: 2)
   --mismatch MISMATCH   Mismatch penalty (default: 7)
   --indel INDEL         Indel penalty (default: 7)
@@ -157,7 +157,7 @@ Identifying high-confidence BSJs and full-length circRNAs:
                         flanking BSJ (2-bp each side) (default: 0)
   --min-circ-dis MIN_CIRC_DIS
                         Minimum distance between genomic coordinates of
-                        the two back-splice sites (default: 150)
+                        two back-splice sites (default: 150)
   --rescue-low          Use high-mapping quality reads to rescue low-mapping
                         quality reads (default: False)
   --sj-xid SJ_XID       Maximum allowed mis/ins/del for 20-bp exonic sequence
@@ -209,17 +209,17 @@ isoCirc outputs three result files in a user-specified directory:
 |  10 | blockStarts     | relative start coordinates of each block, separated by `,`. refer to `bed12` format for further details |
 |  11 | refMapLen       | total length of circRNA |
 |  12 | blockType       | category of each block. E: exon, I: intron, N: intergenic |
-|  13 | blockAnno       | detailed annotation for each block. format: "TransID:E1(100)+I(50)+E2(30)", where TransID is ID of corresponding transcript, E1 and E2 are 1st and 2nd exon of transcript. Multiple blocks are seperated by `,` and multiple transcripts of one block are seperated by `;` |
+|  13 | blockAnno       | detailed annotation for each block, in format: "TransID:E1(100)+I(50)+E2(30)", where TransID is ID of corresponding transcript; E1 and E2 are 1st and 2nd exon of transcript; multiple blocks are seperated by `,`; and multiple transcripts of one block are seperated by `;` |
 |  14 | isKnownSS      | `True` if SS is catalogued in gene annotation, `False` if not, separated by `,` |
 |  15 | isKnownSJ      | `True` if SJ is catalogued in gene annotation, `False` if not, separated by `,` | 
 |  16 | isCanoSJ       | `True` if SJ is canonical (GT-AG/GC-AG/AT-AC), `False` if not, separated by `,`|
-|  17 | isHighSJ       | `True` if alignment around the SJ is high-quality, `False` if not, separated by `,`  |
+|  17 | isHighSJ       | `True` if alignment around SJ is high-quality, `False` if not, separated by `,`  |
 |  18 | isKnownExon    | `True` if block is a catalogued exon in gene annotation, `False` if not, separated by ‘,’ | 
-|  19 | isKnownBSJ     | `True` if BSJ exists in circRNA annotation, `False` if not, separated by `,` if multiple circRNA annotations are provided | 
+|  19 | isKnownBSJ     | `True` if BSJ exists in circRNA annotation, `False` if not; multiple circRNA annotations are separated by `,` | 
 |  20 | isCanoBSJ      | `True` if BSJ has canonical motif (GT/AG), `False` if not | 
 |  21 | canoBSJMotif   | strandness and canonical motif of BSJ, e.g., `-GT/AG`, `NA` if BSJ is not canonical | 
-|  22 | isFullLength   | `True` if the isoform is considered as `full-length isoform`, `False` if not |
-|  23 | BSJCate        | category of the BSJs: `FSM`/`NIC`/`NNC`, see explanation below. |
+|  22 | isFullLength   | `True` if isoform is considered as `full-length isoform`, `False` if not |
+|  23 | BSJCate        | category of BSJs: `FSM`/`NIC`/`NNC`, see explanation below. |
 |  24 | FSJCate   | category of FSJs: `FSM`/`NIC`/`NNC` |
 |  25 | CDS            | number of bases that are mapped to CDS region |
 |  26 | UTR            | number of bases that are mapped to UTR region |
@@ -228,8 +228,8 @@ isoCirc outputs three result files in a user-specified directory:
 |  29 | rRNA           | number of bases that are mapped to rRNA region |
 |  30 | Alu            | number of bases that are mapped to Alu element, `NA` if Alu annotation is not provided |
 |  31 | allRepeat      | number of bases that are mapped to all repeat element, `NA` if repeat annotation is not provided |
-|  32 | upFlankAlu     | flanking alu element in upstream, `NA` if none or Alu annotation is not provided |
-|  33 | downFlankAlu   | flanking alu element in downstream, `NA` if none or Alu annotation is not provided |
+|  32 | upFlankAlu     | flanking Alu element in upstream, `NA` if none or Alu annotation is not provided |
+|  33 | downFlankAlu   | flanking Alu element in downstream, `NA` if none or Alu annotation is not provided |
 |  34 | readCount      | number of reads that come from this circRNA isoform |
 |  35 | readIDs        | ID of reads that come from this circRNA isoform, separated by `,`  |
 
