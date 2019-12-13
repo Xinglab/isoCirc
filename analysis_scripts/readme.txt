@@ -1,7 +1,10 @@
 1) all_samples_isocirc0320.pl 
 This script summarizes outputs of the isoCirc pipeline for the R script (overlap_datasets_example.R) in the next step. 
 Its usage is: perl all_samples_isocirc0320.pl /path/to/isoCirc_output_folders/
-For example: 'perl all_samples_isocirc0320.pl /mnt/isilon/xing_lab/aspera/isocirc_datasets/raw_long_reads/raw_isoCirc_out/ > all_samples_isocirc4overlap_nanopore_raw_0417.txt' 
+
+For example: 
+'perl all_samples_isocirc0320.pl /mnt/isilon/xing_lab/aspera/isocirc_datasets/raw_long_reads/raw_isoCirc_out/ > all_samples_isocirc4overlap_nanopore_raw_0417.txt' 
+
 will generate a summary of isoCirc outputs for raw data.
 
 2) R script overlap_datasets_example.R
