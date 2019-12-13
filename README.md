@@ -236,34 +236,34 @@ isoCirc outputs three result files in a user-specified directory:
 ### <a name="stats"></a>Stats numbers
 | No. | Name           |  Explanation | 
 |:---:|   :---         | ---          |
-|  1  | Total reads                                      | Number of raw reads in the sample |
-|  2  | Total reads with cons                            | Number of reads with consensus sequence called |
-|  3  | Total mappable reads with cons                   | Number of reads with consensus sequence called, mappable to the genome |
-|  4  | Total reads with candidate BSJ                   | Number of reads with consensus sequence called, mappable to the genome, and with BSJs ("candidate BSJs") |
-|  5  | Total candidate BSJs                             | Number of candidate BSJs (circRNA species) |
-|  6  | Total known candidate BSJs                       | Number of candidate BSJs that are known (reported in existing circRNA BSJ database - circBase / MiOncoCirc) |
-|  7  | Total reads with high BSJs                       | Number of reads with consensus sequence called, mappable to the genome, and with high-confidence BSJs (based on additional inspection of alignment around BSJs) |
-|  8  | Total high BSJs                                  | Number of high-confidence BSJs |
-|  9  | Total known high BSJs                            | Number of high-confidence BSJs that are known |
-|  10 | Total isoforms with high BSJs                    | Number of circRNA isoforms with high-confidence BSJs |
-|  11 | Total isoforms with high BSJs cano SJs           | Number of circRNA isoforms with high-confidence BSJs, and all internal splice sites are canonical |
-|  12 | Total isoforms with high BSJs high SJs           | Number of circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence (canonical, high-quality alignment around internal splice sites) |
-|  13 | Total isoforms with high BSJ known SSs           | Number of circRNA isoforms with with high-confidence BSJs, and all internal splice sites are known (known is based in existing transcript GTF annotations for splice sites in linear RNA) |
-|  14 | Total isoforms with high BSJs high SJs known SSs | Number of circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence and known |
-|  15 | Total full-length isoforms                       | Number of circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence or known |
-|  16 | Total reads for full-length isoforms             | Number of reads for circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence or known |
-|  17 | Total full-length isoforms with FSM BSJ | Number of full-length circRNA isoforms with FSM BSJ |
-|  18 | Total reads for full-length isoforms with FSM BSJ | Number of reads for full-length circRNA isoforms with FSM BSJ |
-|  19 | Total full-length isoforms with NIC BSJ | Number of full-length circRNA isoforms with NIC  BSJ|
-|  20 | Total reads for full-length isoforms with NIC BSJ| Number of reads for full-length circRNA isoforms with NIC BSJ |
-|  21 | Total full-length isoforms with NNC BSJ | Number of full-length circRNA isoforms with NNC  BSJ|
-|  22 | Total reads for full-length isoforms with NNC BSJ | Number of reads for full-length circRNA isoforms with NNC BSJ |
-|  23 | Total full-length isoforms with FSM FSJ | Number of full-length circRNA isoforms with FSM  FSJ|
-|  24 | Total reads for full-length isoforms with FSM FSJ | Number of reads for full-length circRNA isoforms with FSM FSJ|
-|  25 | Total full-length isoforms with NIC FSJ | Number of full-length circRNA isoforms with NIC internal FSJ|
-|  26 | Total reads for full-length isoforms with NIC FSJ | Number of reads for full-length circRNA isoforms with NIC FSJ|
-|  27 | Total full-length isoforms with NNC FSJ | Number of full-length circRNA isoforms with NNC FSJ|
-|  28 | Total reads for full-length isoforms with NNC FSJ | Number of reads for full-length circRNA isoforms with NNC FSJ|
+|  1  | Total reads                                       | Number of raw reads in sample |
+|  2  | Total reads with cons                             | Number of reads with consensus sequence called |
+|  3  | Total mappable reads with cons                    | Number of reads with consensus sequence called, mappable to genome |
+|  4  | Total reads with candidate BSJ                    | Number of reads with consensus sequence called, mappable to genome, and with BSJs ("candidate BSJs") |
+|  5  | Total candidate BSJs                              | Number of candidate BSJs (circRNA species) |
+|  6  | Total known candidate BSJs                        | Number of candidate BSJs reported in existing circRNA BSJ database (circBase / MiOncoCirc) |
+|  7  | Total reads with high BSJs                        | Number of reads with consensus sequence called, mappable to genome, and with high-confidence BSJs (based on additional inspection of alignment around BSJs) |
+|  8  | Total high BSJs                                   | Number of high-confidence BSJs |
+|  9  | Total known high BSJs                             | Number of high-confidence BSJs that are known |
+|  10 | Total isoforms with high BSJs                     | Number of circRNA isoforms with high-confidence BSJs |
+|  11 | Total isoforms with high BSJs cano SJs            | Number of circRNA isoforms with high-confidence BSJs, and all internal splice sites are canonical |
+|  12 | Total isoforms with high BSJs high SJs            | Number of circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence (canonical, high-quality alignment around internal splice sites) |
+|  13 | Total isoforms with high BSJ known SSs            | Number of circRNA isoforms with with high-confidence BSJs, and all internal splice sites are known (based on existing transcript GTF annotations for splice sites in linear RNA) |
+|  14 | Total isoforms with high BSJs high SJs known SSs  | Number of circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence and known |
+|  15 | Total full-length isoforms                        | Number of circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence or known |
+|  16 | Total reads for full-length isoforms              | Number of reads for circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence or known |
+|  17 | Total full-length isoforms with FSM BSJ           | Number of full-length circRNA isoforms with FSM BSJs |
+|  18 | Total reads for full-length isoforms with FSM BSJ | Number of reads for full-length circRNA isoforms with FSM BSJs |
+|  19 | Total full-length isoforms with NIC BSJ           | Number of full-length circRNA isoforms with NIC BSJs |
+|  20 | Total reads for full-length isoforms with NIC BSJ | Number of reads for full-length circRNA isoforms with NIC BSJs |
+|  21 | Total full-length isoforms with NNC BSJ           | Number of full-length circRNA isoforms with NNC BSJs |
+|  22 | Total reads for full-length isoforms with NNC BSJ | Number of reads for full-length circRNA isoforms with NNC BSJs |
+|  23 | Total full-length isoforms with FSM FSJ           | Number of full-length circRNA isoforms with FSM FSJs |
+|  24 | Total reads for full-length isoforms with FSM FSJ | Number of reads for full-length circRNA isoforms with FSM FSJs |
+|  25 | Total full-length isoforms with NIC FSJ           | Number of full-length circRNA isoforms with NIC internal FSJs |
+|  26 | Total reads for full-length isoforms with NIC FSJ | Number of reads for full-length circRNA isoforms with NIC FSJs |
+|  27 | Total full-length isoforms with NNC FSJ           | Number of full-length circRNA isoforms with NNC FSJs |
+|  28 | Total reads for full-length isoforms with NNC FSJ | Number of reads for full-length circRNA isoforms with NNC FSJs |
 
  * BSJ:  Back-Splice Junction
  * FSJ:  Forward-Splice Junction
