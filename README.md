@@ -1,13 +1,13 @@
 # isoCirc catalogs full-length circular RNA isoforms in human transcriptomes
 [![Github All Releases](https://img.shields.io/github/downloads/Xinglab/isoCirc/total.svg?label=Download)](https://github.com/Xinglab/isoCirc/releases)
 [![Latest Release](https://img.shields.io/github/release/Xinglab/isoCirc.svg?label=Release)](https://github.com/Xinglab/isoCirc/releases/latest)
+[![License](https://img.shields.io/badge/License-GPL-black.svg)](https://github.com/Xinglab/isoCirc/blob/master/LICENSE)
+[![GitHub Issues](https://img.shields.io/github/issues/Xinglab/isoCirc.svg?label=Issues)](https://github.com/Xinglab/isoCirc/issues)
+<!-- [![Published in Bioinformatics](https://img.shields.io/badge/Published%20in-Bioinformatics-purple.svg)](https://doi.org/XXX) -->
 <!-- [![Build Status](https://travis-ci.org/yangao07/TideHunter.svg?branch=master)](https://travis-ci.org/yangao07/TideHunter) -->
 <!-- [![Anaconda-Server Badge](https://anaconda.org/darts-comp-bio/darts_dnn/badges/version.svg)](https://anaconda.org/darts-comp-bio/darts_dnn) -->
 <!-- [![Anaconda-Server Badge](https://anaconda.org/darts-comp-bio/darts_dnn/badges/installer/conda.svg)](https://conda.anaconda.org/darts-comp-bio) -->
 <!-- pip??? -->
-[![License](https://img.shields.io/badge/License-GPL-black.svg)](https://github.com/Xinglab/isoCirc/blob/master/LICENSE)
-[![GitHub Issues](https://img.shields.io/github/issues/Xinglab/isoCirc.svg?label=Issues)](https://github.com/Xinglab/isoCirc/issues)
-<!-- [![Published in Bioinformatics](https://img.shields.io/badge/Published%20in-Bioinformatics-purple.svg)](https://doi.org/XXX) -->
 
 ## <a name="isocirc"></a>What is isoCirc ?
 isoCirc is a long-read sequencing strategy coupled with an integrated 
