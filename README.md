@@ -23,8 +23,8 @@ using rolling circle amplification (RCA) followed by long-read sequencing.
   - [Install isoCirc from source](#src)
 - [Getting started](#start)
 - [Input and output](#input_output)
-  - [Input files](#input)
-  - [Output files](#output)
+  - [Input files](#input_file)
+  - [Output files](#output_file)
   - [Column explanation of detailed information](#detailed)
 - [FAQ](#FAQ)
 - [Contact](#contact)
@@ -192,8 +192,8 @@ isoCirc outputs three result files in a user-specified directory:
 |  2  | isocirc.bed       | bed12 format file of `isocirc.out` |
 |  3  | isocirc_stats.out | basic summary stats numbers for `isocirc.out` |
 
-### <a name="detailed"></a>Explanation of detailed information
-30 columns are generated for each circRNA isoform:
+#### <a name="detailed"></a>1. isocirc.out
+`isocirc.out` is a 30-column tabular file, each line represents one unique circRNA isoform that has a high-confidence BSJ:
 
 | No. | Column name     |  Explanation | 
 |:---:|   :---          | ---        |
@@ -233,7 +233,27 @@ isoCirc outputs three result files in a user-specified directory:
 |  34 | readCount      | number of reads that come from this circRNA isoform |
 |  35 | readIDs        | ID of reads that come from this circRNA isoform, separated by `,`  |
 
-### <a name="stats"></a>Stats numbers
+#### <a name="detailed"></a>2. isocirc.bed
+`isocirc.bed` is a bed12 format file, each line represents one unique circRNA isoform from `isocirc.out`:
+
+| No. | Column name     |  Explanation | 
+|:---:|   :---          | ---        |
+|  1  | chrom           | chromosome ID |
+|  2  | startCoor0based | start coordinate of circRNA, 0-based |
+|  3  | endCoor         | end coordinate of circRNA |
+|  4  | isoformName     | name of the circRNA isoform     |   
+|  5  | score           | indicates how dark the peak will be displayed in the browser (0-1000), set as 0 by `isoCirc` |
+|  6  | strand          | +/- to denote strand  |
+|  7  | thickStart      | the starting position at which the feature is drawn thickly, set as 0 by `isoCirc`  |
+|  8  | thickEnd        | the ending position at which the feature is drawn thickly, set as 0 by `isoCirc`  |
+|  9  | itemRgb         | an RGB value of the form R,G,B (e.g. 255,0,0), set as 0 by `isoCirc` |
+|  10 | blockCount      | number of block  |
+|  11 | blockSize       | size of each block, separated by `,` |
+|  12 | blockStarts     | relative start coordinates of each block, separated by `,`. refer to `bed12` format for further details |
+
+#### <a name="stats"></a>3. isocirc_stats.out
+`isocirc_stats.out` contains 28 basic stats numbers for `isocirc.out`:
+
 | No. | Name           |  Explanation | 
 |:---:|   :---         | ---          |
 |  1  | Total reads                                       | Number of raw reads in sample |
