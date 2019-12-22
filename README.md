@@ -25,7 +25,9 @@ using rolling circle amplification (RCA) followed by long-read sequencing.
 - [Input and output](#input_output)
   - [Input files](#input_file)
   - [Output files](#output_file)
-  - [Column explanation of detailed information](#detailed)
+    - [1. `isocirc.out`](#isocirc_out)
+    - [2. `isocirc.bed`](#isocirc_bed)
+    - [3. `isocirc_stats.out`](#isocirc_stats_out)
 - [FAQ](#FAQ)
 - [Contact](#contact)
 - [Changelog](#change)
@@ -192,8 +194,8 @@ isoCirc outputs three result files in a user-specified directory:
 |  2  | isocirc.bed       | bed12 format file of `isocirc.out` |
 |  3  | isocirc_stats.out | basic summary stats numbers for `isocirc.out` |
 
-#### <a name="detailed"></a>1. isocirc.out
-`isocirc.out` is a 30-column tabular file, each line represents one unique circRNA isoform that has a high-confidence BSJ:
+#### <a name="isocirc_out"></a>1. isocirc.out
+`isocirc.out` is a 35-column tabular file, each line represents one unique circRNA isoform that has a high-confidence BSJ:
 
 | No. | Column name     |  Explanation | 
 |:---:|   :---          | ---        |
@@ -233,7 +235,7 @@ isoCirc outputs three result files in a user-specified directory:
 |  34 | readCount      | number of reads that come from this circRNA isoform |
 |  35 | readIDs        | ID of reads that come from this circRNA isoform, separated by `,`  |
 
-#### <a name="detailed"></a>2. isocirc.bed
+#### <a name="isocirc_bed"></a>2. isocirc.bed
 `isocirc.bed` is a bed12 format file, each line represents one unique circRNA isoform from `isocirc.out`:
 
 | No. | Column name     |  Explanation | 
@@ -251,7 +253,7 @@ isoCirc outputs three result files in a user-specified directory:
 |  11 | blockSize       | size of each block, separated by `,` |
 |  12 | blockStarts     | relative start coordinates of each block, separated by `,`. refer to `bed12` format for further details |
 
-#### <a name="stats"></a>3. isocirc_stats.out
+#### <a name="isocirc_stats_out"></a>3. isocirc_stats.out
 `isocirc_stats.out` contains 28 basic stats numbers for `isocirc.out`:
 
 | No. | Name           |  Explanation | 
