@@ -6,13 +6,11 @@ from collections import defaultdict as dd
 import isocirc.isocirc_stats as ps
 import isocirc.parse_bam as pb
 import isocirc.utils as ut
-import isocirc.hcBSJ_fullIso as hf
 from isocirc.__init__ import isoform_output_header
 from isocirc.__init__ import isoform_output_header_idx
 from isocirc.__init__ import __program__
 from isocirc.__init__ import __version__
 
-# isoform_output_header = hf.hcBSJ_fullIso.isoform_output_header
 idx = isoform_output_header_idx
 
 def get_error_rate(in_sam_fn=''):

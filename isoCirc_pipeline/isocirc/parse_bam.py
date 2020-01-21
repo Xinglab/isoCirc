@@ -218,7 +218,8 @@ def get_spec_MD(mdstr='', start=0, end=0):
             ret_md.append(mSplit[mi])
         mi += 1
     # print ret_md
-    return ''.join(ret_md)
+    return ret_md
+    # return ''.join(ret_md)
 
 # '15M1D5M2I10M', 10, 25 => '5M1D5M2I4M'
 def get_spec_ref_cigar(cigartuples=[], start=0, end=0):  # Aligned bases
@@ -295,8 +296,80 @@ def get_spec_read_cigar(cigartuples=[], start=0, end=0):  # Aligned bases
 # MISMATCH: read_pos(first), ref_pos(first), len, read_base, ref_base
 # INSERTION: ins_read_pos(first), ins_ref_pos(left),  len, ins_base
 # DELETION: del_read_pos(left), del_ref_pos(first), len, del_base
-
 def get_error_from_MD(cigartuples=[], mdstr='', full_query_seq='', ref_start=0):
+    mis, ins, dele = [], [], []
+    last_error = ''
+    md_i, m_pos = 0, 0
+    mdSub = re.sub(r'([\\^][ACGTNacgtn]+)[0]*', ' \\1 ', mdstr)
+    mdSplit = mdSub.rsplit()
+    ref_pos, query_pos = ref_start, 0
+
+    for tuples in cigartuples:
+        if tuples[0] == BAM_CMATCH:
+            m = mdSplit[md_i]
+
+            if m.startswith('^'):
+                ut.format_time(sys.stderr, 'get_error_from_MD', 'Unexpected MD string: {}\n'.format(mdstr))
+                sys.exit(1)
+            mSub = re.sub(r'([ACGTNacgtn])', ' \\1 ', m)
+            m_len = sum(map(int, (re.sub(r'([ACGTNacgtn])', '1', mSub)).rsplit()))
+
+            # from m_pos to m_pos + tuples[1]
+            sub_ms = get_spec_MD(m, m_pos, m_pos + tuples[1])
+
+            for ms in sub_ms:
+                if ms.isalpha():  # MISMATCH
+                    if full_query_seq[query_pos] != ms:
+                        if last_error != 'MIS' or mis[-1][0] + mis[-1][2] != query_pos:
+                            mis_error = [query_pos, ref_pos, 1, full_query_seq[query_pos], ms]
+                            mis.append(mis_error)
+                        else:  # last_error == 'MIS' and  mis[-1][2] == ap[0] - 1:
+                            mis[-1][-3] += 1
+                            mis[-1][-2] += full_query_seq[query_pos]
+                            mis[-1][-1] += ms
+                        last_error = 'MIS'
+                    else:
+                        ut.fatal_format_time('get_error_from_MD', 'MIS error: {} v.s {}.'.format(full_query_seq[query_pos], ms))
+                    query_pos += 1
+                    ref_pos += 1
+                elif ms.isdigit():  # MATCH
+                    query_pos += int(ms)
+                    ref_pos += int(ms)
+
+            if m_pos + tuples[1] == m_len:
+                md_i += 1
+                m_pos = 0
+            elif m_pos + tuples[1] < m_len:
+                m_pos += tuples[1]
+            else:  #
+                ut.format_time(sys.stderr, 'get_error_from_MD', 'Unexpected MD string: {}\n'.format(mdstr))
+                sys.exit(1)
+        elif tuples[0] == BAM_CDEL:
+            m = mdSplit[md_i]
+            if not m.startswith('^'):
+                ut.format_time(sys.stderr, 'get_error_from_MD', 'Unexpected MD string: {}\n'.format(mdstr))
+                sys.exit(1)
+            del_error = [query_pos - 1, ref_pos, tuples[1], m[1:]]
+            dele.append(del_error)
+            ref_pos += tuples[1]
+            last_error = 'DEL'
+            md_i += 1
+        elif tuples[0] == BAM_CINS:
+            ins_error = [query_pos, ref_pos - 1, tuples[1], full_query_seq[query_pos:query_pos + tuples[1]]]
+            ins.append(ins_error)
+            query_pos += tuples[1]
+            last_error = 'INS'
+        elif tuples[0] == BAM_CSOFT_CLIP or tuples[0] == BAM_CHARD_CLIP:
+            query_pos += tuples[1]
+        elif tuples[0] == BAM_CREF_SKIP:
+            ref_pos += tuples[1]
+        else:
+            ut.format_time(sys.stderr, 'get_error_from_MD', 'Unexpected cigar: {}\n'.format(cigartuples))
+            sys.exit(1)
+
+    return mis, ins, dele
+
+def old_get_error_from_MD(cigartuples=[], mdstr='', full_query_seq='', ref_start=0):
     mis, ins, dele = [], [], []
     last_error = ''
     md_i, m_pos = 0, 0
@@ -316,6 +389,7 @@ def get_error_from_MD(cigartuples=[], mdstr='', full_query_seq='', ref_start=0):
 
             # from m_pos to m_pos + tuples[1]
             sub_ms = get_spec_MD(m, m_pos, m_pos + tuples[1])
+
             for ms in sub_ms:
                 if ms.isalpha():  # MISMATCH
                     if last_error != 'MIS' or mis[-1][0] != query_pos - 1:

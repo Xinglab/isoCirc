@@ -2,7 +2,6 @@ import os, sys, re
 from collections import defaultdict as dd
 import gffutils as gu
 import pysam as ps
-import numpy as np
 import itertools
 from Bio.Seq import Seq
 

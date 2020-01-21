@@ -10,6 +10,7 @@ setup(
         #package_dir = {"": "src"},
 	version='{}'.format(__version__),
         scripts=['isocirc/isocirc',
+        	'isocirc/isocircPlot',
             'bin/bed2exonGtf',
             'bin/bed2gtf',
             'bin/gtf2bed',
@@ -37,6 +38,7 @@ setup(
 	install_requires=[
 		'biopython',
 		'gffutils',
+		'pyinterval',
 		'mappy',
 		'matplotlib',
 		'numpy',
