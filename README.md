@@ -57,11 +57,6 @@ cd isoCirc/test_data
 isocirc -t 1 read_toy.fa chr16_toy.fa chr16_toy.gtf chr16_circRNA_toy.bed output
 ```
 
-Command example:
-```
-isocirc -t 8 long_circRNA.fa reference.fa gene_anno.gtf circRNA.bed output_folder \
-  --short-read short_read.fa --Alu alu.bed --all-repeat all_repeat.bed
-```
 
 Detailed arguments:
 ```
