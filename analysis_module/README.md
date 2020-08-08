@@ -49,7 +49,7 @@ Raw isoCirc output files for tested tissues/cell lines will be merged together i
 a single file that contains the union of full-length circular RNA isoforms detected
 across all tissues/cell lines. Specifically, the file will only include isoforms
 for which there exists at least one tissue/cell line in which the sum of read counts
-across all respective biological replicates is greater than or equal to a user-defined
+across all respective sequencing libraries is greater than or equal to a user-defined
 threshold. To generate this file:
 ```bash
 	python merge_isocirc.py -c /path/to/configuration/file \
@@ -57,7 +57,7 @@ threshold. To generate this file:
 		-o /path/to/output/file
 ```
 Note that the configuration file is a user-supplied comma-separated file (CSV) with the
-following field information: (i) tissue/cell line name, (ii) biological replicate number,
+following field information: (i) tissue/cell line name, (ii) sequencing library number,
 (iii) path name to corresponding isoCirc output file.
 
 #### Assigning isoform IDs

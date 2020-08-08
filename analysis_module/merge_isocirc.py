@@ -8,7 +8,7 @@
 # This is a script for merging raw isocirc.out files into a single file containing only
 # full-length circular RNA isoforms. This script only keeps full-length isoforms for which
 # there exists at least one tissue/cell-line in which the sum of read counts across all
-# respective biological replicates is greater than or equal to a specified read count
+# respective sequencing libraries is greater than or equal to a specified read count
 # threshold.
 
 # Usage:
@@ -18,7 +18,7 @@
 
 # The configuration file is a user-written comma-separated file with the following structure:
 #   Field 1: tissue OR cell-line name
-#   Field 2: biological replicate number  
+#   Field 2: sequencing library number  
 #   Field 3: path name to corresponding isocirc.out file
 
 # Example:
@@ -137,7 +137,7 @@ def merge_file(config, threshold):
     outdict = {}
     
     # Filter for isoforms for which there exists at least one tissue/cell-line where
-    # the sum of read counts across all biological replicates is greater than or equal
+    # the sum of read counts across all sequencing libraries is greater than or equal
     # to a threshold value
     for id in list(fldict.keys()):
         # If isoform is full-length:
@@ -159,13 +159,13 @@ def write_header(config, outfile):
         'isKnownExon', 'isKnownBSJ', 'isCanoBSJ', 'canoBSJMotif', 'isFullLength', 'BSJCate', 'FSJCate', 'CDS', 'UTR',
         'lincRNA', 'antisense', 'rRNA', 'Alu', 'allRepeat', 'upFlankAlu', 'downFlankAlu']
     
-    # Parse the configuration file and extract sample and replicate columns
+    # Parse the configuration file and extract sample and library columns
     df = pd.read_csv(config, header=None)
     nrow = df.shape[0]
     names = list(df.loc[0:nrow,0])
     reps = list(df.loc[0:nrow,1])
     
-    # Add new column names for storing read counts associated with each biological sample
+    # Add new column names for storing read counts associated with each library
     header += ['{}_{}'.format(names_, reps_) for names_, reps_ in zip(names, reps)]
     
     # Print header to output file using tab-separated fields

@@ -8,8 +8,8 @@
 # This is a script for assigning IDs to each circular RNA isoform of a given gene using
 # the following format: [gene name].circRNA.[rank]. The "rank" is determined by the 
 # following tier list of rules: (i) highest median isoform read count sum (taken over
-# all biological replicates of a given tissue/cell-line) across all tissues/cell-lines,
-# (ii) highest mean isoform read count sum (taken over all biological replicates of a 
+# all sequencing libraries of a given tissue/cell-line) across all tissues/cell-lines,
+# (ii) highest mean isoform read count sum (taken over all sequencing libraries of a 
 # given tissue/cell-line) across all tissues/cell-lines. For intergenic circular RNA
 # isoforms, the script assigns IDs using the following format: NA.[chromosome #].circRNA.
 # [sort index]. The "sort index" is determined by sorting the genomic coordinates of the
