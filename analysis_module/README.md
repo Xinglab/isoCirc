@@ -29,7 +29,7 @@ pandas (version 1.1.0).
 ### Workflow
 The workflow of the analysis module:
 
-![](https://raw.githubusercontent.com/Xinglab/isoCirc/analysis_module/Workflow.png "Workflow")
+![](https://raw.githubusercontent.com/Xinglab/isoCirc/master/analysis_module/Workflow.png?token=AFTHNXRJZWEH5AKO7VOHYCC7HBGZ2 "Workflow")
 
 ## USAGE
 As shown in the [Module Overview](#module-overview), the analysis module can be used
