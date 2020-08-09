@@ -336,7 +336,7 @@ get_specific_isoforms <- function(gene, geneLL, isoformLL, inDF) {
 			isoPct <- normMatrix[id]
 			isoRC <- geneMatrix[id]
 			sjCate <- get_BSJ_FSJ(id, isoformLL, inDF)
-			info <- c(gene, nrow(geneMatrix), id, tissue, isoPct, isoRC, 0, sjCate, 'EXCLUSIVE')
+			info <- c(gene, length(geneMatrix), id, tissue, isoPct, isoRC, 0, sjCate, 'EXCLUSIVE')
 			returnString <- c(returnString, paste(info, collapse=','))
 		}
 		return(paste(returnString, collapse=';'))
