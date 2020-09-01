@@ -60,6 +60,37 @@ def circRNA_isoform_bed12(circRNA_bed, circRNA_out, iso_to_name_dict):
             bed_fp.write('{}\t{}\t{}\t{}{}\t0\t{}\t0\t0\t0\t{}\t{}\t{}\n'.format(out1['chrom'], out1['startCoor0based'], out1['endCoor'], __program__, iso_id, out1['canoBSJMotif'][0], out1['blockCount'], out1['blockSize'], out1['blockStarts']))
 
 
+def is_fullLength(out1, all_out, read_ids):
+    if int(out1['blockCount']) == 1:
+            out1['isFullLength'] = 'True'
+    else:
+        out1['isFullLength'] = 'True'
+        bsj_strand = out1['canoBSJMotif'][0]
+        for sj_motif in out1['canoSJMotif'].rsplit(','):
+            if sj_motif[0] != bsj_strand:
+                out1['isFullLength'] = 'False'
+                return
+        # all FSJ has canonical motifs and same strand with BSJ
+        # if any FSJ is NOT known and NOT high-quality: False
+
+        known_sj = []
+        known_fsj_ss = out1['isKnownSS'].rsplit(',')[1:-1]
+        for i in range(int(len(known_fsj_ss) / 2)):
+            known_sj.append(','.join([known_fsj_ss[i*2], known_fsj_ss[i*2+1]]))
+        cano_sj = out1['isCanoSJ'].rsplit(',')
+        high_sj = ['False'] * len(cano_sj)
+        for read_id in read_ids:
+            for i, high1 in enumerate(all_out[read_id]['isHighSJ'].rsplit(',')):
+                if high1 == 'True':
+                    high_sj[i] = 'True'
+        if len(known_sj) != len(high_sj):
+            ut.fatal_format_time('output_isoform_eval', 'Unmatched list size.')
+        for k, h in zip(known_sj, high_sj):
+            if 'False' in k and 'False' in h:
+                out1['isFullLength'] = 'False'
+                break
+
+
 # add 'isFullLength', 'isFSM', 'isNIC', 'isNNC', # FSM: full splice match, NIC: novel in catalog, NNC, novel and not in catalog
 def output_isoform_eval(out_fp, all_out, itst_out_dict, all_trans, iso_to_name_dict={}):
     ut.err_format_time('output_isoform_eval', 'Writing isoform-wise evaluation result to file ...')
@@ -74,29 +105,8 @@ def output_isoform_eval(out_fp, all_out, itst_out_dict, all_trans, iso_to_name_d
         # block type, anno
         out1['blockType'], out1['blockAnno'] = itst_out_dict['blockType'][str(iso_name)], itst_out_dict['blockAnno'][str(iso_name)]
         # full-length: BSJ is already high-confidenc, only check FSJ (internal SJ) XXX
-        if int(out1['blockCount']) == 1:
-            out1['isFullLength'] = 'True'
-        else:
-            known_fsj_ss = out1['isKnownSS'].rsplit(',')[1:-1]
-            if 'False' not in known_fsj_ss:
-                out1['isFullLength'] = 'True'
-            else:
-                out1['isFullLength'] = 'True'
-                known_sj = []
-                for i in range(int(len(known_fsj_ss) / 2)):
-                    known_sj.append(','.join([known_fsj_ss[i*2], known_fsj_ss[i*2+1]]))
-                cano_sj = out1['isCanoSJ'].rsplit(',')
-                high_sj = ['False'] * len(cano_sj)
-                for read_id in read_ids:
-                    for i, high1 in enumerate(all_out[read_id]['isHighSJ'].rsplit(',')):
-                        if high1 == 'True':
-                            high_sj[i] = 'True'
-                if len(known_sj) != len(cano_sj) or len(cano_sj) != len(high_sj):
-                    ut.fatal_format_time('output_isoform_eval', 'Unmatched list size.')
-                for k, c, h in zip(known_sj, cano_sj, high_sj):
-                    if 'False' in k and ('False' in c or 'False' in h):
-                        out1['isFullLength'] = 'False'
-                        break
+        is_fullLength(out1, all_out, read_ids)
+        
         # FSM/NIC/NNC for BSJ and interIso
         if 'True' in out1['isKnownBSJ']:
             bsj_cate = 'FSM'
@@ -647,17 +657,17 @@ def circRNA_rescue(all_out, bsj_coors, h_bam, anno_site, anno_exon):
                             filtered_coors.pop(filtered_id)
                             continue
                         out1['refMapLen'] = sum(map(int, out1['blockSize'].rsplit(',')))
-                        if not is_coincide_knownSS(out1): # update
-                            is_known_ss = out1['isKnownSS'].rsplit(',')
-                            is_known_ss[0] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', True, adj_start+1) in anno_site else 'False'
-                            is_known_ss[-1] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', False, adj_end) in anno_site else 'False'
-                            out1['isKnownSS'] = ','.join(is_known_ss)
+                        # if not is_coincide_knownSS(out1): # update
+                        is_known_ss = out1['isKnownSS'].rsplit(',')
+                        is_known_ss[0] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', True, adj_start+1) in anno_site else 'False'
+                        is_known_ss[-1] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', False, adj_end) in anno_site else 'False'
+                        out1['isKnownSS'] = ','.join(is_known_ss)
 
-                            is_known_exon = out1['isKnownExon'].rsplit(',')
-                            block_sizes = list(map(int, out1['blockSize'].rsplit(',')))
-                            is_known_exon[0] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', adj_start+1, adj_start + block_sizes[0]) in anno_exon else 'False'
-                            is_known_exon[-1] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', adj_end-block_sizes[-1]+1, adj_end) in anno_exon else 'False'
-                            out1['isKnownExon'] = ','.join(is_known_exon)
+                        is_known_exon = out1['isKnownExon'].rsplit(',')
+                        block_sizes = list(map(int, out1['blockSize'].rsplit(',')))
+                        is_known_exon[0] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', adj_start+1, adj_start + block_sizes[0]) in anno_exon else 'False'
+                        is_known_exon[-1] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', adj_end-block_sizes[-1]+1, adj_end) in anno_exon else 'False'
+                        out1['isKnownExon'] = ','.join(is_known_exon)
                         filtered_out[filtered_id] = out1
                         filtered_id += 1
             mul_cons = [eval_out]
@@ -684,18 +694,18 @@ def circRNA_rescue(all_out, bsj_coors, h_bam, anno_site, anno_exon):
                     filtered_coors.pop(filtered_id)
                     return filtered_out, filtered_coors
                 out1['refMapLen'] = sum(map(int, out1['blockSize'].rsplit(',')))
-                if not is_coincide_knownSS(out1): # update
-                    is_known_ss = out1['isKnownSS'].rsplit(',')
-                    is_known_ss[0] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', True, adj_start+1) in anno_site else 'False'
-                    is_known_ss[-1] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', False, adj_end) in anno_site else 'False'
-                    out1['isKnownSS'] = ','.join(is_known_ss)
+                # if not is_coincide_knownSS(out1): # update
+                is_known_ss = out1['isKnownSS'].rsplit(',')
+                is_known_ss[0] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', True, adj_start+1) in anno_site else 'False'
+                is_known_ss[-1] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', False, adj_end) in anno_site else 'False'
+                out1['isKnownSS'] = ','.join(is_known_ss)
 
 
-                    is_known_exon = out1['isKnownExon'].rsplit(',')
-                    block_sizes = list(map(int, out1['blockSize'].rsplit(',')))
-                    is_known_exon[0] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', adj_start+1, adj_start + block_sizes[0]) in anno_exon else 'False'
-                    is_known_exon[-1] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', adj_end-block_sizes[-1]+1, adj_end) in anno_exon else 'False'
-                    out1['isKnownExon'] = ','.join(is_known_exon)
+                is_known_exon = out1['isKnownExon'].rsplit(',')
+                block_sizes = list(map(int, out1['blockSize'].rsplit(',')))
+                is_known_exon[0] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', adj_start+1, adj_start + block_sizes[0]) in anno_exon else 'False'
+                is_known_exon[-1] = 'True' if (chrom_id, out1['canoBSJMotif'][0] == '-', adj_end-block_sizes[-1]+1, adj_end) in anno_exon else 'False'
+                out1['isKnownExon'] = ','.join(is_known_exon)
                 filtered_out[filtered_id] = out1
                 filtered_id += 1
     return filtered_out, filtered_coors

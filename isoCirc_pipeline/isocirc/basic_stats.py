@@ -175,15 +175,15 @@ def stats_core(long_read_len, cons_info, cons_bam, isoform_out, all_bsj_stats_di
             if 'False' not in ele[idx['isKnownSS']]:
                 tot_read_with_known_ss += read_cnt
                 tot_iso_with_known_ss += isoform_inc_cnt
-            if 'False' not in ele[idx['isCanoSJ']]:
-                tot_iso_with_cano_sj += isoform_inc_cnt
-                tot_read_with_cano_sj += read_cnt
-                if 'False' not in ele[idx['isHighSJ']]:
-                    tot_iso_with_high_sj += isoform_inc_cnt
-                    tot_read_with_high_sj += read_cnt
-                    if 'False' not in ele[idx['isKnownSS']]:
-                        tot_iso_with_high_sj_known_ss += isoform_inc_cnt
-                        tot_read_with_high_sj_known_ss += read_cnt
+            # if 'False' not in ele[idx['isCanoSJ']]:
+            #     tot_iso_with_cano_sj += isoform_inc_cnt
+            #     tot_read_with_cano_sj += read_cnt
+            if 'False' not in ele[idx['isHighSJ']]:
+                tot_iso_with_high_sj += isoform_inc_cnt
+                tot_read_with_high_sj += read_cnt
+                if 'False' not in ele[idx['isKnownSS']]:
+                    tot_iso_with_high_sj_known_ss += isoform_inc_cnt
+                    tot_read_with_high_sj_known_ss += read_cnt
             if ele[idx['isFullLength']] == 'True':
                 full_iso[iso] = 1
                 tot_full_iso += isoform_inc_cnt
@@ -233,26 +233,26 @@ def stats_core(long_read_len, cons_info, cons_bam, isoform_out, all_bsj_stats_di
         else:
             out.write('9_Total_known_high_confidence_BSJs\t{:,}\n'.format(tot_known_bsj[0]))
         out.write('10_Total_isoforms_with_high_BSJs\t{:,}\n'.format(tot_isoform))
-        out.write('11_Total_isoforms_with_high_BSJs_cano_SJs\t{:,}\n'.format(tot_iso_with_cano_sj))
-        out.write('12_Total_isoforms_with_high_BSJs_high_SJs\t{:,}\n'.format(tot_iso_with_high_sj))
-        out.write('13_Total_isoforms_with_high_BSJ_known_SSs\t{:,}\n'.format(tot_iso_with_known_ss))
-        out.write('14_Total_isoforms_with_high_BSJs_high_SJs_known_SSs\t{:,}\n'.format(tot_iso_with_high_sj_known_ss))
-        out.write('15_Total_full_length_isoforms\t{:,}\n'.format(len(full_iso))) #tot_full_iso))
-        out.write('16_Total_reads_for_full_length_isoforms\t{:,}\n'.format(tot_full_read))
+        # out.write('11_Total_isoforms_with_high_BSJs_cano_SJs\t{:,}\n'.format(tot_iso_with_cano_sj))
+        out.write('11_Total_isoforms_with_high_BSJs_high_SJs\t{:,}\n'.format(tot_iso_with_high_sj))
+        out.write('12_Total_isoforms_with_high_BSJ_known_SSs\t{:,}\n'.format(tot_iso_with_known_ss))
+        out.write('13_Total_isoforms_with_high_BSJs_high_SJs_known_SSs\t{:,}\n'.format(tot_iso_with_high_sj_known_ss))
+        out.write('14_Total_full_length_isoforms\t{:,}\n'.format(len(full_iso))) #tot_full_iso))
+        out.write('15_Total_reads_for_full_length_isoforms\t{:,}\n'.format(tot_full_read))
         # FSM/NIC/NNC
-        out.write('17_Total_full_length_isoforms_with_FSM_BSJ\t{:,}\n'.format(tot_full_iso_bsj_fsm_iso))
-        out.write('18_Total_reads_for_full_length_isoforms_with_FSM_BSJ\t{:,}\n'.format(tot_full_iso_bsj_fsm_read))
-        out.write('19_Total_full_length_isoforms_with_NIC_BSJ\t{:,}\n'.format(tot_full_iso_bsj_nic_iso))
-        out.write('20_Total_reads_for_full_length_isoforms_with_NIC_BSJ\t{:,}\n'.format(tot_full_iso_bsj_nic_read))
-        out.write('21_Total_full_length_isoforms_with_NNC_BSJ\t{:,}\n'.format(tot_full_iso_bsj_nnc_iso))
-        out.write('22_Total_reads_for_full_length_isoforms_with_NNC_BSJ\t{:,}\n'.format(tot_full_iso_bsj_nnc_read))
+        out.write('16_Total_full_length_isoforms_with_FSM_BSJ\t{:,}\n'.format(tot_full_iso_bsj_fsm_iso))
+        out.write('17_Total_reads_for_full_length_isoforms_with_FSM_BSJ\t{:,}\n'.format(tot_full_iso_bsj_fsm_read))
+        out.write('18_Total_full_length_isoforms_with_NIC_BSJ\t{:,}\n'.format(tot_full_iso_bsj_nic_iso))
+        out.write('19_Total_reads_for_full_length_isoforms_with_NIC_BSJ\t{:,}\n'.format(tot_full_iso_bsj_nic_read))
+        out.write('20_Total_full_length_isoforms_with_NNC_BSJ\t{:,}\n'.format(tot_full_iso_bsj_nnc_iso))
+        out.write('21_Total_reads_for_full_length_isoforms_with_NNC_BSJ\t{:,}\n'.format(tot_full_iso_bsj_nnc_read))
 
-        out.write('23_Total_full_length_isoform_with_FSM_FSJ\t{:,}\n'.format(tot_full_iso_int_fsm_iso))
-        out.write('24_Total_reads_full_length_isoforms_with_FSM_FSJ\t{:,}\n'.format(tot_full_iso_int_fsm_read))
-        out.write('25_Total_full_length_isoforms_with_NIC_FSJ\t{:,}\n'.format(tot_full_iso_int_nic_iso))
-        out.write('26_Total_reads_for_full_length_isoforms_with_NIC_FSJ\t{:,}\n'.format(tot_full_iso_int_nic_read))
-        out.write('27_Total_full_length_isoforms_with_NNC_FSJ\t{:,}\n'.format(tot_full_iso_int_nnc_iso))
-        out.write('28_Total_reads_for_full_length_isoforms_with_NNC_FSJ\t{:,}\n'.format(tot_full_iso_int_nnc_read))
+        out.write('22_Total_full_length_isoform_with_FSM_FSJ\t{:,}\n'.format(tot_full_iso_int_fsm_iso))
+        out.write('23_Total_reads_full_length_isoforms_with_FSM_FSJ\t{:,}\n'.format(tot_full_iso_int_fsm_read))
+        out.write('24_Total_full_length_isoforms_with_NIC_FSJ\t{:,}\n'.format(tot_full_iso_int_nic_iso))
+        out.write('25_Total_reads_for_full_length_isoforms_with_NIC_FSJ\t{:,}\n'.format(tot_full_iso_int_nic_read))
+        out.write('26_Total_full_length_isoforms_with_NNC_FSJ\t{:,}\n'.format(tot_full_iso_int_nnc_iso))
+        out.write('27_Total_reads_for_full_length_isoforms_with_NNC_FSJ\t{:,}\n'.format(tot_full_iso_int_nnc_read))
     ut.err_format_time('basic_stats_core', 'Writing basic stats to file done!')
 
 def basic_stats(args):

@@ -388,12 +388,17 @@ def get_transcript_from_gene_pred(in_gene_pred, bam_fn=""):
             for s, e in zip(exon_start, exon_end):
                 coor.extend([s, e])
             trans[gene_id].append('_'.join(map(str, coor)))
-    ut.err_format_time('get_transcript_from_bed12', 'Loading transcript from {} done!'.format(in_gene_pred))
+    ut.err_format_time('get_transcript_from_gene_pred', 'Loading transcript from {} done!'.format(in_gene_pred))
     # if bam: bam.close()
     return trans
 
+# return:
+# {(tid, is_rev, is_left, site_coor) : is_start/end}
+# exonic 1-base coordinate
+# is_left: site is on the left of the exon
+# excluding start/end of each transcript
 def get_splice_site_from_bed12(in_bed, bam_fn=""):
-    split_site = dict()
+    splice_site = dict()
     ut.err_format_time('get_splice_site_from_bed12', 'Loading splice site from {} ... '.format(in_bed))
     # chromStart: 0-base, exonStarts: 0-base
     header_ele = ['chrom', 'chromStart', 'chromEnd', 'name', 'score', 'strand',
@@ -417,16 +422,19 @@ def get_splice_site_from_bed12(in_bed, bam_fn=""):
             tid = bam.get_tid(chrom) if bam else chrom
             is_rev = strand == '-'
 
-            split_site[(tid, is_rev, True, start + 1)] = True
-            split_site[(tid, is_rev, False, end)] = True
-
-            for s, l in zip(exon_start, exon_len):
-                split_site[(tid, is_rev, True, start + 1 + s)] = False
-                split_site[(tid, is_rev, False, start + s + l)] = False
+            for i in range(len(exon_start)):
+                s, l = exon_start[i], exon_len[i]
+                keep_left = False if i != 0 else True
+                keep_right = False if i != len(exon_start) - 1 else True
+                
+                if keep_left:  
+                    splice_site[(tid, is_rev, True, start + 1 + s)] = True
+                if keep_right:
+                    splice_site[(tid, is_rev, False, start + s + l)] = True
 
     ut.err_format_time('get_splice_site_from_bed12', 'Loading splice site from {} done!'.format(in_bed))
     if bam: bam.close()
-    return split_site
+    return splice_site
 
 
 # return:
@@ -777,7 +785,7 @@ def is_known_exon(exon, is_left, is_right, anno_exon, site_dis, end_dis):
     return False
 
 
-# return: is_known, dis_to_known
+# return: is_known, is_reverse, dis_to_known
 def is_known_splice_site(site, is_end, anno_site, site_dis, end_dis):
     dis_lim = end_dis if is_end else site_dis
     S_range = [0]
@@ -786,7 +794,7 @@ def is_known_splice_site(site, is_end, anno_site, site_dis, end_dis):
         S_range.append(-i)
 
     for s in S_range:
-        if ((site[0], True, site[2], site[3] + s) in anno_site or (site[0], False, site[2], site[3] + s) in anno_site):
+        if (site[0], True, site[2], site[3] + s) in anno_site or (site[0], False, site[2], site[3] + s) in anno_site:
             return True, s
     return False, 'NA'
 
