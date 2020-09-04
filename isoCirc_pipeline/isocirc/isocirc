@@ -55,6 +55,20 @@ def check_depen(bedtools='bedtools', minimap2='minimap2'):
 	ut.err_format_time('check_dependencies', 'Checking dependencies done!')
 
 
+
+def not_fasta(in_fn):
+	if in_fn.endswith('.gz'):
+		return True
+	with open(in_fn) as in_fp:
+		for line in in_fp:
+			if line.startswith('@'):
+				return True
+			elif line.startswith('>'):
+				return False
+			else:
+				ut.fatal_format_time('main', 'Input data is not FASTA/FASTQ file.')
+
+
 def isocirc_core(args):
 	if not os.path.exists(args.out_dir):
 		os.makedirs(args.out_dir)
@@ -81,6 +95,9 @@ def isocirc_core(args):
 	# else:
 	# 1. generate cons with TRF
 	ut.err_format_time('Tandem-Repeats-Finder', 'Finding tandem repeats with TRF ...')
+	if not_fasta(corr_long):
+		ut.exec_cmd(sys.stderr, 'fxtools', '{} qa {} > {} 2> /dev/null'.format(cc.fxtools, corr_long, args.out_dir + '/long_reads.fa'))
+		corr_long = args.out_dir + '/long_reads.fa'
 	trf_out = args.out_dir + '/trf.out'
 	if args.threads > 1:
 		cc.run_trf_parall(corr_long, cons_fa, cons_info, trf_out, args.trf, args.match, args.mismatch, args.indel, args.match_frac, args.indel_frac, args.min_score, args.max_period, args.min_len, args.min_copy, args.min_frac, args.threads)
