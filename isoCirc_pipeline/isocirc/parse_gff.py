@@ -424,8 +424,8 @@ def get_splice_site_from_bed12(in_bed, bam_fn=""):
 
             for i in range(len(exon_start)):
                 s, l = exon_start[i], exon_len[i]
-                keep_left = False if i != 0 else True
-                keep_right = False if i != len(exon_start) - 1 else True
+                keep_left = False if i == 0 else True
+                keep_right = False if i == len(exon_start) - 1 else True
                 
                 if keep_left:  
                     splice_site[(tid, is_rev, True, start + 1 + s)] = True
