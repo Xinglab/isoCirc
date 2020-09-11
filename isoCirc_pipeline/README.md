@@ -57,16 +57,11 @@ cd isoCirc/test_data
 isocirc -t 1 read_toy.fa chr16_toy.fa chr16_toy.gtf chr16_circRNA_toy.bed output
 ```
 
-Command example:
-```
-isocirc -t 8 long_circRNA.fa reference.fa gene_anno.gtf circRNA.bed output_folder \
-  --short-read short_read.fa --Alu alu.bed --all-repeat all_repeat.bed
-```
 
 Detailed arguments:
 ```
 usage: isocirc [-h] [-v] [-t THREADS] [--bedtools BEDTOOLS]
-               [--minimap2 MINIMAP2] [--short-read short.fa] [--lordec LORDEC]
+               [--minimap2 MINIMAP2] [--short-read short.fa/fq] [--lordec LORDEC]
                [--kmer KMER] [--solid SOLID] [--trf TRF] [--match MATCH]
                [--mismatch MISMATCH] [--indel INDEL] [--match-frac MATCH_FRAC]
                [--indel-frac INDEL_FRAC] [--min-score MIN_SCORE]
@@ -81,12 +76,12 @@ usage: isocirc [-h] [-v] [-t THREADS] [--bedtools BEDTOOLS]
                [--key-bsj-xid KEY_BSJ_XID] [--min-circ-dis MIN_CIRC_DIS]
                [--rescue-low] [--sj-xid SJ_XID] [--key-sj-xid KEY_SJ_XID]
                [--Alu ALU] [--flank-len FLANK_LEN] [--all-repeat ALL_REPEAT]
-               long.fa ref.fa anno.gtf circRNA.bed/gtf out_dir
+               long.fa/fq ref.fa anno.gtf circRNA.bed/gtf out_dir
 
 isocirc: circular RNA profiling and analysis using long-read sequencing
 
 positional arguments:
-  long.fa               Long-read sequencing data generated with isoCirc
+  long.fa/fq            Long-read sequencing data generated with isoCirc
   ref.fa                Reference genome sequence file
   anno.gtf              Gene annotation file in GTF format
   circRNA.bed/gtf       circRNA database annotation file in BED or GTF format
@@ -104,7 +99,7 @@ General options:
   --minimap2 MINIMAP2   Path to minimap2 (default: minimap2)
 
 Hybrid error-correction with short-read data (LoRDEC):
-  --short-read short.fa
+  --short-read short.fa/fq
                         Short-read data for error correction 
                         Use ',' to connect multiple or paired-end short-read data
                         (default: )

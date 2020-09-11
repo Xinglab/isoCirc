@@ -144,7 +144,7 @@ def isocirc_core(args):
 def parser_argv():
 	# parse command line arguments
 	parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter, description="{}: circular RNA profiling and analysis using long-read sequencing".format(__program__))
-	parser.add_argument("in_long_read", metavar='long.fa', type=str, help='Long read sequencing data generated with isoCirc.')
+	parser.add_argument("in_long_read", metavar='long.fa/fq', type=str, help='Long read sequencing data generated with isoCirc.')
 	parser.add_argument("ref", metavar='ref.fa', type=str, help='Reference genome sequence file.')
 	parser.add_argument('gene_anno', metavar='anno.gtf', type=str, help='Gene annotation file in GTF format.')
 	parser.add_argument('circRNA_anno', metavar='circRNA.bed/gtf', type=str, help='circRNA database annotation file in BED or GTF format. Use \',\' to separate multiple circRNA annotation files.')
@@ -159,7 +159,7 @@ def parser_argv():
 	general_par.add_argument('--minimap2', help='Path to minimap2.', default=ca.minimap2)
 
 	corr_par = parser.add_argument_group('Hybrid error-correction with short-read data (LoRDEC)')
-	corr_par.add_argument("--short-read", metavar='short.fa', type=str, default='', help="Short-read data for error correction. Use \',\' to connect multiple or paired-end short read data.")
+	corr_par.add_argument("--short-read", metavar='short.fa/fq', type=str, default='', help="Short-read data for error correction. Use \',\' to connect multiple or paired-end short read data.")
 	corr_par.add_argument('--lordec', type=str, help='Path to lordec-correct.', default=ec.lordec)
 	corr_par.add_argument('--kmer', type=int, help='k-mer size.', default=ec.kmer)
 	corr_par.add_argument('--solid', type=int, help='Solid k-mer abundance threshold.', default=ec.solid)
