@@ -35,7 +35,7 @@ using rolling circle amplification (RCA) followed by long-read sequencing.
 
 ## <a name="install"></a>Installation
 ### <a name="depen"></a>Dependencies 
-isoCirc is dependent on two open-source software packages: [`bedtools`(>= v2.25.0)](https://bedtools.readthedocs.io/) and minimap2 [`minimap2`(>= 2.11)](https://github.com/lh3/minimap2).
+isoCirc is dependent on two open-source software packages: [`bedtools`(>= v2.27.0)](https://bedtools.readthedocs.io/) and minimap2 [`minimap2`(>= 2.11)](https://github.com/lh3/minimap2).
 Please ensure that these packages are installed before running isoCirc.
 
 ### <a name="pip"></a>Install isoCirc with `pip` (Note: does not currently work, will work on after publication)
@@ -207,28 +207,28 @@ isoCirc outputs three result files in a user-specified directory:
 |  11 | refMapLen       | total length of circRNA |
 |  12 | blockType       | category of each block. E: exon, I: intron, N: intergenic |
 |  13 | blockAnno       | detailed annotation for each block, in format: "TransID:E1(100)+I(50)+E2(30)", where TransID is ID of corresponding transcript; E1 and E2 are 1st and 2nd exon of transcript; multiple blocks are separated by `,`; and multiple transcripts of one block are separated by `;` |
-|  14 | isKnownSS      | `True` if SS is catalogued in gene annotation, `False` if not, separated by `,` |
-|  15 | isKnownSJ      | `True` if SJ is catalogued in gene annotation, `False` if not, separated by `,` | 
-|  16 | isCanoSJ       | `True` if SJ is canonical (GT-AG/GC-AG/AT-AC), `False` if not, separated by `,`|
-|  17 | isHighSJ       | `True` if alignment around SJ is high-quality, `False` if not, separated by `,`  |
-|  18 | isKnownExon    | `True` if block is a catalogued exon in gene annotation, `False` if not, separated by ‘,’ | 
-|  19 | isKnownBSJ     | `True` if BSJ exists in circRNA annotation, `False` if not; multiple circRNA annotations are separated by `,` | 
-|  20 | isCanoBSJ      | `True` if BSJ has canonical motif (GT/AG), `False` if not | 
-|  21 | canoBSJMotif   | strandness and canonical motif of BSJ, e.g., `-GT/AG`, `NA` if BSJ is not canonical | 
-|  22 | isFullLength   | `True` if isoform is considered as `full-length isoform`, `False` if not |
-|  23 | BSJCate        | category of BSJs: `FSM`/`NIC`/`NNC`, see explanation below. |
-|  24 | FSJCate   | category of FSJs: `FSM`/`NIC`/`NNC` |
-|  25 | CDS            | number of bases that are mapped to CDS region |
-|  26 | UTR            | number of bases that are mapped to UTR region |
-|  27 | lincRNA        | number of bases that are mapped to lincRNA region |
-|  28 | antisense      | number of bases that are mapped to antisense region |
-|  29 | rRNA           | number of bases that are mapped to rRNA region |
-|  30 | Alu            | number of bases that are mapped to Alu element; `NA` if Alu annotation is not provided |
-|  31 | allRepeat      | number of bases that are mapped to all repeat elements; `NA` if repeat annotation is not provided |
-|  32 | upFlankAlu     | flanking Alu element in upstream; `NA` if none or Alu annotation is not provided |
-|  33 | downFlankAlu   | flanking Alu element in downstream; `NA` if none or Alu annotation is not provided |
-|  34 | readCount      | number of reads that come from this circRNA isoform |
-|  35 | readIDs        | ID of reads that come from this circRNA isoform, separated by `,`  |
+|  14 | isKnownSS       | `True` if SS is catalogued in gene annotation, `False` if not, separated by `,` |
+|  15 | isKnownFSJ      | `True` if FSJ is catalogued in gene annotation, `False` if not, separated by `,` | 
+|  16 | canoFSJMotif    | strandness and canonical motifs of FSJs, e.g., `-GT/AG`, `NA` if FSJ is not canonical, separated by `,`|
+|  17 | isHighFSJ       | `True` if alignment around FSJ is high-quality, `False` if not, separated by `,`  |
+|  18 | isKnownExon     | `True` if block is a catalogued exon in gene annotation, `False` if not, separated by ‘,’ | 
+|  19 | isKnownBSJ      | `True` if BSJ exists in circRNA annotation, `False` if not; multiple circRNA annotations are separated by `,` | 
+|  20 | isCanoBSJ       | `True` if BSJ has canonical motif (GT/AG), `False` if not | 
+|  21 | canoBSJMotif    | strandness and canonical motif of BSJ, e.g., `-GT/AG`, `NA` if BSJ is not canonical | 
+|  22 | isFullLength    | `True` if isoform is considered as `full-length isoform`, `False` if not |
+|  23 | BSJCate         | category of BSJs: `FSM`/`NIC`/`NNC`, see explanation below. |
+|  24 | FSJCate         | category of FSJs: `FSM`/`NIC`/`NNC` |
+|  25 | CDS             | number of bases that are mapped to CDS region |
+|  26 | UTR             | number of bases that are mapped to UTR region |
+|  27 | lincRNA         | number of bases that are mapped to lincRNA region |
+|  28 | antisense       | number of bases that are mapped to antisense region |
+|  29 | rRNA            | number of bases that are mapped to rRNA region |
+|  30 | Alu             | number of bases that are mapped to Alu element; `NA` if Alu annotation is not provided |
+|  31 | allRepeat       | number of bases that are mapped to all repeat elements; `NA` if repeat annotation is not provided |
+|  32 | upFlankAlu      | flanking Alu element in upstream; `NA` if none or Alu annotation is not provided |
+|  33 | downFlankAlu    | flanking Alu element in downstream; `NA` if none or Alu annotation is not provided |
+|  34 | readCount       | number of reads that come from this circRNA isoform |
+|  35 | readIDs         | ID of reads that come from this circRNA isoform, separated by `,`  |
 
 #### <a name="isocirc_bed"></a>2. isocirc.bed
 `isocirc.bed` is a bed12 format file, each line represents one unique circRNA isoform from `isocirc.out`:
@@ -249,7 +249,7 @@ isoCirc outputs three result files in a user-specified directory:
 |  12 | blockStarts     | relative start coordinates of each block, separated by `,`. refer to `bed12` format for further details |
 
 #### <a name="isocirc_stats_out"></a>3. isocirc_stats.out
-`isocirc_stats.out` contains 28 basic stats numbers for `isocirc.out`:
+`isocirc_stats.out` contains 27 basic stats numbers for `isocirc.out`:
 
 | No. | Name           |  Explanation | 
 |:---:|   :---         | ---          |
@@ -263,28 +263,27 @@ isoCirc outputs three result files in a user-specified directory:
 |  8  | Total high BSJs                                   | Number of high-confidence BSJs |
 |  9  | Total known high BSJs                             | Number of high-confidence BSJs that are known |
 |  10 | Total isoforms with high BSJs                     | Number of circRNA isoforms with high-confidence BSJs |
-|  11 | Total isoforms with high BSJs cano SJs            | Number of circRNA isoforms with high-confidence BSJs, and all internal splice sites are canonical |
-|  12 | Total isoforms with high BSJs high SJs            | Number of circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence (canonical, high-quality alignment around internal splice sites) |
-|  13 | Total isoforms with high BSJ known SSs            | Number of circRNA isoforms with high-confidence BSJs, and all internal splice sites are known (based on existing transcript GTF annotations for splice sites in linear RNA) |
-|  14 | Total isoforms with high BSJs high SJs known SSs  | Number of circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence and known |
-|  15 | Total full-length isoforms                        | Number of circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence or known |
-|  16 | Total reads for full-length isoforms              | Number of reads for circRNA isoforms with high-confidence BSJs, and all internal splice sites are high-confidence or known |
-|  17 | Total full-length isoforms with FSM BSJ           | Number of full-length circRNA isoforms with FSM BSJs |
-|  18 | Total reads for full-length isoforms with FSM BSJ | Number of reads for full-length circRNA isoforms with FSM BSJs |
-|  19 | Total full-length isoforms with NIC BSJ           | Number of full-length circRNA isoforms with NIC BSJs |
-|  20 | Total reads for full-length isoforms with NIC BSJ | Number of reads for full-length circRNA isoforms with NIC BSJs |
-|  21 | Total full-length isoforms with NNC BSJ           | Number of full-length circRNA isoforms with NNC BSJs |
-|  22 | Total reads for full-length isoforms with NNC BSJ | Number of reads for full-length circRNA isoforms with NNC BSJs |
-|  23 | Total full-length isoforms with FSM FSJ           | Number of full-length circRNA isoforms with FSM FSJs |
-|  24 | Total reads for full-length isoforms with FSM FSJ | Number of reads for full-length circRNA isoforms with FSM FSJs |
-|  25 | Total full-length isoforms with NIC FSJ           | Number of full-length circRNA isoforms with NIC internal FSJs |
-|  26 | Total reads for full-length isoforms with NIC FSJ | Number of reads for full-length circRNA isoforms with NIC FSJs |
-|  27 | Total full-length isoforms with NNC FSJ           | Number of full-length circRNA isoforms with NNC FSJs |
-|  28 | Total reads for full-length isoforms with NNC FSJ | Number of reads for full-length circRNA isoforms with NNC FSJs |
+|  11 | Total isoforms with high BSJs high FSJs           | Number of circRNA isoforms with high-confidence BSJs, and all FSJs are high-confidence (canonical, high-quality alignment around internal splice sites) |
+|  12 | Total isoforms with high BSJ known SSs            | Number of circRNA isoforms with high-confidence BSJs, and all SS are known (based on existing transcript GTF annotations for splice sites in linear RNA) |
+|  13 | Total isoforms with high BSJs high SJs known SSs  | Number of circRNA isoforms with high-confidence BSJs, all FSJs are high-confidence, and all SS are known |
+|  14 | Total full-length isoforms                        | Number of circRNA isoforms with high-confidence BSJs, and FSJs are high-confidence or all SS are known |
+|  15 | Total reads for full-length isoforms              | Number of reads for circRNA isoforms with high-confidence BSJs, and all FSJs arehigh-confidence or all SS are known |
+|  16 | Total full-length isoforms with FSM BSJ           | Number of full-length circRNA isoforms with FSM BSJs |
+|  17 | Total reads for full-length isoforms with FSM BSJ | Number of reads for full-length circRNA isoforms with FSM BSJs |
+|  18 | Total full-length isoforms with NIC BSJ           | Number of full-length circRNA isoforms with NIC BSJs |
+|  19 | Total reads for full-length isoforms with NIC BSJ | Number of reads for full-length circRNA isoforms with NIC BSJs |
+|  20 | Total full-length isoforms with NNC BSJ           | Number of full-length circRNA isoforms with NNC BSJs |
+|  21 | Total reads for full-length isoforms with NNC BSJ | Number of reads for full-length circRNA isoforms with NNC BSJs |
+|  22 | Total full-length isoforms with FSM FSJ           | Number of full-length circRNA isoforms with FSM FSJs |
+|  23 | Total reads for full-length isoforms with FSM FSJ | Number of reads for full-length circRNA isoforms with FSM FSJs |
+|  24 | Total full-length isoforms with NIC FSJ           | Number of full-length circRNA isoforms with NIC internal FSJs |
+|  25 | Total reads for full-length isoforms with NIC FSJ | Number of reads for full-length circRNA isoforms with NIC FSJs |
+|  26 | Total full-length isoforms with NNC FSJ           | Number of full-length circRNA isoforms with NNC FSJs |
+|  27 | Total reads for full-length isoforms with NNC FSJ | Number of reads for full-length circRNA isoforms with NNC FSJs |
 
  * BSJ:  Back-Splice Junction
  * FSJ:  Forward-Splice Junction
- * SJ:   Splice Junction
+ * FSS:  Forward-Splice Site
  * SS:   Splice Site
  * cons: consensus sequence
  * cano: canonical

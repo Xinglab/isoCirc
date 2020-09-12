@@ -10,8 +10,8 @@ exon_gtf=$2
 tmp_gtf=${exon_gtf}.tmp.gtf
 
 # 0. bed => gtf
-#>&2 echo "bed2gtf ${in_bed} $tmp_gtf parris"
-bed2gtf ${in_bed} $tmp_gtf parris
+#>&2 echo "bed2gtf ${in_bed} $tmp_gtf isocirc"
+bed2gtf ${in_bed} $tmp_gtf isocirc
 
 # 1. gtf => exon.gtf
 #>&2 echo "awk '(\$3==\"exon\"){print}' $tmp_gtf > ${exon_gtf}"

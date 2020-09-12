@@ -21,7 +21,7 @@ from isocirc.__init__ import __program__
 from isocirc.__init__ import __version__
 
 
-bedtools_v = '2.25.0'
+bedtools_v = '2.27.0'
 minimap2_v = '2.11'
 
 def satisfied_version(res, tool, version):

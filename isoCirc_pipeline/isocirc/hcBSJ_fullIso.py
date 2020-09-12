@@ -66,7 +66,7 @@ def is_fullLength(out1, all_out, read_ids):
     else:
         out1['isFullLength'] = 'True'
         bsj_strand = out1['canoBSJMotif'][0]
-        for sj_motif in out1['canoSJMotif'].rsplit(','):
+        for sj_motif in out1['canoFSJMotif'].rsplit(','):
             if sj_motif[0] != bsj_strand:
                 out1['isFullLength'] = 'False'
                 return
@@ -77,10 +77,10 @@ def is_fullLength(out1, all_out, read_ids):
         known_fsj_ss = out1['isKnownSS'].rsplit(',')[1:-1]
         for i in range(int(len(known_fsj_ss) / 2)):
             known_sj.append(','.join([known_fsj_ss[i*2], known_fsj_ss[i*2+1]]))
-        cano_sj = out1['isCanoSJ'].rsplit(',')
+        cano_sj = out1['isCanoFSJ'].rsplit(',')
         high_sj = ['False'] * len(cano_sj)
         for read_id in read_ids:
-            for i, high1 in enumerate(all_out[read_id]['isHighSJ'].rsplit(',')):
+            for i, high1 in enumerate(all_out[read_id]['isHighFSJ'].rsplit(',')):
                 if high1 == 'True':
                     high_sj[i] = 'True'
         if len(known_sj) != len(high_sj):
@@ -452,7 +452,7 @@ def is_coincide_knownSS(eval_out):
     if not eval_out['isCanoBSJ']:
         return False
     dis_to_bsj = eval_out['disToCanoBSJ'].split(',')
-    dis_to_known = eval_out['disToKnownSS'].split(',')
+    dis_to_known = eval_out['disToKnownFSS'].split(',')
     return dis_to_bsj[0] == dis_to_known[0] and dis_to_bsj[-1] == dis_to_known[-1]
 
 
@@ -744,8 +744,8 @@ def eval_core(id, r, cons_info_dict, ref_fa, cons_fa, all_site, all_exon, all_sj
 
     eval_out['isKnownBSJ'], eval_out['isCanoBSJ'], eval_out['disToCanoBSJ'], eval_out['canoBSJMotif'], eval_out['alignAroundCanoBSJ'] = is_known_bsj, is_cano_bsj, dis_to_cano_bsj, bsj_motif, align_bsj
 
-    eval_out['isKnownSS'], eval_out['isKnownSJ'], eval_out['isCanoSJ'], eval_out['isKnownExon'], eval_out['disToKnownSS'], eval_out['disToCanoSJ'], eval_out['canoSJMotif'] = ','.join(map(str, is_known_site)), ','.join(map(str, is_known_junc)),  ','.join(map(str, is_cano_junc)), ','.join(map(str, is_known_exon)), ','.join(map(str, dis_to_known_ss)), ','.join(dis_to_cano_sj), ','.join(cano_splice_motif)
-    eval_out['isHighSJ'] = ','.join(map(str, is_high_sj))
+    eval_out['isKnownSS'], eval_out['isKnownFSJ'], eval_out['isCanoFSJ'], eval_out['isKnownExon'], eval_out['disToKnownFSS'], eval_out['disToCanoFSJ'], eval_out['canoFSJMotif'] = ','.join(map(str, is_known_site)), ','.join(map(str, is_known_junc)),  ','.join(map(str, is_cano_junc)), ','.join(map(str, is_known_exon)), ','.join(map(str, dis_to_known_ss)), ','.join(dis_to_cano_sj), ','.join(cano_splice_motif)
+    eval_out['isHighFSJ'] = ','.join(map(str, is_high_sj))
 
     all_out[id] = eval_out
 
