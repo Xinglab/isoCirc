@@ -1,6 +1,7 @@
-# isoCirc catalogs full-length circular RNA isoforms in human transcriptomes
+# isoCirc: computational pipeline to identify high-confidence BSJs and full-length circRNA isoforms from isoCirc long-read data
 [![Github All Releases](https://img.shields.io/github/downloads/Xinglab/isoCirc/total.svg?label=Download)](https://github.com/Xinglab/isoCirc/releases)
 [![Latest Release](https://img.shields.io/github/release/Xinglab/isoCirc.svg?label=Release)](https://github.com/Xinglab/isoCirc/releases/latest)
+[![PyPI](https://img.shields.io/pypi/dm/isocirc.svg?label=pip%20install)](https://pypi.python.org/pypi/isocirc)
 [![License](https://img.shields.io/badge/License-GPL-black.svg)](https://github.com/Xinglab/isoCirc/blob/master/LICENSE)
 [![GitHub Issues](https://img.shields.io/github/issues/Xinglab/isoCirc.svg?label=Issues)](https://github.com/Xinglab/isoCirc/issues)
 <!-- [![Published in Bioinformatics](https://img.shields.io/badge/Published%20in-Bioinformatics-purple.svg)](https://doi.org/XXX) -->
@@ -38,7 +39,7 @@ using rolling circle amplification (RCA) followed by long-read sequencing.
 isoCirc is dependent on two open-source software packages: [`bedtools`(>= v2.27.0)](https://bedtools.readthedocs.io/) and minimap2 [`minimap2`(>= 2.11)](https://github.com/lh3/minimap2).
 Please ensure that these packages are installed before running isoCirc.
 
-### <a name="pip"></a>Install isoCirc with `pip` (Note: does not currently work, will work on after publication)
+### <a name="pip"></a>Install isoCirc with `pip`
 **isoCirc** is written with `python`, please use `pip` to install **isoCirc**:
 ```
 pip install isocirc            # first time installation

@@ -840,7 +840,7 @@ def hcBSJ_fullIso_core(args):
         args.cons_fa, args.ref, args.all_anno, args.circRNA_anno, itst_anno_dict, args.bedtools,
         args.flank_len, args.cano_motif, 
         args.bsj_xid, args.key_bsj_xid, args.min_circ_dis, args.rescue_low,
-        args.sj_xid, args.key_sj_xid,
+        args.fsj_xid, args.key_fsj_xid,
         args.out, args.bed, args.stats_out)
 
 

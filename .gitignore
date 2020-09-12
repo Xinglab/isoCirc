@@ -14,3 +14,4 @@ isoCirc_pipeline/build/*
 isoCirc_pipeline/isocirc.egg-info/
 test_data/output/*
 
+README.html

@@ -8,7 +8,7 @@ setup(
 	# packages=['isocirc'],
 	packages=find_packages(),
         #package_dir = {"": "src"},
-	version='{}'.format(__version__),
+	version='{}a0'.format(__version__),
         scripts=['isocirc/isocirc',
         	'isocirc/isocircPlot',
             'bin/bed2exonGtf',
@@ -50,7 +50,7 @@ setup(
 	license='GLP',
 	author='Yan Gao',
 	author_email='yangao07@hit.edu.cn',
-	description='isoCirc catalogs full-length circular RNA isoforms in human transcriptomes',
+	description='isoCirc: computational pipeline to identify high-confidence BSJs and full-length circRNA isoforms from isoCirc long-read data',
 	long_description=open('README.md').read(),
 	long_description_content_type="text/markdown",
 )
