@@ -874,8 +874,8 @@ def parser_argv():
     parser.add_argument('--min-circ-dis', type=int, default=150, help='Minimum distance between the genomic coordinates of the two back-splice sites.')
     parser.add_argument('--rescue-low', default=False, action='store_true', help='Use high mapping quality reads to rescue low mapping quality reads.')
 
-    parser.add_argument('--sj-xid', type=int, default=1, help='Maximum allowed mis/ins/del for 20-bp exonic sequence flanking the FSJ (10-bp each side).')
-    parser.add_argument('--key-sj-xid', type=int, default=0, help='Maximum allowed mis/ins/del for 4-bp exonic sequence flanking the FSJ (2-bp each side).')
+    parser.add_argument('--fsj-xid', type=int, default=1, help='Maximum allowed mis/ins/del for 20-bp exonic sequence flanking the FSJ (10-bp each side).')
+    parser.add_argument('--key-fsj-xid', type=int, default=0, help='Maximum allowed mis/ins/del for 4-bp exonic sequence flanking the FSJ (2-bp each side).')
 
     parser.add_argument('--Alu', type=str, default='', help='Alu repetitive element annotation in BED format. ')
     parser.add_argument('--flank-len', type=int, default=flank_len, help='Length of upstream and downstream flanking sequence to search for Alu.')

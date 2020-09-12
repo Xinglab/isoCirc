@@ -74,7 +74,7 @@ usage: isocirc [-h] [-v] [-t THREADS] [--bedtools BEDTOOLS]
                [--low-repeat-ratio LOW_REPEAT_RATIO]
                [--cano-motif {GT/AG,all}] [--bsj-xid BSJ_XID]
                [--key-bsj-xid KEY_BSJ_XID] [--min-circ-dis MIN_CIRC_DIS]
-               [--rescue-low] [--sj-xid SJ_XID] [--key-sj-xid KEY_SJ_XID]
+               [--rescue-low] [--fsj-xid FSJ_XID] [--key-fsj-xid KEY_FSJ_XID]
                [--Alu ALU] [--flank-len FLANK_LEN] [--all-repeat ALL_REPEAT]
                long.fa/fq ref.fa anno.gtf circRNA.bed/gtf out_dir
 
@@ -157,9 +157,9 @@ Identifying high-confidence BSJs and full-length circRNAs:
                         two back-splice sites (default: 150)
   --rescue-low          Use high-mapping quality reads to rescue low-mapping
                         quality reads (default: False)
-  --sj-xid SJ_XID       Maximum allowed mis/ins/del for 20-bp exonic sequence
+  --fsj-xid SJ_XID       Maximum allowed mis/ins/del for 20-bp exonic sequence
                         flanking FSJ (10-bp each side) (default: 1)
-  --key-sj-xid KEY_SJ_XID
+  --key-fsj-xid KEY_SJ_XID
                         Maximum allowed mis/ins/del for 4-bp exonic sequence
                         flanking FSJ (2-bp each side) (default: 0)
 
@@ -265,7 +265,7 @@ isoCirc outputs three result files in a user-specified directory:
 |  10 | Total isoforms with high BSJs                     | Number of circRNA isoforms with high-confidence BSJs |
 |  11 | Total isoforms with high BSJs high FSJs           | Number of circRNA isoforms with high-confidence BSJs, and all FSJs are high-confidence (canonical, high-quality alignment around internal splice sites) |
 |  12 | Total isoforms with high BSJ known SSs            | Number of circRNA isoforms with high-confidence BSJs, and all SS are known (based on existing transcript GTF annotations for splice sites in linear RNA) |
-|  13 | Total isoforms with high BSJs high SJs known SSs  | Number of circRNA isoforms with high-confidence BSJs, all FSJs are high-confidence, and all SS are known |
+|  13 | Total isoforms with high BSJs high FSJs known SSs  | Number of circRNA isoforms with high-confidence BSJs, all FSJs are high-confidence, and all SS are known |
 |  14 | Total full-length isoforms                        | Number of circRNA isoforms with high-confidence BSJs, and FSJs are high-confidence or all SS are known |
 |  15 | Total reads for full-length isoforms              | Number of reads for circRNA isoforms with high-confidence BSJs, and all FSJs arehigh-confidence or all SS are known |
 |  16 | Total full-length isoforms with FSM BSJ           | Number of full-length circRNA isoforms with FSM BSJs |
@@ -287,7 +287,7 @@ isoCirc outputs three result files in a user-specified directory:
  * SS:   Splice Site
  * cons: consensus sequence
  * cano: canonical
- * high: high-confidence (canonical and high-quality alignment around SJ/BSJ)
+ * high: high-confidence (canonical and high-quality alignment around FSJ/BSJ)
  * FSM: Full Splice Match
  * NIC: Novel In Catalog
  * NNC: Novel Not in Catalog
