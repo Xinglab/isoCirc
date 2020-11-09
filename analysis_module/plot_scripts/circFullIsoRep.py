@@ -30,15 +30,15 @@ def get_count_bin(cnt):
 
 if len(sys.argv) < 8:
     print('Usage:')
-    print('{} min_cnt in1.out in2.out ... vennFig stackFig cdfFig pairFig lenFig blockCntFig'.format(sys.argv[0]))
+    print('{} min_cnt in1.out in2.out ... pairFig'.format(sys.argv[0]))
     sys.exit(1)
 
 min_read_cnt = int(sys.argv[1])
-in_fn_list = sys.argv[2:-6]
-[fig1, fig2, fig3, fig4, fig5, fig6] = sys.argv[-6:]
+in_fn_list = sys.argv[2:-1]
+fig = sys.argv[-1]
 names= []
 fn_n = len(in_fn_list)
-tmp_dir=os.path.dirname(os.path.abspath(fig1))
+tmp_dir=os.path.dirname(os.path.abspath(fig))
 iso_out = tmp_dir + '/cnt{}_iso.out'.format(min_read_cnt)
 anno_out = tmp_dir + '/cnt{}_iso_anno.out'.format(min_read_cnt)
 cnt_out  = tmp_dir + '/cnt{}_iso_read_cnt.out'.format(min_read_cnt)
@@ -136,26 +136,6 @@ with open(iso_out, 'w') as out_fp, open(anno_out, 'w') as anno_fp, open(cnt_out,
 
 
 
-cmd='Rscript /home/gaoy1/program/circ_plot/circFullIsoRepVenn.R {} {}'.format(iso_out, fig1)
-# print(cmd)
-# os.system(cmd)
-
-cmd='Rscript /home/gaoy1/program/circ_plot/circFullIsoRepAnno.R {} {}'.format(anno_out, fig2)
-# print(cmd)
-# os.system(cmd)
-
-cmd='Rscript /home/gaoy1/program/circ_plot/circFullIsoRepCnt.R {} {}'.format(cnt_out, fig3)
-# print(cmd)
-# os.system(cmd)
-
-cmd='Rscript /home/gaoy1/program/circ_plot/circFullIsoRepPair.R {} {}'.format(pairs_out, fig4)
-print(cmd)
-os.system(cmd)
-
-cmd='Rscript /home/gaoy1/program/circ_plot/circFullIsoRepLen.R {} {}'.format(len_out, fig5)
-print(cmd)
-os.system(cmd)
-
-cmd='Rscript /home/gaoy1/program/circ_plot/circFullIsoRepBlockCnt.R {} {}'.format(len_out, fig6)
+cmd='Rscript /home/gaoy1/program/circ_plot/circFullIsoRepPair.R {} {}'.format(pairs_out, fig)
 print(cmd)
 os.system(cmd)

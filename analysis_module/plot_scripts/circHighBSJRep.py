@@ -16,12 +16,12 @@ idx = {h: i for i, h in enumerate(header)}
 
 if len(sys.argv) < 6:
     print('Usage:')
-    print('{} min_cnt in1.out in2.out ... vennFig stackFig cdfFig pairFig'.format(sys.argv[0]))
+    print('{} min_cnt in1.out in2.out ... stackFig cdfFig pairFig'.format(sys.argv[0]))
     sys.exit(1)
 
 min_read_cnt = int(sys.argv[1])
-in_fn_list = sys.argv[2:-4]
-[fig1, fig2, fig3, fig4] = sys.argv[-4:]
+in_fn_list = sys.argv[2:-3]
+[fig1, fig2, fig3] = sys.argv[-3:]
 names= []
 fn_n = len(in_fn_list)
 tmp_dir=os.path.dirname(os.path.abspath(fig1))
@@ -115,19 +115,15 @@ with open(bsj_out, 'w') as out_fp, open(anno_out, 'w') as anno_fp, open(cnt_out,
                     pair_fp.write('{}\t{}\t{}\t{}\n'.format(name2, name1, cnt2, cnt1))
 
 
-cmd='Rscript /home/gaoy1/program/circ_plot/circHighBSJRepVenn.R {} {}'.format(bsj_out, fig1)
-# print(cmd)
-# os.system(cmd)
-
-cmd='Rscript /home/gaoy1/program/circ_plot/circHighBSJRepAnno.R {} {}'.format(anno_out, fig2)
+cmd='Rscript /home/gaoy1/program/circ_plot/circHighBSJRepAnno.R {} {}'.format(anno_out, fig1)
 print(cmd)
 os.system(cmd)
 
-cmd='Rscript /home/gaoy1/program/circ_plot/circHighBSJRepCnt.R {} {}'.format(cnt_out, fig3)
+cmd='Rscript /home/gaoy1/program/circ_plot/circHighBSJRepCnt.R {} {}'.format(cnt_out, fig2)
 print(cmd)
 os.system(cmd)
 
-cmd='Rscript /home/gaoy1/program/circ_plot/circHighBSJRepPair.R {} {}'.format(pairs_out, fig4)
+cmd='Rscript /home/gaoy1/program/circ_plot/circHighBSJRepPair.R {} {}'.format(pairs_out, fig3)
 print(cmd)
 os.system(cmd)
 

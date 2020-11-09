@@ -1,5 +1,4 @@
 #!/bin/bash
-# root_dir=/home/gaoy1/circRNA/corr_long_reads/isoCirc_new_output  #corr
 root_dir=/home/gaoy1/circRNA/raw_long_reads/raw_isoCirc_out # raw
 out_dir=$root_dir/all_figures
 # out_dir=/scr1/users/gaoy1/isocirc_figs
@@ -199,6 +198,7 @@ mionco=/home/gaoy1/data/genome/mioncocirc_hg19_sorted_uniq.bed
 fig=$out_dir/fig_s12_alu_pair.pdf
 min_cnt=2
 for min_cnt in 2 3; do for flank_len in 1000 2000; do echo "python $src $min_cnt $flank_len $rep1_out $rep2_out $alu_bed $gene_pred $circbase $mionco $fig"; done done
+cat $out_dir/*bsj_alu_pair.out > $out_dir/bsj_alu_pair_all.out
 r_src=$src_dir/bsjAluPair.R
 echo "Rscript $r_src $out_dir/bsj_alu_pair_all.out $fig"
 
@@ -288,5 +288,3 @@ src=$src_dir/RI_anno_maxEntBox.R
 echo "Rscript $src $out_dir/ri.comb.score fig1"
 src=$src_dir/RI_anno_maxEntCDF.R
 echo "Rscript $src $out_dir/ri.comb.score fig2"
-
-
