@@ -2,6 +2,7 @@
 [![Github All Releases](https://img.shields.io/github/downloads/Xinglab/isoCirc/total.svg?label=Download)](https://github.com/Xinglab/isoCirc/releases)
 [![Latest Release](https://img.shields.io/github/release/Xinglab/isoCirc.svg?label=Release)](https://github.com/Xinglab/isoCirc/releases/latest)
 [![PyPI](https://img.shields.io/pypi/dm/isocirc.svg?label=pip%20install)](https://pypi.python.org/pypi/isocirc)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4264644.svg)](https://doi.org/10.5281/zenodo.4264644)
 [![License](https://img.shields.io/badge/License-GPL-black.svg)](https://github.com/Xinglab/isoCirc/blob/master/LICENSE)
 [![GitHub Issues](https://img.shields.io/github/issues/Xinglab/isoCirc.svg?label=Issues)](https://github.com/Xinglab/isoCirc/issues)
 <!-- [![Published in Bioinformatics](https://img.shields.io/badge/Published%20in-Bioinformatics-purple.svg)](https://doi.org/XXX) -->
