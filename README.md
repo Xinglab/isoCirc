@@ -1,15 +1,15 @@
 # isoCirc: computational pipeline to identify high-confidence BSJs and full-length circRNA isoforms from isoCirc long-read data
-[![Github All Releases](https://img.shields.io/github/downloads/Xinglab/isoCirc/total.svg?label=Download)](https://github.com/Xinglab/isoCirc/releases)
+<!-- [![Github All Releases](https://img.shields.io/github/downloads/Xinglab/isoCirc/total.svg?label=Download)](https://github.com/Xinglab/isoCirc/releases) -->
 [![Latest Release](https://img.shields.io/github/release/Xinglab/isoCirc.svg?label=Release)](https://github.com/Xinglab/isoCirc/releases/latest)
 [![PyPI](https://img.shields.io/pypi/dm/isocirc.svg?label=pip%20install)](https://pypi.python.org/pypi/isocirc)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4264644.svg)](https://doi.org/10.5281/zenodo.4264644)
 [![License](https://img.shields.io/badge/License-GPL-black.svg)](https://github.com/Xinglab/isoCirc/blob/master/LICENSE)
+[![Published in Nat. Commun.](https://img.shields.io/badge/Published%20in-NatCommun-orange.svg)](https://doi.org/10.1038/s41467-020-20459-8)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4264644.svg)](https://doi.org/10.5281/zenodo.4264644)
 [![GitHub Issues](https://img.shields.io/github/issues/Xinglab/isoCirc.svg?label=Issues)](https://github.com/Xinglab/isoCirc/issues)
 <!-- [![Published in Bioinformatics](https://img.shields.io/badge/Published%20in-Bioinformatics-purple.svg)](https://doi.org/XXX) -->
 <!-- [![Build Status](https://travis-ci.org/yangao07/TideHunter.svg?branch=master)](https://travis-ci.org/yangao07/TideHunter) -->
 <!-- [![Anaconda-Server Badge](https://anaconda.org/darts-comp-bio/darts_dnn/badges/version.svg)](https://anaconda.org/darts-comp-bio/darts_dnn) -->
 <!-- [![Anaconda-Server Badge](https://anaconda.org/darts-comp-bio/darts_dnn/badges/installer/conda.svg)](https://conda.anaconda.org/darts-comp-bio) -->
-<!-- pip??? -->
 
 ## <a name="isocirc"></a>What is isoCirc ?
 isoCirc is a long-read sequencing strategy coupled with an integrated 
