@@ -304,7 +304,7 @@ A `.png` file will be generated in the `output` folder indicating how the isoCir
 ## <a name="FAQ"></a>FAQ
 ## <a name="contact"></a>Contact
 
-Yan Gao gaoy1@email.chop.edu
+Yan Gao gaoy286@mail.sysu.edu.cn
 
 Yi Xing yi.xing@pennmedicine.upenn.edu
 

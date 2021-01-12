@@ -13,13 +13,12 @@ from isocirc.__init__ import __version__
 
 idx = isoform_output_header_idx
 
-def get_error_rate(in_sam_fn=''):
+def get_map_stats(in_sam_fn=''):
     map_read_name = dict()
-    tot_mapped_read_n, tot_mapped_cons_n, tot_unmapped_n, tot_mapped_base, tot_ins, tot_del, tot_mis, tot_match = 0, 0, 0, 0, 0, 0, 0, 0
+    tot_mapped_read_n, tot_mapped_cons_n, tot_mapped_base = 0, 0, 0
     with pysam.AlignmentFile(in_sam_fn) as in_sam:
         for r in in_sam:
             if r.is_unmapped:
-                tot_unmapped_n += 1
                 continue
             elif r.is_secondary or r.is_supplementary:
                 continue
@@ -29,98 +28,18 @@ def get_error_rate(in_sam_fn=''):
                 tot_mapped_read_n += 1
             tot_mapped_cons_n += 1
             tot_mapped_base += r.query_alignment_length
-            cigar_stats = pb.cigarstring_to_cigarstats(r.cigarstring)
-            tot_match += cigar_stats[pb.cigar_op_dict['=']]
-            tot_ins += cigar_stats[pb.cigar_op_dict['I']]
-            tot_del += cigar_stats[pb.cigar_op_dict['D']]
-            tot_mis += cigar_stats[pb.cigar_op_dict['X']]
-    return tot_mapped_read_n, tot_mapped_cons_n, tot_mapped_base, '{0:.1f}%'.format((tot_ins+tot_del+tot_mis) / (tot_ins+tot_mis+tot_match+0.0) * 100)
-# Read number
-# Base-pair number:
-# Cons. read number:
-# Cons. sequence number:
-# Mappable cons. number:
-# Error rate:
-
-# TODO only for pacbio
-def pb_stats_core(long_read_len, cons_info, cons_bam, isoform_out, all_bsj_stats_dict, stats_out):
-    ut.err_format_time('basic_stats_core', 'Writing basic stats to file ... ')
-    # basic stats of read/cons
-    tot_subread_n, tot_polyread_n, tot_base, tot_cons_read_n, tot_cons_n, tot_cons_base, tot_map_cons_n, tot_map_cons_base, error_rate = 0, 0, 0, 0, 0, 0, 0, 0, '0.0%'
-    poly_names = dict()
-    with open(long_read_len, 'r') as in_fp:
-        for line in in_fp:
-            [name, read_len] = line.rsplit()
-            read_len = int(read_len)
-            tot_subread_n += 1
-            tot_base += read_len
-            if len(name.rsplit('/')) > 1:
-                poly_name = name.rsplit('/')[0]+ '/' + name.rsplit('/')[1]
-                poly_names[poly_name] = 1
-    tot_polyread_n = len(poly_names)
-    tot_map_cons_n, tot_map_cons_base, error_rate = pb.get_error_rate(cons_bam)
-    with open(cons_info) as in_fp:
-        cons_names = dict()
-        for line in in_fp:
-            ele = line.rsplit()
-            cons_name = ele[0].rsplit('_cons')[0]
-            cons_names[cons_name] = 1
-            tot_cons_n += 1
-            tot_cons_base += int(ele[2])
-    tot_cons_read_n = len(cons_names)
-
-    # detailed stats of circRNA
-    # tot_known_circRNA
-    tot_circRNA_read_n, tot_isoform, tot_known_bsj, tot_known_bsj_subread_n, tot_known_bsj_polyread_n, tot_cano_bsj, tot_cano_bsj_subread_n, tot_cano_bsj_polyread_n = 0, 0, 0, 0, 0, 0, 0, 0
-    with open(isoform_out) as in_fp:
-        for line in in_fp:
-            if line.startswith('#'): continue
-            tot_isoform += 1
-            ele = line.rsplit()
-            tot_circRNA_read_n += int(ele[idx['readCount']])
-            if ele[idx['isKnownBSJ']] == 'True':
-                tot_known_bsj += 1
-                subreads_cnt = ps.get_subreads_cnt(ele[idx['readIDs']])
-                polyreads_cnt = ps.get_polyreads_cnt(ele[idx['readIDs']])
-                tot_known_bsj_subread_n += subreads_cnt
-                tot_known_bsj_polyread_n += polyreads_cnt
-            elif ele[idx['isCanoBSJ']] == 'True':
-                tot_cano_bsj += 1
-                subreads_cnt = ps.get_subreads_cnt(ele[idx['readIDs']])
-                polyreads_cnt = ps.get_polyreads_cnt(ele[idx['readIDs']])
-                tot_cano_bsj_subread_n += subreads_cnt
-                tot_cano_bsj_polyread_n += polyreads_cnt
-
-    with open(stats_out, 'w') as out:
-        out.write('Total_subread_number\t{}\n'.format(tot_subread_n))
-        out.write('Total_polyread_number\t{}\n'.format(tot_polyread_n))
-        out.write('Total_base\t{}\n'.format(tot_base))
-        out.write('Total_cons_read_number\t{}\n'.format(tot_cons_read_n))
-        out.write('Total_cons_seq_number\t{}\n'.format(tot_cons_n))
-        out.write('Total_cons_seq_base\t{}\n'.format(tot_cons_base))
-        out.write('Total_mappable_cons_number\t{}\n'.format(tot_map_cons_n))
-        out.write('Total_mappable_cons_base\t{}\n'.format(tot_map_cons_base))
-        out.write('Error_rate\t{}\n'.format(error_rate))
-        out.write('Total_circRNA_read_number\t{}\n'.format(tot_circRNA_read_n))
-        out.write('Total_isoform\t{}\n'.format(tot_isoform))
-        out.write('Total_isoform_with_known_BSJ\t{}\n'.format(tot_known_bsj))
-        out.write('Total_subread_with_known_BSJ\t{}\n'.format(tot_known_bsj_subread_n))
-        out.write('Total_polyread_with_known_BSJ\t{}\n'.format(tot_known_bsj_polyread_n))
-        out.write('Total_isoform_with_unknown_cano_BSJ\t{}\n'.format(tot_cano_bsj))
-        out.write('Total_subread_with_unknown_cano_BSJ\t{}\n'.format(tot_cano_bsj_subread_n))
-        out.write('Total_polyread_cano_BSJ\t{}\n'.format(tot_cano_bsj_polyread_n))
-    ut.err_format_time('basic_stats_core', 'Writing basic stats to file done!')
+    return tot_mapped_read_n, tot_mapped_cons_n, tot_mapped_base
 
 def stats_core(long_read_len, cons_info, cons_bam, isoform_out, all_bsj_stats_dict, stats_out):
     # basic stats of read/cons
-    tot_read_n, tot_base, tot_read_cons_n, tot_cons_n, tot_cons_base, tot_map_cons_n, tot_map_cons_base, error_rate = 0, 0, 0, 0, 0, 0, 0, '0.0%'
+    tot_read_n, tot_base, tot_read_cons_n, tot_cons_n, tot_cons_base, tot_map_cons_n, tot_map_cons_base = 0, 0, 0, 0, 0, 0, 0
     with open(long_read_len, 'r') as in_fp:
         for line in in_fp:
             [name, read_len] = line.rsplit()
             read_len = int(read_len)
             tot_read_n += 1
             tot_base += read_len
-    tot_map_read_n, tot_map_cons_n, tot_map_cons_base, error_rate = get_error_rate(cons_bam)
+    tot_map_read_n, tot_map_cons_n, tot_map_cons_base = get_map_stats(cons_bam)
     with open(cons_info) as in_fp:
         cons_names = dict()
         for line in in_fp:
@@ -258,10 +177,7 @@ def stats_core(long_read_len, cons_info, cons_bam, isoform_out, all_bsj_stats_di
 def basic_stats(args):
     all_bsj_stats_dict = dd(lambda:0)
     all_bsj_stats_dict['known_bsj_n'] = [0]
-    # if args.type == 'ont':
     stats_core(args.long_read_len, args.cons_info, args.cons_bam, args.out, all_bsj_stats_dict, args.stats_out)
-    # elif args.type == 'pb':
-    #     pb_stats_core(args.long_read_len, args.cons_info, args.cons_bam, args.out, all_bsj_stats_dict, args.stats_out)
 
 def parser_argv():
     # parse command line arguments

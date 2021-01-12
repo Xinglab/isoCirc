@@ -51,7 +51,7 @@ def check_depen(bedtools='bedtools', minimap2='minimap2'):
 			ut.fatal_format_time('check_dependencies', '{} ({}, >= v{}) is not installed.'.format(n, u, v))
 		if not isinstance(r, str): r = str(r, 'utf-8') 
 		if not satisfied_version(r, n, v):
-			ut.fatal_format_time('check_dependencies', 'Version of {} ({}) is too low, >= v{} is needed.'.format(n, u, v))
+			ut.fatal_format_time('check_dependencies', '{} ({}) is too old, >= v{} is needed.'.format(n, u, v))
 	ut.err_format_time('check_dependencies', 'Checking dependencies done!')
 
 

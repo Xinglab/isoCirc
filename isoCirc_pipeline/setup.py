@@ -8,7 +8,7 @@ setup(
 	# packages=['isocirc'],
 	packages=find_packages(),
         #package_dir = {"": "src"},
-	version='{}a0'.format(__version__),
+	version='{}'.format(__version__),
         scripts=['isocirc/isocirc',
         	'isocirc/isocircPlot',
             'bin/bed2exonGtf',
