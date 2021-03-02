@@ -583,7 +583,7 @@ def align_to_circRNA_fa(ref_fa, anno_gtf, read_fa, read_len_fn, isocirc_bed, iso
     cmd = 'fxtools fn -l -n {} {} > {}'.format(read_list, read_fa, circRNA_read_fa)
     ut.exec_cmd(sys.stderr, 'circRNA read sequence', cmd)
     # ref.fa copy_n copyies
-    cmd = 'bedtools getfasta -split -name -fi {} -bed {} -fo {}'.format(ref_fa, isocirc_list, circRNA_ref_fa)
+    cmd = 'bedtools getfasta -split -nameOnly -fi {} -bed {} -fo {}'.format(ref_fa, isocirc_list, circRNA_ref_fa)
     ut.exec_cmd(sys.stderr, 'circRNA reference sequence', cmd)
     ut.exec_cmd(sys.stderr, 'Temporary files', 'rm {} {}'.format(isocirc_list, read_list))
 
