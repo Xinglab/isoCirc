@@ -19,6 +19,8 @@ def restore_gff_db(gtf_fn):
                 with open(gtf_fn) as fp:
                     l = 0
                     for line in fp:
+                        line = line.rstrip()
+                        if len(line) < 1: continue
                         if line[0] != '#':
                             if line.split()[2] == 'gene':
                                 disable_gene = True
@@ -121,8 +123,10 @@ def get_exon_block_from_bed12(in_bed, bam_fn=''):
     bam = ps.AlignmentFile(bam_fn) if bam_fn else None
     with open(in_bed, 'r') as bed:
         for line in bed:
+            line = line.rstrip()
+            if len(line) < 1: continue
             if line.startswith('#'): continue
-            ele = line[:-1].rsplit('\t')
+            ele = line.rsplit('\t')
             chrom = bam.get_tid(ele[bed_header['chrom']]) if bam else ele[bed_header['chrom']]
             strand = ele[bed_header['strand']]
             start = int(ele[bed_header['chromStart']])
@@ -154,8 +158,10 @@ def get_sorted_exon_block_from_bed12(in_bed, bam_fn=''):
     bam = ps.AlignmentFile(bam_fn) if bam_fn else None
     with open(in_bed, 'r') as bed:
         for line in bed:
+            line = line.rstrip()
+            if len(line) < 1: continue
             if line.startswith('#'): continue
-            ele = line[:-1].rsplit('\t')
+            ele = line.rsplit('\t')
             chrom = ele[bed_header['chrom']]
             strand = ele[bed_header['strand']]
             start = int(ele[bed_header['chromStart']])
@@ -285,8 +291,10 @@ def get_back_splice_junction_from_bed(in_bed, bam_fn=""):
     bam = ps.AlignmentFile(bam_fn) if bam_fn else None
     with open(in_bed, 'r') as bed:
         for line in bed:
+            line = line.rstrip()
+            if len(line) < 1: continue
             if line.startswith('#'): continue
-            ele = line[:-1].rsplit()
+            ele = line.rsplit()
             chrom = ele[bed_header['chrom']]
             start = int(ele[bed_header['chromStart']])
             end = int(ele[bed_header['chromEnd']])
@@ -311,8 +319,10 @@ def get_splice_junction_from_bed12(in_bed, include_end, bam_fn=""):
     bam = ps.AlignmentFile(bam_fn) if bam_fn else None
     with open(in_bed, 'r') as bed:
         for line in bed:
+            line = line.rstrip()
+            if len(line) < 1: continue
             if line.startswith('#'): continue
-            ele = line[:-1].rsplit('\t')
+            ele = line.rsplit('\t')
             chrom = ele[bed_header['chrom']]
             strand = ele[bed_header['strand']]
             start = int(ele[bed_header['chromStart']])
@@ -371,8 +381,10 @@ def get_transcript_from_gene_pred(in_gene_pred, bam_fn=""):
     # bam = ps.AlignmentFile(bam_fn) if bam_fn else None
     with open(in_gene_pred, 'r') as pred:
         for line in pred:
+            line = line.rstrip()
+            if len(line) < 1: continue
             if line.startswith('#'): continue
-            ele = line[:-1].rsplit('\t')
+            ele = line.rsplit('\t')
             # chrom = ele[bed_header['chrom']]
             # strand = ele[bed_header['strand']]
             start_array, end_array = ele[pred_header['exonStarts']].split(','), ele[pred_header['exonEnds']].split(
@@ -407,8 +419,10 @@ def get_splice_site_from_bed12(in_bed, bam_fn=""):
     bam = ps.AlignmentFile(bam_fn) if bam_fn else None
     with open(in_bed, 'r') as bed:
         for line in bed:
+            line = line.rstrip()
+            if len(line) < 1: continue
             if line.startswith('#'): continue
-            ele = line[:-1].rsplit('\t')
+            ele = line.rsplit('\t')
             chrom = ele[bed_header['chrom']]
             strand = ele[bed_header['strand']]
             start = int(ele[bed_header['chromStart']])
@@ -466,8 +480,10 @@ def get_exon_from_bed12(in_bed, bam_fn=""):
     bam = ps.AlignmentFile(bam_fn) if bam_fn else None
     with open(in_bed, 'r') as bed:
         for line in bed:
+            line = line.rstrip()
+            if len(line) < 1: continue
             if line.startswith('#'): continue
-            ele = line[:-1].rsplit('\t')
+            ele = line.rsplit('\t')
             chrom = ele[bed_header['chrom']]
             strand = ele[bed_header['strand']]
             start = int(ele[bed_header['chromStart']])
@@ -873,6 +889,8 @@ def get_block_from_coor(coor=[]):
 def bed12_to_site_bed(in_bed_fn, out_five_site_fn, out_three_site_fn, site_dis, end_dis):
     with open(in_bed_fn) as in_bed, open(out_five_site_fn, 'w') as five_out_bed, open(out_three_site_fn, 'w') as three_out_bed:
         for line in in_bed:
+            line = line.rstrip()
+            if len(line) < 1: continue
             if line.startswith('#'): continue
             ele = line.rsplit()
             start0base = int(ele[1])
