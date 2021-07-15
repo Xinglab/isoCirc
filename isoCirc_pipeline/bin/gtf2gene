@@ -16,14 +16,20 @@ tmp=${1}.tmp
 # 0. gene_gtf => gene.bed
 awk -v OFS="\t" '
     ($3=="gene") {
-    gene_id='NA';
-    gene_name='NA';
-    gene_strand='NA';
     if (match($0, /gene_id \"([^\"]+)\";/, arr)) {
         gene_id=arr[1];
+    } else {
+        gene_id = "AA"
     }
     if (match($0, /gene_name \"([^\"]+)\";/, arr)) {
         gene_name=arr[1];
+    } else {
+        gene_name = "NA"
+    }
+    if (gene_id == "NA" && gene_name != "NA") {
+        gene_id = gene_name
+    } else if (gene_name == "NA" && gene_id != "NA") {
+        gene_name = gene_id
     }
     print $1, $4-1, $5, gene_id","gene_name","$7, ".", $7;
 }
@@ -45,5 +51,5 @@ awk -v OFS="\t" '
         print read_id, gene_id, gene_name, gene_strand
     }
 ' $tmp | sort | uniq > $out_name_id
-rm $gene_bed
-rm $tmp
+# rm $gene_bed
+# rm $tmp
