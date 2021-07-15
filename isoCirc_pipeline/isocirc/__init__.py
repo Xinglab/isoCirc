@@ -1,5 +1,5 @@
 __program__ = "isocirc"
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 
 whole_output_header = ['#readID', 'chrom', 'startCoor0based', 'endCoor', 'mapStrand',
                        'geneStrand', 'geneID', 'geneName',  # 'transID', 'transName',
