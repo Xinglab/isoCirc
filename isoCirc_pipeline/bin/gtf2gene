@@ -51,5 +51,5 @@ awk -v OFS="\t" '
         print read_id, gene_id, gene_name, gene_strand
     }
 ' $tmp | sort | uniq > $out_name_id
-# rm $gene_bed
-# rm $tmp
+rm $gene_bed
+rm $tmp
