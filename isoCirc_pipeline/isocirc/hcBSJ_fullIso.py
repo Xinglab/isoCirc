@@ -764,7 +764,8 @@ def hcBSJ_fullIso(high_bam, low_bam, long_len, cons_info, cons,
 
     all_anno_bed = out_dir + os.path.basename(all_anno) + '.bed'
     all_anno_gene_pred = out_dir + os.path.basename(all_anno) + '.gene_pred' 
-    ut.exec_cmd(sys.stderr, 'gtfToGenePred', '{} -genePredExt -ignoreGroupsWithoutExons {} {}'.format(gtfToGenePred, all_anno, all_anno_gene_pred))
+    # ut.exec_cmd(sys.stderr, 'gtfToGenePred', '{} -genePredExt -ignoreGroupsWithoutExons {} {}'.format(gtfToGenePred, all_anno, all_anno_gene_pred))
+    ut.exec_cmd(sys.stderr, 'gtfToGenePred', '{} -ignoreGroupsWithoutExons {} {}'.format(gtfToGenePred, all_anno, all_anno_gene_pred))
     ut.exec_cmd(sys.stderr, 'genePredToBed', '{} {} {}'.format(genePredToBed, all_anno_gene_pred, all_anno_bed))
 
     all_trans = pg.get_transcript_from_gene_pred(all_anno_gene_pred, high_bam)
