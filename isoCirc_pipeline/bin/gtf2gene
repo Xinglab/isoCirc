@@ -16,12 +16,12 @@ tmp=${1}.tmp
 # 0. gene_gtf => gene.bed
 awk -v OFS="\t" '
     ($3=="gene") {
-    if (match($0, /gene_id \"([^\"]+)\";/, arr)) {
+    if (match($0, /gene_id "([^"]+)";/, arr)) {
         gene_id=arr[1];
     } else {
         gene_id = "AA"
     }
-    if (match($0, /gene_name \"([^\"]+)\";/, arr)) {
+    if (match($0, /gene_name "([^"]+)";/, arr)) {
         gene_name=arr[1];
     } else {
         gene_name = "NA"
@@ -41,7 +41,7 @@ bedtools intersect -s -a $gene_bed -b $exon_gtf -split -wb > $tmp
 
 # 2. extract gene id and gene name
 awk -v OFS="\t" '
-    (match($0, /gene_id \"([^\"]+)\";/, arr)) {
+    (match($0, /gene_id "([^"]+)";/, arr)) {
         read_id=arr[1]
         split($4, gene, ",")
         gene_id=gene[1]

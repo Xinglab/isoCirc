@@ -5,7 +5,6 @@ from threading import Thread
 from collections import defaultdict as dd
 import pysam as ps
 from pyfaidx import Fasta
-from Bio.Seq import Seq
 
 import isocirc.parse_bam as pb
 import isocirc.parse_gff as pg
@@ -763,12 +762,13 @@ def hcBSJ_fullIso(high_bam, low_bam, long_len, cons_info, cons,
     out_dir = os.path.dirname(os.path.abspath(isoform_out_fn)) + '/'
 
     all_anno_bed = out_dir + os.path.basename(all_anno) + '.bed'
-    all_anno_gene_pred = out_dir + os.path.basename(all_anno) + '.gene_pred' 
+    all_anno_gene_pred = out_dir + os.path.basename(all_anno) + '.gene_pred'
     # ut.exec_cmd(sys.stderr, 'gtfToGenePred', '{} -genePredExt -ignoreGroupsWithoutExons {} {}'.format(gtfToGenePred, all_anno, all_anno_gene_pred))
     ut.exec_cmd(sys.stderr, 'gtfToGenePred', '{} -ignoreGroupsWithoutExons {} {}'.format(gtfToGenePred, all_anno, all_anno_gene_pred))
     ut.exec_cmd(sys.stderr, 'genePredToBed', '{} {} {}'.format(genePredToBed, all_anno_gene_pred, all_anno_bed))
 
-    all_trans = pg.get_transcript_from_gene_pred(all_anno_gene_pred, high_bam)
+    all_trans = pg.get_transcript_from_gtf(all_anno)
+    # all_trans = pg.get_transcript_from_gene_pred(all_anno_gene_pred)
     all_site = pg.get_splice_site_from_bed12(all_anno_bed, high_bam)
     all_sj = pg.get_splice_junction_from_bed12(all_anno_bed, False, high_bam)
     all_exon = pg.get_exon_from_bed12(all_anno_bed, high_bam)

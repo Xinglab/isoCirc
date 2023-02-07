@@ -2,7 +2,7 @@ import sys, re
 import pysam as ps
 from collections import defaultdict as dd
 import copy
-from Bio import pairwise2
+from Bio import Align
 
 import isocirc.utils as ut
 
@@ -57,30 +57,27 @@ def is_cigar_M(c):
 # c     A callback function returns the gap penalties.
 
 
-# align1: ref, align2: query
 # return: ref_pos,cigar
-def get_cigar_from_pairwise_res(r):
-    (align1, align2, score, start, end) = r
-    ref_pos = start - align1[:start].count('-')  # 0-base
-    read_left_clip = start - align2[:start].count('-')
-    read_right_clip = len(align2) - end - align2[end:].count('-')
-    cigartuples = [(cigar_op_dict['S'], read_left_clip)] if read_left_clip else []
-    align_str1 = align1[start:end]
-    align_str2 = align2[start:end]
-    for (s1, s2) in zip(align_str1, align_str2):
-        if s1 == '-' and s2 != '-':  # insertion
-            op = 'I'
-        elif s1 != '-' and s2 == '-':  # deletion
-            op = 'D'
-        elif s1 == s2:  # match
+def get_cigar_from_pairwise_res(aln_info):
+    ele = aln_info.rsplit()
+    target_str, query_str, aln_str = ele[2], ele[9], ele[5]
+    cigartuples = []
+    for t, q, s in zip(target_str, query_str, aln_str):
+        if s == '|':  # match
             op = '='
-        else:  # mismatch
+        elif s == '.':  # mismatch
             op = 'X'
+        elif s == '-':  # insertion
+            if t == '-' and q != '-':
+                op = 'I'
+            elif t != '-' and q == '-':  # deletion
+                op = 'D'
+            else:
+                ut.fatal_format_time('get_cigar_from_pairwise_res', 'Error is pairwise alignment result.')
         if cigartuples and cigartuples[-1][0] == cigar_op_dict[op]:
             cigartuples[-1] = (cigar_op_dict[op], cigartuples[-1][1] + 1)
         else:
             cigartuples.append((cigar_op_dict[op], 1))
-    if read_right_clip: cigartuples.append((cigar_op_dict['S'], read_right_clip))
     cigarstring = cigartuples_to_cigarstring(cigartuples)
     return cigarstring
 
@@ -88,15 +85,24 @@ def get_cigar_from_pairwise_res(r):
 # return: ref_pos,cigar
 def pairwise_align(seq1='', seq2='', align_mode='g', cigar=False):  # match:1, mismatch:-1, no gap penalties
     # global, local
-    match, mismatch, gap_open, gap_ext = 2, -4, -6, -2
-    res = pairwise2.align.globalms(seq1, seq2, match, mismatch, gap_open, gap_ext) if align_mode == 'g' else pairwise2.align.localms(seq1, seq2, match, mismatch, gap_open, gap_ext)
+    aligner = Align.PairwiseAligner()
+    if align_mode == 'g':
+        aligner.mode = 'global'
+    else:
+        aligner.mode = 'local'
+    aligner.match_score = 2
+    aligner.mismatch_score = -4
+    aligner.open_gap_score = -6
+    aligner.extend_gap_score = -2
+
+    res = aligner.align(seq1, seq2)
+
     if len(res) == 0: return 0, 'NA'
     r = res[0]
     if cigar:
-        # print r[2], get_cigar_from_pairwise_res(r)
-        return r[2], get_cigar_from_pairwise_res(r)
+        return res.score, get_cigar_from_pairwise_res(r.format())
     else:
-        return r[2], r
+        return res.score, r
 
 
 def cigartuples_to_cigarstring(cigartuples=[]):

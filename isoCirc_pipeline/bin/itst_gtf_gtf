@@ -11,10 +11,10 @@ out=$3
 
 # 0. intersect gene.gtf and read.gtf
 #>&2 echo "bedtools intersect -s -a ${read_gtf} -b ${gene_gtf} -wb"
-bedtools intersect -s -a ${read_gtf} -b ${gene_gtf} -wb | gawk -v OFS="\t" '
-    (match($0, /gene_id \"([^\"]+)\"/, arr)) {
+bedtools intersect -s -a ${read_gtf} -b ${gene_gtf} -wb | awk -v OFS="\t" '
+    (match($0, /gene_id "([^"]+)"/, arr)) {
         read_id = arr[1]
-        match(substr($0, RSTART + RLENGTH,length($0)), /gene_id \"([^\"]+)\"/, arr)
+        match(substr($0, RSTART + RLENGTH,length($0)), /gene_id "([^"]+)"/, arr)
         gene_id = arr[1]
         split(gene_id, id_name, ",")
         print read_id, id_name[1], id_name[2], id_name[3]

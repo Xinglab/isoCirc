@@ -369,13 +369,53 @@ def get_splice_site_from_gtf(in_gtf, is_db, bam_fn=""):
     if bam: bam.close()
     return split_site
 
+
 # return
 # {gene_id: ['s_e_s_e ...']}
 # s/e: exonic 1-base position
 # exonic 1-base coordinate
-def get_transcript_from_gene_pred(in_gene_pred, bam_fn=""):
+def get_transcript_from_gtf(in_gtf):
     trans = dd(lambda: [])
-    ut.err_format_time('get_transcript_from_bed12', 'Loading transcript from {} ... '.format(in_gene_pred))
+    ut.err_format_time('get_transcript_from_gtf', 'Loading transcript from {} ... '.format(in_gtf))
+    # bam = ps.AlignmentFile(bam_fn) if bam_fn else None
+    with open(in_gtf, 'r') as gtf:
+        gene_id, trans_coor = '', []
+        for line in gtf:
+            ele = line.rsplit()
+            if line.startswith('#') or len(ele) < 3:
+                continue
+            if ele[2] == 'transcript':
+                # add coor to gene
+                if gene_id != '' and trans_coor != []:
+                    trans[gene_id].append('_'.join(map(str, trans_coor)))
+                if 'gene_id' in line:
+                    gene_ids = line[9+line.index('gene_id'):]
+                    gene_id = gene_ids[:gene_ids.index('"')]
+                else:
+                    ut.fatal_format_time("get_transcript_from_gtf", 'No gene_id in GTF file ({}).'.foramt(in_gtf))
+                trans_coor = []
+                continue
+            elif ele[2] == 'exon':
+                start, end, strand = ele[3], ele[4], ele[6]
+                if strand == '+':
+                    trans_coor.extend([start, end])
+                else:  # '-'
+                    trans_coor.insert(0, end)
+                    trans_coor.insert(0, start)
+        if gene_id != '' and trans_coor != []:
+            trans[gene_id].append('_'.join(map(str, trans_coor)))
+    ut.err_format_time('get_transcript_from_gtf', 'Loading transcript from {} done!'.format(in_gtf))
+    # if bam: bam.close()
+    return trans
+
+
+# return
+# {gene_id: ['s_e_s_e ...']}
+# s/e: exonic 1-base position
+# exonic 1-base coordinate
+def get_transcript_from_gene_pred(in_gene_pred):
+    trans = dd(lambda: [])
+    ut.err_format_time('get_transcript_from_gene_pred', 'Loading transcript from {} ... '.format(in_gene_pred))
     header_ele = ['transID', 'chrom', 'strand', 'transStart', 'transEnd', 'cdsStart', 'cdsEnd', 'blockCount', 'exonStarts', 'exonEnds', 'score', 'geneID', 'cdsStartStatus', 'cdsEndStatus', 'exonFrame']
     pred_header = {header_ele[i]: i for i in range(len(header_ele))}
     # bam = ps.AlignmentFile(bam_fn) if bam_fn else None
@@ -440,8 +480,8 @@ def get_splice_site_from_bed12(in_bed, bam_fn=""):
                 s, l = exon_start[i], exon_len[i]
                 keep_left = False if i == 0 else True
                 keep_right = False if i == len(exon_start) - 1 else True
-                
-                if keep_left:  
+
+                if keep_left:
                     splice_site[(tid, is_rev, True, start + 1 + s)] = True
                 if keep_right:
                     splice_site[(tid, is_rev, False, start + s + l)] = True
