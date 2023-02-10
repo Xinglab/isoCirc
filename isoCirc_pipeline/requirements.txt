@@ -1,8 +1,8 @@
-biopython
+biopython>=1.79
 gffutils
 pyinterval
 matplotlib
-mappy
+mappy>=2.11
 numpy
 pandas
 pyfaidx
