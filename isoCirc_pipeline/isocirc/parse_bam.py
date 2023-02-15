@@ -74,6 +74,8 @@ def get_cigar_from_pairwise_res(aln_info):
                 op = 'D'
             else:
                 ut.fatal_format_time('get_cigar_from_pairwise_res', 'Error is pairwise alignment result.')
+        else:
+            ut.fatal_format_time('get_cigar_from_pairwise_res', 'Unexpected alignment string: {} {} {}.'.format(target_str, query_str, aln_str))
         if cigartuples and cigartuples[-1][0] == cigar_op_dict[op]:
             cigartuples[-1] = (cigar_op_dict[op], cigartuples[-1][1] + 1)
         else:
