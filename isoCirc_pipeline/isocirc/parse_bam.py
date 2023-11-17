@@ -60,7 +60,7 @@ def is_cigar_M(c):
 # return: ref_pos,cigar
 def get_cigar_from_pairwise_res(aln_info):
     ele = aln_info.rsplit()
-    target_str, query_str, aln_str = ele[0], ele[2], ele[1]
+    target_str, query_str, aln_str = ele[2], ele[9], ele[5]
     cigartuples = []
     for t, q, s in zip(target_str, query_str, aln_str):
         if s == '|':  # match
