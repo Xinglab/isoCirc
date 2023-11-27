@@ -83,6 +83,32 @@ def get_cigar_from_pairwise_res(aln_info):
     cigarstring = cigartuples_to_cigarstring(cigartuples)
     return cigarstring
 
+def get_cigar_from_pairwise_aln_res(aln_res):
+    aln_indice = aln_res.indices
+    query, target = aln_res.query, aln_res.target
+    target_idx, query_idx = aln_indice[0], aln_indice[1]
+    if len(target_idx) != len(query_idx):
+        ut.fatal_format_time('get_cigar_from_pairwise_res', 'Error in pairwise alignment result. \n{}'.format(aln_res))
+    cigartuples = []
+    for ti, qi in zip(target_idx, query_idx):
+        if ti >= 0 and qi >= 0: # match/mismatch
+            if target[ti] == query[qi]:
+                op = '='
+            else:
+                op = 'X'
+        elif ti >= 0 and qi < 0: # deletion
+            op = 'D'
+        elif ti < 0 and qi >= 0: # insertion
+            op = 'I'
+        else:
+            ut.fatal_format_time('get_cigar_from_pairwise_res', 'Error in pairwise alignment result. \n{}'.format(aln_res))
+        if cigartuples and cigartuples[-1][0] == cigar_op_dict[op]:
+            cigartuples[-1] = (cigar_op_dict[op], cigartuples[-1][1] + 1)
+        else:
+            cigartuples.append((cigar_op_dict[op], 1))
+    cigarstring = cigartuples_to_cigarstring(cigartuples)
+    return cigarstring
+
 # return: (align1, align2, score, start, end)
 # return: ref_pos,cigar
 def pairwise_align(seq1='', seq2='', align_mode='g', cigar=False):  # match:1, mismatch:-1, no gap penalties
@@ -102,7 +128,7 @@ def pairwise_align(seq1='', seq2='', align_mode='g', cigar=False):  # match:1, m
     if len(res) == 0: return 0, 'NA'
     r = res[0]
     if cigar:
-        return res.score, get_cigar_from_pairwise_res(r.format())
+        return res.score, get_cigar_from_pairwise_aln_res(r)
     else:
         return res.score, r
 
